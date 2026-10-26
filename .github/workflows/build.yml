@@ -165,8 +165,18 @@ jobs:
           #    之前写的 github.com/tc-hib/winres-bin/cmd/go-winres 仓库根本不存在，
           #    git 会把它当成私有库要求用户名 → CI 报 "terminal prompts disabled"，
           #    go-winres 没装上 → 后续命令报 "not recognized" → 整个 job 失败。
+          #
+          # ⚠️ --out 是「前缀」不是完整文件名！go-winres 会自动在后面追加
+          #    _windows_<arch>.syso。之前写 --out rsrc_windows_amd64.syso，
+          #    实际生成了两个文件：
+          #      rsrc_windows_amd64.syso_windows_amd64.syso
+          #      rsrc_windows_amd64.syso_windows_386.syso
+          #    Go 的 goodOSArchFile 用 strings.Cut(name, ".") 在【第一个点】处截断，
+          #    两个文件的有效名都变成 "rsrc_windows_amd64" → 在 amd64 构建里
+          #    两个都被加载 → linker 报 "too many .rsrc sections" → job 失败。
+          #    正确写法：--out 给前缀，--arch 限定单一架构，只出一个文件。
           go install github.com/tc-hib/go-winres@v0.3.3
-          go-winres make --in winres.json --out rsrc_windows_amd64.syso
+          go-winres make --in winres.json --out rsrc --arch amd64
           go build -o ../launcher.exe .
 
       - name: Download runtimes
