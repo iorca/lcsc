@@ -245,9 +245,16 @@ final class AssetRoutes
     {
         self::requireEdit();
         $partId = (int)($_POST['part_id'] ?? 0);
-        $ids    = $partId > 0 ? [$partId] : [];
         $limit  = (int)($_POST['limit'] ?? 0);
         $overwrite = (string)($_POST['overwrite'] ?? '') === '1';
+
+        // 批量下载必须显式给 limit：不给上限会遍历全部物料，
+        // 每个都要访问立创（~2s/个），几十个就超过 nginx fastcgi_read_timeout(60s)
+        // → 504，前端只看到网关超时，看不到真实进度。
+        // 这里兜一个默认上限，保证单次请求能在超时窗口内跑完。
+        if ($partId <= 0 && $limit <= 0) $limit = 20;
+
+        $ids    = $partId > 0 ? [$partId] : [];
 
         $svc   = new PartDatasheetLocalizer($db, $dataUid, (int)\getWorkspaceId());
         $stats = $svc->download($ids, ['overwrite' => $overwrite, 'limit' => $limit]);
