@@ -304,15 +304,20 @@
         width: 100%;
     }
 
-    /* 每行 = 一个 grid：勾选 | 图片 | 主信息 | 参数描述 | 库存 | 操作 */
+    /* 每行 = 一个 grid：
+     *   上排：勾选 | 图片 | 商品型号 | 其他信息 | 库存 | 操作
+     *   下排：            描述（横跨主体列）
+     */
     body.mode-comfy .inv-table tbody tr {
         display: grid;
-        grid-template-columns: 34px 92px 320px minmax(0, 1fr) 76px 104px;
+        grid-template-columns: 34px 92px 300px minmax(0, 1fr) 76px 104px;
         grid-template-areas:
-            "cb    cover  model  desc  stock acts";
-        align-items: center;
+            "cb    cover  model  info   stock acts"
+            "cb    cover  desc   desc   desc  desc";
+        align-items: start;
         column-gap: 10px;
-        padding: 10px 12px 10px 0;
+        row-gap: 6px;
+        padding: 12px 12px 12px 0;
         border-bottom: 1px solid rgba(127, 127, 127, .13);
         transition: background .12s;
     }
@@ -338,6 +343,7 @@
     body.mode-comfy .inv-table tbody td.cb-col     { grid-area: cb; }
     body.mode-comfy .inv-table tbody td.col-cover  { grid-area: cover; }
     body.mode-comfy .inv-table tbody td.col-model  { grid-area: model; }
+    body.mode-comfy .inv-table tbody td.col-info   { grid-area: info; }
     body.mode-comfy .inv-table tbody td.col-desc   { grid-area: desc; }
     body.mode-comfy .inv-table tbody td.col-stock  { grid-area: stock; }
     body.mode-comfy .inv-table tbody td.td-actions { grid-area: acts; }
@@ -379,20 +385,56 @@
     body.mode-comfy .inv-table tbody td.col-thumb { display: none; }
 }
 
-/* ══ 立创式主信息块：型号大标题 + 元信息行 ═══════════════════════════ */
-.lcsc-main {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    min-width: 0;
-}
-
+/* ══ 立创式主信息块：型号大标题 + 角标 ═══════════════════════════════ */
 .lcsc-model-line {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
 }
+
+/* ══ 其他信息列：品牌 / 封装 / 类目 / 编号 / 库位 / 导入 ═══════════════ */
+.lcsc-info {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px 14px;
+    font-size: 11.5px;
+    min-width: 0;
+}
+
+.lcsc-info-item {
+    display: flex;
+    align-items: baseline;
+    gap: 5px;
+    min-width: 0;
+}
+
+.lcsc-info-item > .k {
+    color: var(--text3);
+    flex: 0 0 auto;
+}
+
+.lcsc-info-item > .v {
+    color: var(--text2);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lcsc-info-item > .v a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.lcsc-info-item > .v a:hover { text-decoration: underline; }
+
+/* 分类标签（立创是蓝色文字链接） */
+.lcsc-type-link {
+    color: var(--accent);
+    cursor: pointer;
+}
+
+.lcsc-type-link:hover { text-decoration: underline; }
 
 /* 型号：立创是柠檬黄高亮 + 下划线 */
 .lcsc-model {
@@ -470,33 +512,39 @@
 
 .lcsc-type-link:hover { text-decoration: underline; }
 
-/* ══ 参数 / 描述区 ═════════════════════════════════════════════════ */
+/* ══ 参数 / 描述区（横跨下排）════════════════════════════════════════ */
 .lcsc-desc {
     font-size: 11.5px;
     color: var(--text2);
-    line-height: 1.65;
-    display: -webkit-box;
-    -webkit-line-clamp: 3;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
+    line-height: 1.7;
+    min-width: 0;
 }
 
 .lcsc-desc .d-title {
     color: var(--text);
     font-size: 12.5px;
-    margin-bottom: 2px;
+    margin-bottom: 3px;
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+}
+
+.lcsc-desc .d-params {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 10px;
 }
 
 .lcsc-desc .d-param {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.lcsc-desc .d-param .pk {
     color: var(--text3);
-    display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+}
+
+.lcsc-desc .d-param .pv {
+    color: var(--text2);
 }
 
 /* ══ 图片 ═════════════════════════════════════════════════════════ */

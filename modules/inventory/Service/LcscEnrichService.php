@@ -66,7 +66,7 @@ class LcscEnrichService
         if (empty($ids)) return $stats;
 
         $in  = implode(',', array_fill(0, count($ids), '?'));
-        $sql = "SELECT id, platform_id, platform_part_no, product_type, brand, package, image
+        $sql = "SELECT id, platform_id, platform_part_no, product_type, brand, package, image, parameters
                 FROM parts WHERE id IN ($in) AND user_id=?";
         if ($this->wsId > 0) $sql .= " AND workspace_id=?";
         $st = $this->db->prepare($sql);
@@ -129,6 +129,15 @@ class LcscEnrichService
                     $params[] = $localPath;
                     $fields[] = 'image';
                 }
+            }
+
+            // 立创参数表（paramVOList，中文「名: 值」）→ parts.parameters（JSON）
+            // 这是列表「描述」区的数据源：立创商品页的参数表。
+            // parameters_text 保留导入原值不动（那是 Excel 里的「参数」列）。
+            if (!empty($detail['params']) && trim((string)($r['parameters'] ?? '')) === '') {
+                $set[]    = 'parameters=?';
+                $params[] = json_encode($detail['params'], JSON_UNESCAPED_UNICODE);
+                $fields[] = 'parameters';
             }
 
             if (empty($set)) { $stats['skipped']++; continue; }

@@ -70,6 +70,7 @@ $listCols = array_values(array_filter([
     ['cls' => 'col-cover',    'cond' => null],
     ['cls' => 'col-code',     'cond' => null],
     ['cls' => 'col-model',    'cond' => null],
+    ['cls' => 'col-info',     'cond' => null],
     ['cls' => 'col-desc',     'cond' => null],
     ['cls' => 'col-pkg',      'cond' => null],
     ['cls' => 'col-cat',      'cond' => null],
@@ -298,7 +299,8 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         <th class="col-cover">图片</th>
         <th class="sortable" data-sort="platform_part_no" onclick="toggleSort(this)" title="点击排序">商品编号<span class="sort-arrow"></span></th>
         <th class="sortable" data-sort="model" onclick="toggleSort(this)" title="点击排序">型号<span class="sort-arrow"></span></th>
-        <th class="col-desc">参数/描述</th>
+        <th class="col-info">其他信息</th>
+        <th class="col-desc">描述</th>
         <th>封装</th>
         <th>分类</th>
         <th class="sortable" data-sort="brand" onclick="toggleSort(this)" title="点击排序">品牌<span class="sort-arrow"></span></th>
@@ -397,26 +399,39 @@ require __DIR__ . '/../../../ui/layouts/head.php';
             <?php endif; ?>
         </td>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($modelRaw)?>" class="col-model" data-label="型号">
-            <div class="lcsc-main">
-                <div class="lcsc-model-line">
-                    <span class="lcsc-model" onclick="openDrawer(<?=$r['id']?>)"><?=h($modelRaw !== '' ? $modelRaw : '—')?></span>
-                    <?=$hotBadge?>
-                </div>
-                <div class="lcsc-meta">
-                    <div class="lcsc-meta-row"><span class="k">品牌：</span><span class="v"><?=h($brandRaw !== '' ? $brandRaw : '—')?></span></div>
-                    <div class="lcsc-meta-row"><span class="k">封装：</span><span class="v"><?=h($pkgRaw !== '' ? $pkgRaw : '—')?></span></div>
-                    <div class="lcsc-meta-row"><span class="k">类目：</span><span class="v lcsc-type-link"><?=h($catText !== '' ? $catText : '—')?></span></div>
-                    <div class="lcsc-meta-row"><span class="k">编号：</span><span class="v"><?=$codeHtml?></span></div>
-                    <div class="lcsc-meta-row"><span class="k">库位：</span><span class="v"><?=h($locRaw !== '' ? $locRaw : '—')?></span></div>
-                    <div class="lcsc-meta-row"><span class="k">导入：</span><span class="v"><?=h($ctimeRaw !== '' ? substr(str_replace('T',' ',$ctimeRaw),0,16) : '—')?></span></div>
-                </div>
+            <div class="lcsc-model-line">
+                <span class="lcsc-model" onclick="openDrawer(<?=$r['id']?>)"><?=h($modelRaw !== '' ? $modelRaw : '—')?></span>
+                <?=$hotBadge?>
             </div>
         </td>
-        <td onclick="openDrawer(<?=$r['id']?>)" class="col-desc" data-label="参数/描述">
+        <td onclick="openDrawer(<?=$r['id']?>)" class="col-info" data-label="其他信息">
+            <div class="lcsc-info">
+                <div class="lcsc-info-item"><span class="k">品牌</span><span class="v"><?=h($brandRaw !== '' ? $brandRaw : '—')?></span></div>
+                <div class="lcsc-info-item"><span class="k">封装</span><span class="v"><?=h($pkgRaw !== '' ? $pkgRaw : '—')?></span></div>
+                <div class="lcsc-info-item"><span class="k">类目</span><span class="v lcsc-type-link"><?=h($catText !== '' ? $catText : '—')?></span></div>
+                <div class="lcsc-info-item"><span class="k">编号</span><span class="v"><?=$codeHtml?></span></div>
+                <div class="lcsc-info-item"><span class="k">库位</span><span class="v"><?=h($locRaw !== '' ? $locRaw : '—')?></span></div>
+                <div class="lcsc-info-item"><span class="k">导入</span><span class="v"><?=h($ctimeRaw !== '' ? substr(str_replace('T',' ',$ctimeRaw),0,16) : '—')?></span></div>
+            </div>
+        </td>
+        <td onclick="openDrawer(<?=$r['id']?>)" class="col-desc" data-label="描述">
             <div class="lcsc-desc">
                 <?php if($nameRaw!==''): ?><span class="d-title"><?=h($nameRaw)?></span><?php endif; ?>
-                <?php $paramRaw = (string)($r['parameters_text'] ?? ''); ?>
-                <?php if($paramRaw!==''): ?><span class="d-param">参数：<?=h($paramRaw)?></span><?php endif; ?>
+                <?php
+                    // 立创参数表（parts.parameters 存 JSON：{"名":"值"}）
+                    $pl = json_decode((string)($r['parameters'] ?? ''), true);
+                    if (is_array($pl) && $pl) {
+                        echo '<div class="d-params">';
+                        foreach ($pl as $pk => $pv) {
+                            if ($pv === '' || $pv === null) continue;
+                            echo '<span class="d-param"><span class="pk">'.h((string)$pk).'</span><span class="pv">'.h((string)$pv).'</span></span>';
+                        }
+                        echo '</div>';
+                    } else {
+                        $paramRaw = (string)($r['parameters_text'] ?? '');
+                        if ($paramRaw !== '') echo '<span class="d-param">参数：'.h($paramRaw).'</span>';
+                    }
+                ?>
             </div>
         </td>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($pkgRaw)?>" class="col-pkg td-ellipsis" data-label="封装"><?php if($pkgRaw!==''): ?><span class="pkg-badge"><?=h($pkgRaw)?></span><?php else: ?><span class="ph-dash">—</span><?php endif; ?></td>
