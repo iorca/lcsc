@@ -8,28 +8,36 @@ use PDO;
 /**
  * 规则自动归类器
  *
- * 按固定规则把物料挂到两级分类树上：
- *   一级分类 = 品牌值 或 商品类型值（可多维度并存）
- *   二级分类 = 封装格式
+ * 按**并列维度**把物料挂到分类树上（对齐立创商城 UI 的「类目 / 品牌 / 封装」三行筛选）：
  *
- * 例：物料「ESP32-WROOM-32D-N4 / 品牌=ESPRESSIF(乐鑫) / 封装=SMD,25.5x18mm」
- *   → 一级「ESPRESSIF(乐鑫)」→ 二级「SMD,25.5x18mm」
+ *   品牌      → ESPRESSIF(乐鑫) / TI(德州仪器) / …
+ *   商品类型  → 射频收发器IC / TVS管 / …
+ *   封装格式  → SOT-23 / 0603 / SOIC-8 / …
  *
- * ── 关于同名二级分类 ─────────────────────────────────────────────
- * categories 表的原始约束是 UNIQUE(user_id, name)（分类名在用户内全局唯一），
- * 而「品牌→0603」与「电阻→0603」需要同名二级共存。因此本类在插入前
- * 先按 (user_id, parent_id, name) 查重；命中不了时，说明该名字已被别的
- * 一级分类占用，此时自动加限定后缀消歧（如 "0603 (ESPRESSIF(乐鑫))"），
- * 保证既不报错、也不产生歧义，且不改动表结构。
+ * 三个维度是**并列的一级分类**（各自互不从属），每个物料在每个维度下
+ * 挂一个「值」二级节点，因此按任一维度筛选都能命中。
+ *
+ * ── 关于同名值 ───────────────────────────────────────────────
+ * categories 表的原始约束是 UNIQUE(user_id, name)（分类名在用户内全局唯一）。
+ * 同一维度下的值天然唯一（同一父级），不同维度之间值撞名是极端情况，
+ * 此时自动加限定后缀消歧（如 "0603 (封装格式)"），不报错、不丢数据。
  */
 class CategoryAutoClassifier
 {
-    /** 可作为一级分类的维度 */
+    /** 维度：parts 表字段名 */
     public const DIM_BRAND = 'brand';
     public const DIM_TYPE  = 'product_type';
+    public const DIM_PKG   = 'package';
 
-    /** 二级分类默认取封装格式 */
-    public const LEAF_PACKAGE = 'package';
+    /** 字段名 → 一级分类显示名（三个并列维度） */
+    public const DIM_LABELS = [
+        self::DIM_BRAND => '品牌',
+        self::DIM_TYPE  => '商品类型',
+        self::DIM_PKG   => '封装格式',
+    ];
+
+    /** 默认参与归类的三个维度 */
+    public const DEFAULT_DIMS = [self::DIM_BRAND, self::DIM_TYPE, self::DIM_PKG];
 
     private PDO $db;
     private int $dataUid;
@@ -53,16 +61,14 @@ class CategoryAutoClassifier
      *
      * @param int[] $partIds
      * @param array $opts [
-     *   'dims'      => ['brand','product_type'], // 用哪些字段做一级分类
-     *   'leaf'      => 'package',                // 二级分类取哪个字段
-     *   'overwrite' => false,                    // 是否先清掉原有分类关联
+     *   'dims'      => ['brand','product_type','package'], // 参与归类的维度
+     *   'overwrite' => false,   // 是否先清掉原有分类关联
      * ]
      * @return array{processed:int,linked:int,new_top:int,new_leaf:int,no_value:int}
      */
     public function classify(array $partIds, array $opts = []): array
     {
-        $dims      = (array)($opts['dims'] ?? [self::DIM_BRAND, self::DIM_TYPE]);
-        $leafField = (string)($opts['leaf'] ?? self::LEAF_PACKAGE);
+        $dims      = (array)($opts['dims'] ?? self::DEFAULT_DIMS);
         $overwrite = !empty($opts['overwrite']);
 
         $stats = ['processed' => 0, 'linked' => 0, 'new_top' => 0, 'new_leaf' => 0, 'no_value' => 0];
@@ -86,23 +92,16 @@ class CategoryAutoClassifier
             $pid = (int)$r['id'];
             if ($overwrite) $delStmt->execute([$pid]);
 
-            $leafName = trim((string)($r[$leafField] ?? ''));
-            $linked   = 0;
-
+            $linked = 0;
             foreach ($dims as $dim) {
-                $topName = trim((string)($r[$dim] ?? ''));
-                if ($topName === '') continue;
+                $val = trim((string)($r[$dim] ?? ''));
+                if ($val === '') continue;
 
-                $topId = $this->ensureTop($dim, $topName);
+                $label = self::DIM_LABELS[$dim] ?? $dim;
+                $topId = $this->ensureTop($label);
                 if ($topId <= 0) continue;
 
-                if ($leafName === '') {
-                    // 没有封装值时，一级分类本身直接挂上
-                    $linkStmt->execute([$pid, $topId]);
-                    $linked++;
-                    continue;
-                }
-                $leafId = $this->ensureLeaf($topId, $leafName, $topName);
+                $leafId = $this->ensureLeaf($topId, $val, $label);
                 if ($leafId > 0) {
                     $linkStmt->execute([$pid, $leafId]);
                     $linked++;
@@ -136,72 +135,73 @@ class CategoryAutoClassifier
 
     // ── 内部：分类节点的取或建 ─────────────────────────────────────
 
-    /** 取或建一级分类（parent_id = NULL） */
-    private function ensureTop(string $dim, string $name): int
+    /**
+     * 取或建**维度一级分类**（品牌 / 商品类型 / 封装格式）
+     *
+     * 根层分类有两种历史写法：分类管理页建的是 parent_id=NULL，
+     * 而 getOrCreateCategory()（config.php）建的是 parent_id=0 —— 都要认，
+     * 否则同一名称会被重复建出两个一级分类。
+     */
+    private function ensureTop(string $label): int
     {
-        $key = $dim . '|' . $name;
-        if (isset($this->topCache[$key])) return $this->topCache[$key];
+        if (isset($this->topCache[$label])) return $this->topCache[$label];
 
-        // 根层分类有两种历史写法：分类管理页建的是 parent_id=NULL，
-        // 而 getOrCreateCategory()（config.php）建的是 parent_id=0 —— 都要认，
-        // 否则同一名称会被重复建出两个一级分类。
         $st = $this->db->prepare("SELECT id FROM categories WHERE user_id=? AND (parent_id IS NULL OR parent_id=0) AND name=?");
-        $st->execute([$this->dataUid, $name]);
+        $st->execute([$this->dataUid, $label]);
         $id = $st->fetchColumn();
         if ($id) {
-            $this->topCache[$key] = (int)$id;
+            $this->topCache[$label] = (int)$id;
             return (int)$id;
         }
 
         $this->db->prepare("INSERT INTO categories (user_id, parent_id, name) VALUES (?, NULL, ?)")
-            ->execute([$this->dataUid, $name]);
+            ->execute([$this->dataUid, $label]);
         $id = (int)$this->db->lastInsertId();
         $this->newTop++;
-        $this->topCache[$key] = $id;
+        $this->topCache[$label] = $id;
         return $id;
     }
 
-    /** 取或建二级分类（parent_id = 一级分类 id） */
-    private function ensureLeaf(int $topId, string $name, string $topName): int
+    /** 取或建维度下的**值节点**（父级 = 维度一级分类） */
+    private function ensureLeaf(int $topId, string $value, string $label): int
     {
-        $key = $topId . '|' . $name;
+        $key = $topId . '|' . $value;
         if (isset($this->leafCache[$key])) return $this->leafCache[$key];
 
         // 同一父级下已有同名 → 直接用
         $st = $this->db->prepare("SELECT id FROM categories WHERE user_id=? AND parent_id=? AND name=?");
-        $st->execute([$this->dataUid, $topId, $name]);
+        $st->execute([$this->dataUid, $topId, $value]);
         $id = $st->fetchColumn();
         if ($id) {
             $this->leafCache[$key] = (int)$id;
             return (int)$id;
         }
 
-        // 全局同名但挂在别的父级下 → 加限定后缀消歧（不改表结构）
+        // 全局同名（UNIQUE(user_id,name) 硬约束）→ 加限定后缀消歧
         $st2 = $this->db->prepare("SELECT id FROM categories WHERE user_id=? AND name=?");
-        $st2->execute([$this->dataUid, $name]);
+        $st2->execute([$this->dataUid, $value]);
         if ($st2->fetch()) {
-            $suffix = self::shortName($topName);
-            $base   = $name . ' (' . $suffix . ')';
-            $name   = $base;
+            $base   = $value . ' (' . self::shortName($label) . ')';
+            $value  = $base;
             $n      = 1;
             while (true) {
                 $st3 = $this->db->prepare("SELECT id FROM categories WHERE user_id=? AND name=?");
-                $st3->execute([$this->dataUid, $name]);
+                $st3->execute([$this->dataUid, $value]);
                 if (!$st3->fetchColumn()) break;
                 $n++;
-                $name = $base . ' ' . $n;
+                $value = $base . ' ' . $n;
             }
         }
 
         $this->db->prepare("INSERT INTO categories (user_id, parent_id, name) VALUES (?, ?, ?)")
-            ->execute([$this->dataUid, $topId, $name]);
+            ->execute([$this->dataUid, $topId, $value]);
         $id = (int)$this->db->lastInsertId();
         $this->newLeaf++;
         $this->leafCache[$key] = $id;
         return $id;
     }
 
-    /** 一级分类名做后缀时过长则截断 */
+    /** 限定后缀过长则截断 */
     private static function shortName(string $s): string
     {
         $s = trim($s);

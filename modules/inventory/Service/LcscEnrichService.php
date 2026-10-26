@@ -99,7 +99,11 @@ class LcscEnrichService
                 // 已有类型且不覆盖 → 仍可补其它空字段
             } elseif (!empty($detail['product_type'])) {
                 $set[]    = 'product_type=?';
-                $params[] = $detail['product_type'];
+                $params[] = \Modules\Category\Service\LcscCatalogCn::name(
+                    (int)($detail['catalog_id'] ?? 0),
+                    (int)($detail['parent_catalog_id'] ?? 0),
+                    (string)$detail['product_type']
+                );
                 $fields[] = 'product_type';
             }
 
@@ -207,7 +211,12 @@ class LcscEnrichService
             }
         }
         return [
-            'product_type' => (string)($raw['catalogName'] ?? $raw['categoryName'] ?? ''),
+            // 保留立创英文原值 + 类目 id：中文类目名在 enrich() 回写时按
+            // 「二级类目 id → 英文名精确匹配 → 关键词表」降级取，
+            // 这样中文类目树更新后无需清缓存即刻生效。
+            'product_type'      => (string)($raw['catalogName'] ?? $raw['categoryName'] ?? ''),
+            'catalog_id'        => (int)($raw['catalogId'] ?? 0),
+            'parent_catalog_id' => (int)($raw['parentCatalogId'] ?? 0),
             'brand'        => (string)($raw['brandNameEn'] ?? $raw['brandName'] ?? $raw['brand'] ?? ''),
             'package'      => (string)($raw['encapStandard'] ?? $raw['encapsulation'] ?? $raw['package'] ?? ''),
             'model'        => (string)($raw['productModel'] ?? $raw['model'] ?? ''),

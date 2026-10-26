@@ -82,14 +82,16 @@ final class ClassifyRoutes
 
         $svc = new LcscEnrichService($db, $dataUid, (int)\getWorkspaceId());
         if (empty($ids)) {
-            // 未指定 ids → 取所有缺商品类型（或缺品牌/封装）且是立创编号的物料
-            $st = $db->prepare(
-                "SELECT id FROM parts
-                 WHERE user_id=? AND status<>'deleted'
-                   AND platform_part_no LIKE 'C%'
-                   AND (product_type IS NULL OR product_type='' OR brand IS NULL OR brand='' OR package IS NULL OR package='')
-                 ORDER BY id ASC LIMIT ?"
-            );
+            // 未指定 ids → 自动挑选：overwrite 时取全部立创物料（用于重拉+重译），
+            // 否则只取字段缺失的
+            $sql = "SELECT id FROM parts
+                    WHERE user_id=? AND status<>'deleted'
+                      AND platform_part_no LIKE 'C%'";
+            if (!$overwrite) {
+                $sql .= " AND (product_type IS NULL OR product_type='' OR brand IS NULL OR brand='' OR package IS NULL OR package='')";
+            }
+            $sql .= " ORDER BY id ASC LIMIT ?";
+            $st = $db->prepare($sql);
             $st->execute([$dataUid, max(1, $limit)]);
             $ids = array_map(static fn(array $r): int => (int)$r['id'], $st->fetchAll(\PDO::FETCH_ASSOC));
         }
@@ -146,7 +148,7 @@ final class ClassifyRoutes
         $raw = $_POST['dims'] ?? $_GET['dims'] ?? [];
         if (is_string($raw)) $raw = array_filter(explode(',', $raw));
         if (!is_array($raw)) $raw = [];
-        $allow = [CategoryAutoClassifier::DIM_BRAND, CategoryAutoClassifier::DIM_TYPE];
+        $allow = CategoryAutoClassifier::DEFAULT_DIMS;
         $dims  = array_values(array_intersect($allow, $raw));
         return empty($dims) ? $allow : $dims;
     }
