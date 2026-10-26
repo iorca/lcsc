@@ -43,6 +43,12 @@ func main() {
 	baseDir := filepath.Dir(exe)
 	runtimeDir := filepath.Join(baseDir, "runtime")
 	wwwDir := filepath.Join(baseDir, "www")
+	if !fileExists(wwwDir) {
+		// 兼容打包时把 PHP 应用根命名为 app/ 的情况（而非 www/）
+		if alt := filepath.Join(baseDir, "app"); fileExists(alt) {
+			wwwDir = alt
+		}
+	}
 	confDir := filepath.Join(baseDir, "conf")
 
 	portable := fileExists(filepath.Join(baseDir, "portable.flag"))
@@ -82,16 +88,26 @@ func main() {
 	}
 
 	// 1. 初始化 MariaDB 数据目录（首次）
+	//
+	// ⚠️ 关键：MariaDB 11.x **不支持** MySQL 的 `--initialize-insecure`
+	// （mariadbd 会报 "unknown option '--initialize-insecure'" 并 Aborting）。
+	// MariaDB 的正确初始化姿势是用官方 bootstrap 工具 mysql_install_db
+	// / mariadb-install-db，且 --datadir 必须给**绝对路径**。
 	if !fileExists(filepath.Join(mariadbData, "mysql")) {
 		log.Println("初始化 MariaDB 数据目录...")
-		initSQL := filepath.Join(dataDir, "init.sql")
-		if err := os.WriteFile(initSQL, []byte("CREATE DATABASE IF NOT EXISTS `"+dbName+"`;\n"), 0644); err != nil {
-			log.Fatalf("写 init.sql 失败: %v", err)
+		if err := os.MkdirAll(mariadbData, 0755); err != nil {
+			log.Fatalf("创建 datadir 失败: %v", err)
 		}
-		initCmd := exec.Command(mariadbBin,
-			"--initialize-insecure",
+		installDb := filepath.Join(runtimeDir, "mariadb", "bin", "mariadb-install-db.exe")
+		if !fileExists(installDb) {
+			installDb = filepath.Join(runtimeDir, "mariadb", "bin", "mysql_install_db.exe")
+		}
+		if !fileExists(installDb) {
+			log.Fatalf("找不到 MariaDB 初始化工具: %s", installDb)
+		}
+		initCmd := exec.Command(installDb,
 			"--datadir="+mariadbData,
-			"--init-file="+initSQL,
+			"--port="+mysqlPort,
 		)
 		initCmd.Stdout = os.Stdout
 		initCmd.Stderr = os.Stderr
@@ -101,9 +117,9 @@ func main() {
 		log.Println("MariaDB 初始化完成")
 	}
 
-	// 2. 生成 nginx.conf（替换 root 为绝对路径）
+	// 2. 生成 nginx.conf（把 root / 运行时路径全部替换成绝对路径）
 	nginxConf := filepath.Join(logsDir, "nginx.conf")
-	genNginxConf(nginxConfTmpl, nginxConf, wwwDir)
+	genNginxConf(nginxConfTmpl, nginxConf, wwwDir, runtimeDir, logsDir)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -118,6 +134,17 @@ func main() {
 		log.Fatalf("MariaDB 启动超时: %v", err)
 	}
 	log.Println("MariaDB 就绪")
+
+	// 2) 建业务库（若不存在）
+	// mysql_install_db 只建系统库（mysql/performance_schema/sys），业务库要自己建。
+	if err := exec.Command(mysqlClient,
+		"-u", "root", "-h", "127.0.0.1", "--port="+mysqlPort,
+		"-e", "CREATE DATABASE IF NOT EXISTS `"+dbName+"` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;",
+	).Run(); err != nil {
+		log.Printf("创建数据库 %s 失败（不阻断启动，可由安装向导处理）: %v", dbName, err)
+	} else {
+		log.Printf("数据库 %s 就绪", dbName)
+	}
 
 	// 4. 起 php-cgi（先由模板生成 extension_dir 为绝对路径的 php.ini）
 	phpIniGen := filepath.Join(logsDir, "php.ini")
@@ -170,12 +197,19 @@ func mustMkdir(dirs ...string) {
 	}
 }
 
-func genNginxConf(tmpl, out, www string) {
+// genNginxConf 由模板生成实际使用的 nginx.conf。
+// ⚠️ nginx 的 include 相对路径是相对**配置文件所在目录**（conf_prefix）解析的，
+// 不是 -p 指定的 prefix，所以模板里凡是要引用别的目录的文件，一律写绝对路径。
+// 运行时用 {{RUNTIME}} / {{LOGS}} 占位符注入绝对路径，{{ROOT}} 注入 web 根。
+func genNginxConf(tmpl, out, www, runtimeDir, logsDir string) {
 	b, err := os.ReadFile(tmpl)
 	if err != nil {
 		log.Fatalf("读取 nginx.conf 模板失败: %v", err)
 	}
-	s := strings.ReplaceAll(string(b), "{{ROOT}}", filepath.ToSlash(www))
+	s := string(b)
+	s = strings.ReplaceAll(s, "{{ROOT}}", filepath.ToSlash(www))
+	s = strings.ReplaceAll(s, "{{RUNTIME}}", filepath.ToSlash(runtimeDir))
+	s = strings.ReplaceAll(s, "{{LOGS}}", filepath.ToSlash(logsDir))
 	if err := os.WriteFile(out, []byte(s), 0644); err != nil {
 		log.Fatalf("写 nginx.conf 失败: %v", err)
 	}
