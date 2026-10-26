@@ -305,18 +305,31 @@
     }
 
     /* 每行 = 一个 grid：
-     *   上排：勾选 | 图片 | 商品型号 | 其他信息(左) | 其他信息(右) | 库存 | 操作
-     *   下排：            描述（横跨型号+左块，给足展示空间）
+     *   上排：勾选 | 图片 | 型号+参数(区块) | 其他信息(品牌块) | 其他信息(编号块) | 库存 | 操作
+     *   下排：            参数表（只占型号列，与型号合成一个纵向区块）
+     *
+     * 布局要点（主人指定）：
+     *   ① 品牌/封装/类目 与 编号/库位/导入 各自独占一列，两块都整体右移，
+     *      不再被型号列压住、也不与参数表混在一块。
+     *   ② 型号（含名称）与参数表合成一个区块：参数表排在型号正下方，
+     *      所以 desc 只占 model 一列，不再横跨到品牌块下面。
+     * 列宽：型号列用 minmax+1fr 吃掉剩余宽度（参数表需要展示空间），
+     *      两个信息列固定宽度并靠右对齐。
      */
     body.mode-comfy .inv-table tbody tr {
         display: grid;
-        grid-template-columns: 34px 92px 300px 170px 150px 76px 104px;
+        grid-template-columns: 34px 92px minmax(340px, 1fr) 176px 158px 76px 172px;
+        /* info1/info2 跨两行（下面 "cb cover desc" 那行也写上同样的名字）：
+           它们内容有 3 行（品牌/封装/类目），若只占上排，会把上排 grid 行高
+           顶到 67px，而型号块只有 50px → 型号下方凭空空 17px，
+           加上 row-gap 后参数表离型号文字 23px（实测值），视觉上"断成两截"。
+           跨行后它们不再参与上排行高计算，上排高度 = 型号块高度，空洞消失。 */
         grid-template-areas:
             "cb    cover  model  info1  info2  stock acts"
-            "cb    cover  desc   desc   .      .     .";
+            "cb    cover  desc   info1  info2  .     .";
         align-items: start;
         column-gap: 5px;
-        row-gap: 8px;
+        row-gap: 6px;
         padding: 14px 14px 14px 0;
         border-bottom: 1px solid rgba(127, 127, 127, .13);
         transition: background .12s;
@@ -376,9 +389,24 @@
 
     /* 图片列 */
     body.mode-comfy .inv-table tbody td.col-cover {
-        display: flex;
-        align-items: center;
-        justify-content: flex-start;
+        display: block;
+        /* 图片不参与行高计算：图片 78px 高，若参与计算会把上排撑到 80px，
+           而型号块只有 ~50px → 型号块下方凭空多出 ~30px 空白，
+           参数表与型号之间出现大空档（实测 36px）。
+           解法：图片绝对定位脱离文档流，cover 单元格高度归零，
+           上排行高改由型号块决定，图片与参数表横向不重叠、互不影响。
+           型号块 + 参数块合计 ~85px > 图片 78px，不会溢出到下一行。 */
+        position: relative;
+        height: 0;
+        min-height: 0;
+        overflow: visible;
+    }
+
+    /* 图片绝对定位：脱离文档流 → 不再撑高 grid 行 */
+    body.mode-comfy .inv-table tbody td.col-cover .lcsc-thumb {
+        position: absolute;
+        top: 0;
+        left: 0;
     }
 
     /* 库存列 */
@@ -402,6 +430,17 @@
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
+}
+
+/* 商品名称（型号列第二行） */
+.lcsc-name {
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    margin-top: 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* ══ 其他信息列：品牌 / 封装 / 类目 / 编号 / 库位 / 导入 ═══════════════ */
@@ -527,7 +566,7 @@
 .lcsc-desc {
     font-size: 12px;
     color: var(--text2);
-    line-height: 1.85;
+    line-height: 1.45;          /* 行距收紧，别太松散 */
     min-width: 0;
     /* 不限高：商品描述有足够空间完整展示 */
 }
@@ -535,14 +574,15 @@
 .lcsc-desc .d-title {
     color: var(--text);
     font-size: 13px;
-    margin-bottom: 3px;
+    margin-bottom: 1px;
     display: block;
+    line-height: 1.4;
 }
 
 .lcsc-desc .d-params {
     display: flex;
     flex-wrap: wrap;
-    gap: 2px 14px;
+    gap: 0 13px;
 }
 
 .lcsc-desc .d-param {
@@ -550,6 +590,7 @@
     align-items: baseline;
     gap: 5px;
     white-space: nowrap;
+    line-height: 1.45;
 }
 
 .lcsc-desc .d-param .pk {
@@ -625,17 +666,24 @@
 }
 
 /* ══ 操作区 ═══════════════════════════════════════════════════════ */
+/* 操作区：三个按钮横排。
+ * 竖排时 .actions 高 80px，会把上排 grid 行撑到 80px，
+ * 而型号块只有 ~50px → 型号块下方凭空多出 30px 空白，
+ * 参数表与型号之间出现大空档（实测 36px）。横排后上排行高
+ * 由信息块（~67px）决定，空档自然收窄。 */
 body.mode-comfy .inv-table tbody td.td-actions .actions {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     gap: 4px;
-    align-items: flex-end;
+    align-items: center;
+    justify-content: flex-end;
 }
 
 body.mode-comfy .inv-table tbody td.td-actions .btn {
     font-size: 11.5px;
     padding: 3px 8px;
-    width: 74px;
+    width: auto;
+    min-width: 52px;
     text-align: center;
 }
 

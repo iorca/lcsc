@@ -122,13 +122,6 @@ require __DIR__ . '/../../../ui/layouts/head.php';
     <div class="inv-statsbar-right">
         <!-- 筛选状态标签（点击统计卡后自动生成，样式与分类标签统一） -->
         <div class="filter-state-row" id="filterStateRow"></div>
-        <!-- 密度切换（舒适/紧凑，存本地偏好） -->
-        <div class="inv-dens-row">
-            <div class="dens-seg" id="densSeg">
-                <button type="button" data-dens="comfort" onclick="toggleDensity('comfort')" title="每行两行信息：型号 + 商品描述">舒适</button>
-                <button type="button" data-dens="dense" onclick="toggleDensity('dense')" title="单行高密度：仅显示型号">紧凑</button>
-            </div>
-        </div>
     </div>
 </div>
 
@@ -405,6 +398,9 @@ require __DIR__ . '/../../../ui/layouts/head.php';
                 <span class="lcsc-model" onclick="openDrawer(<?=$r['id']?>)"><?=h($modelRaw !== '' ? $modelRaw : '—')?></span>
                 <?=$hotBadge?>
             </div>
+            <?php if($nameRaw!==''): ?>
+            <div class="lcsc-name" title="<?=h($nameRaw)?>"><?=h($nameRaw)?></div>
+            <?php endif; ?>
         </td>
         <td onclick="openDrawer(<?=$r['id']?>)" class="col-info" data-label="其他信息">
             <div class="lcsc-info">
@@ -422,7 +418,6 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         </td>
         <td onclick="openDrawer(<?=$r['id']?>)" class="col-desc" data-label="描述">
             <div class="lcsc-desc">
-                <?php if($nameRaw!==''): ?><span class="d-title"><?=h($nameRaw)?></span><?php endif; ?>
                 <?php
                     // 立创参数表（parts.parameters 存 JSON：{"名":"值"}）
                     $pl = json_decode((string)($r['parameters'] ?? ''), true);
@@ -1127,6 +1122,12 @@ window.PartsPageConfig = <?= json_encode([
 
 ], JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) ?>;
 </script>
+<!-- 回到顶部悬浮按钮 -->
+<!-- **必须放在脚本之前**：<script src> 是同步阻塞加载，parts-init.js 里
+     initToTopBtn() 执行时若按钮尚未解析，getElementById 返回 null → 监听器
+     从未注册 → 按钮永远不显示（这是之前"悬浮挂件没做出来"的真正原因）。 -->
+<button type="button" class="to-top-btn" id="toTopBtn" onclick="scrollToTopBtn()" title="回到顶部" aria-label="回到顶部">↑</button>
+
 <?php
 // 物料列表页脚本：按功能域拆为 7 个文件。
 // **加载顺序不可调换**：core 定义全局筛选状态，其余文件依赖它；init 绑定各表单，
@@ -1140,8 +1141,5 @@ foreach ($partsJsFiles as $pj) {
         . h(APP_VERSION . '.' . filemtime($pjPath)) . '"></script>' . "\n";
 }
 ?>
-
-<!-- 回到顶部悬浮按钮 -->
-<button type="button" class="to-top-btn" id="toTopBtn" onclick="scrollToTopBtn()" title="回到顶部" aria-label="回到顶部">↑</button>
 
 </body></html>

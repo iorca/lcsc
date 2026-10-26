@@ -27,6 +27,7 @@ final class AdminManager
         'label_template', 'label_qr_content',
         'auth_enabled',
         'ai_enabled', 'ai_base_url', 'ai_api_key', 'ai_model',
+        'datasheet_dir',
     ];
 
     /** 网站设置字段的中文标签（键与 SETTING_FIELDS 一致） */
@@ -52,6 +53,7 @@ final class AdminManager
         'ai_base_url'           => 'AI 接口地址',
         'ai_api_key'            => 'AI API Key',
         'ai_model'              => 'AI 模型',
+        'datasheet_dir'         => '规格书保存路径',
     ];
 
     /** 功能开关的中文标签（用于操作记录；键与 featureDefaults() 一致） */
@@ -100,11 +102,22 @@ final class AdminManager
         };
 
         foreach (self::SETTING_FIELDS as $f) {
-            if (isset($post[$f])) {
-                $newVal = trim((string)$post[$f]);
-                $note(self::SETTING_LABELS[$f] ?? $f, $newVal, getSetting($f, ''));
-                setSetting($f, $newVal);
+            if (!isset($post[$f])) continue;
+
+            // 规格书保存路径：目录路径不能带 .. （防目录穿越）
+            if ($f === 'datasheet_dir') {
+                $dir = trim((string)$post[$f]);
+                if ($dir !== '' && preg_match('~(^|[\\\\/])\.\.([\\\\/]|$)~', $dir)) {
+                    throw new AdminException('规格书保存路径不能包含 .. ', 4);
+                }
+                $note('规格书保存路径', $dir, getSetting($f, ''));
+                setSetting($f, $dir);
+                continue;
             }
+
+            $newVal = trim((string)$post[$f]);
+            $note(self::SETTING_LABELS[$f] ?? $f, $newVal, getSetting($f, ''));
+            setSetting($f, $newVal);
         }
 
         if (isset($post['sub_notice_content'])) {

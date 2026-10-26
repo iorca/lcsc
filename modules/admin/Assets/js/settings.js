@@ -215,6 +215,68 @@
         if (costBtn && typeof window.confirmRebuildCost === 'function') {
             costBtn.addEventListener('click', function () { window.confirmRebuildCost(); });
         }
+
+        initDatasheetScan();
+    }
+
+    /**
+     * 规格书目录「扫描绑定」：按文件名里的立创编号（C+数字）自动挂到对应物料。
+     * 目录里的 PDF 可能很多，扫描前先确认。
+     */
+    function initDatasheetScan() {
+        var btn = qs('#btnScanDatasheet');
+        if (!btn) return;
+
+        btn.addEventListener('click', function () {
+            var input = qs('input[name="datasheet_dir"]');
+            var dir = input ? input.value.trim() : '';
+
+            AdminUIConfirm({
+                title: '扫描并自动绑定规格书',
+                message: '将扫描目录「' + (dir || 'uploads/datasheets') + '」里的 PDF，'
+                       + '按文件名中的立创编号自动绑定到对应物料。<br>'
+                       + '已绑定过的会跳过，不会重复。确定继续？',
+                okText: '开始扫描',
+                onOk: function () {
+                    btn.disabled = true;
+                    var orig = btn.textContent;
+                    btn.textContent = '扫描中…';
+                    LCSC.post('api.php', {
+                        action: 'asset.datasheet_scan',
+                        dir: dir
+                    }, function (data) {
+                        btn.disabled = false;
+                        btn.textContent = orig;
+                        showDatasheetScanResult(data);
+                    }, function (msg) {
+                        btn.disabled = false;
+                        btn.textContent = orig;
+                        LCSC.toast(msg || '扫描失败', 'error');
+                    });
+                }
+            });
+        });
+    }
+
+    /** 扫描结果汇总展示 */
+    function showDatasheetScanResult(data) {
+        data = data || {};
+        var lines = [];
+        lines.push('扫描 ' + (data.scanned || 0) + ' 个 PDF');
+        lines.push('新绑定 ' + (data.bound || 0) + ' 份');
+        if (data.skipped)     lines.push('已绑定跳过 ' + data.skipped + ' 份');
+        if (data.unmatched)  lines.push('编号未匹配 ' + data.unmatched + ' 份（库中无此编号物料）');
+        if (data.unrecognized) lines.push('文件名无编号 ' + data.unrecognized + ' 份');
+
+        var details = data.details || [];
+        if (details.length) {
+            var bad = details.filter(function (d) { return d.msg && d.file; }).slice(0, 8);
+            if (bad.length) {
+                lines.push('');
+                bad.forEach(function (d) { lines.push('· ' + d.file + '：' + d.msg); });
+            }
+        }
+        LCSC.toast(lines.join('\n'), data.bound ? 'success' : 'info');
     }
 
 

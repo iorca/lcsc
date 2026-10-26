@@ -26,7 +26,7 @@ class LcscEnrichService
     private const API_URL     = 'https://wmsc.lcsc.com/ftps/wm/product/detail?productCode=';
     // 缓存 key 带版本号：normalize() 的返回结构变化时（如新增 image 字段），
     // 改这里即可让旧缓存自动失效并重拉，不必手动清库。
-    private const CACHE_PREFIX = 'lcsc:detail:v2:';
+    private const CACHE_PREFIX = 'lcsc:detail:v3:';
     private const CACHE_TTL    = 604800;   // 7 天
     private const TIMEOUT      = 10;
 
@@ -240,6 +240,11 @@ class LcscEnrichService
         if ($image === '') {
             $image = (string)($raw['image'] ?? '');
         }
+        // 规格书 PDF 直链（pdfUrl / pdfLinkUrl）——规格书本地化用
+        $pdfUrl = (string)($raw['pdfUrl'] ?? '');
+        if ($pdfUrl === '') {
+            $pdfUrl = (string)($raw['pdfLinkUrl'] ?? '');
+        }
         return [
             // 保留立创英文原值 + 类目 id：中文类目名在 enrich() 回写时按
             // 「二级类目 id → 英文名精确匹配 → 关键词表」降级取，
@@ -248,6 +253,7 @@ class LcscEnrichService
             'catalog_id'        => (int)($raw['catalogId'] ?? 0),
             'parent_catalog_id' => (int)($raw['parentCatalogId'] ?? 0),
             'image'             => $image,
+            'pdf_url'      => $pdfUrl,
             'brand'        => (string)($raw['brandNameEn'] ?? $raw['brandName'] ?? $raw['brand'] ?? ''),
             'package'      => (string)($raw['encapStandard'] ?? $raw['encapsulation'] ?? $raw['package'] ?? ''),
             'model'        => (string)($raw['productModel'] ?? $raw['model'] ?? ''),

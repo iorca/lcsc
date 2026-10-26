@@ -197,6 +197,13 @@ $featToggles = [
             </label>
         </div>
     </div>
+    <div class="form-group sg-full"><label>规格书保存路径 <?=$tip('规格书（数据手册 PDF）的保存目录。默认 uploads/datasheets（应用目录下）。可填绝对路径（如 D:\\datasheets）把大文件放到应用目录之外，便于单独备份。目录不存在会自动创建。从立创下载的规格书按「立创编号_型号.pdf」命名，可用「扫描绑定」按文件名里的立创编号自动挂到对应物料')?></label>
+        <div class="settings-inline">
+            <input name="datasheet_dir" type="text" placeholder="uploads/datasheets" value="<?=h($sget('datasheet_dir'))?>" style="flex:1;min-width:220px">
+            <button type="button" class="btn btn-ghost btn-sm" id="btnScanDatasheet" title="扫描该目录里的 PDF，按文件名中的立创编号自动绑定到对应物料">📂 扫描绑定</button>
+            <span class="settings-result" id="datasheetDirState"></span>
+        </div>
+    </div>
     <div class="form-group"><label>AI 智能分类 <?=$tip('用大模型自动判定物料的商品类型 / 品牌 / 封装，并按「品牌 / 商品类型 → 封装格式」挂到两级分类树。需要一个 OpenAI 兼容接口：填 base_url + api_key + model 即可（base_url 填到 /v1，如 https://api.openai.com/v1）')?></label>
         <div class="settings-inline">
             <label class="settings-check">

@@ -15,6 +15,21 @@ final class PartDetail
         return 'app/api/router.php?action=asset.thumb&size=' . $size
              . '&path=' . rawurlencode($filepath);
     }
+
+    /**
+     * 规格书（PDF）链接：本地文件走 asset.datasheet_file 接口输出，
+     * 外链原样返回。
+     *
+     * 为什么不用静态链接：规格书可能存在应用目录之外（设置里配的绝对路径），
+     * 而且桌面版 nginx 把整个 uploads/ 禁了（deny all）→ 静态链接必然 403。
+     */
+    public static function datasheetUrl(string $filepath): string
+    {
+        $filepath = trim($filepath);
+        if ($filepath === '') return '';
+        if (preg_match('~^https?://~i', $filepath)) return $filepath;
+        return 'app/api/router.php?action=asset.datasheet_file&path=' . rawurlencode($filepath);
+    }
     public static function render(array $ctx): string
     {
         $part        = $ctx['part']        ?? [];
@@ -216,6 +231,10 @@ $datasheetUrl = (preg_match('~^https?://~i', $datasheetRaw) === 1) ? $datasheetR
             <button type="button" class="btn btn-ghost btn-sm" onclick="attPick(<?= $id ?>, 'image')">＋ 图片</button>
             <?php endif; ?>
             <button type="button" class="btn btn-ghost btn-sm" onclick="attPick(<?= $id ?>, 'pdf')">＋ PDF 手册</button>
+            <?php // 立创规格书自动下载：按 C 编号从立创抓 PDF 存本地并自动绑定
+            if ($ppn !== ''): ?>
+            <button type="button" class="btn btn-ghost btn-sm" onclick="attFetchDatasheet(<?= $id ?>)" title="从立创商城下载该型号的规格书 PDF，保存到设置里的规格书目录并自动绑定">⬇ 立创规格书</button>
+            <?php endif; ?>
             <?php endif; ?>
         </span>
     </div>
@@ -299,7 +318,7 @@ $datasheetUrl = (preg_match('~^https?://~i', $datasheetRaw) === 1) ? $datasheetR
             <span class="att-size"><?= \h($fmtSize((int)$pdf['filesize'])) ?></span>
             <span class="att-acts">
                 <?php ?>
-                <a class="btn btn-ghost btn-sm" href="<?= \h((string)$pdf['filepath']) ?>" target="_blank" rel="noopener noreferrer">打开</a>
+                <a class="btn btn-ghost btn-sm" href="<?= \h(self::datasheetUrl((string)$pdf['filepath'])) ?>" target="_blank" rel="noopener noreferrer">打开</a>
                 <?php if (hasPermission('can_edit')): ?>
                 <button type="button" class="btn btn-danger btn-sm" onclick="attDelete(<?= $id ?>, <?= (int)$pdf['id'] ?>, this)">删除</button>
                 <?php endif; ?>

@@ -42,6 +42,32 @@ function attUpload(partId, kind, file) {
     });
 }
 
+/* 从立创商城下载该物料的规格书 PDF，存本地并自动绑定 */
+function attFetchDatasheet(partId) {
+    var pid = parseInt(partId, 10) || 0;
+    if (!pid) { LCSC.toast('物料ID无效', 'error'); return; }
+
+    LCSC.toast('正在从立创下载规格书…', 'info');
+
+    LCSC.post('api.php', {
+        action: 'asset.datasheet_download',
+        part_id: pid
+    }, function (data, msg) {
+        var st = data || {};
+        if ((st.downloaded || 0) > 0) {
+            LCSC.toast(msg || '规格书已下载并绑定', 'success');
+        } else if ((st.failed || 0) > 0) {
+            var detail = (st.details || [])[0];
+            LCSC.toast('下载失败：' + ((detail && detail.msg) || '未知原因'), 'error');
+        } else {
+            LCSC.toast('该物料没有可下载的规格书（立创未提供）', 'info');
+        }
+        attReload(pid);
+    }, function (msg) {
+        LCSC.toast(msg || '规格书下载失败', 'error');
+    });
+}
+
 /* 删除附件（带二次确认） */
 function attDelete(partId, attId, btn) {
     var pid = parseInt(partId, 10) || 0;

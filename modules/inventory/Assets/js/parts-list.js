@@ -83,7 +83,7 @@ function renderDesktopTable(parts) {
             ? '<a href="' + esc(ppnUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + esc(r.ppn) + '</a>'
             : esc(r.ppn || '—');
 
-        // ── 型号列：只放型号 + 角标 ──
+        // ── 型号列：型号 + 角标 + 商品名称 ──
         var hotBadge = '';
         if (r.stock > 0 && r.stock <= (r.eff_threshold || 0)) hotBadge = '<span class="lcsc-badge b-blue">库存紧张</span>';
         else if (r.stock === 0) hotBadge = '<span class="lcsc-badge">缺货</span>';
@@ -93,7 +93,8 @@ function renderDesktopTable(parts) {
             '<div class="lcsc-model-line">'
             +   '<span class="lcsc-model" onclick="openDrawer(' + r.id + ')">' + esc(r.model || '—') + '</span>'
             +   hotBadge
-            + '</div>';
+            + '</div>'
+            + (r.product_name ? '<div class="lcsc-name" title="' + esc(r.product_name) + '">' + esc(r.product_name) + '</div>' : '');
 
         // ── 其他信息列：左块(品牌/封装/类目) + 右块(编号/库位/导入) ──
         var infoHtml =
@@ -110,9 +111,8 @@ function renderDesktopTable(parts) {
             +   '<div class="lcsc-info-item"><span class="k">导入</span><span class="v">' + (r.create_time ? esc(String(r.create_time).substring(0, 16).replace('T', ' ')) : '—') + '</span></div>'
             + '</div>';
 
-        // ── 描述区（型号下方）：商品名称 + 立创参数表（全部展开，不折叠）──
+        // ── 描述区（型号下方）：立创参数表（全部展开，不折叠）──
         var descHtml = '<div class="lcsc-desc">';
-        if (r.product_name) descHtml += '<span class="d-title">' + esc(r.product_name) + '</span>';
         var pl = parseLcscParams(r.parameters);
         if (pl.length) {
             descHtml += '<div class="d-params">';
@@ -291,17 +291,68 @@ function initImgTip() {
 }
 
 // ── 回到顶部 ────────────────────────────────────────────────
+/* 页面有两种运行环境：
+   1) 独立打开（tab_mode 不为 studio）→ 滚动的是 window / documentElement
+   2) studio 模式跑在 iframe 里        → 滚动的是 BODY.studio-iframe-body
+   两种情况下 window.scrollY 在 iframe 里恒为 0，只看它按钮永远不会出现。
+   所以这里把「所有可能承载滚动的容器」都收集起来，取真正在滚的那个。 */
+function getScrollContainers() {
+    var list = [];
+    list.push(window);
+    if (document.scrollingElement) list.push(document.scrollingElement);
+    if (document.documentElement) list.push(document.documentElement);
+    if (document.body) list.push(document.body);
+    var wrap = document.getElementById('desktopTable');
+    if (wrap) list.push(wrap);
+    return list;
+}
+
+// 当前实际滚动距离（取所有候选容器里的最大值）
+function currentScrollTop() {
+    var max = 0;
+    getScrollContainers().forEach(function (el) {
+        var t;
+        if (el === window) t = (window.pageYOffset || 0);
+        else t = (el && el.scrollTop) || 0;
+        if (t > max) max = t;
+    });
+    return max;
+}
+
 function scrollToTopBtn() {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    getScrollContainers().forEach(function (el) {
+        if (!el) return;
+        try {
+            // 用 auto（瞬时）而非 smooth：HTML 有 scroll-behavior:smooth 时，
+            // smooth 滚动是异步的，scrollTop 不会立刻归零，按钮状态会失步。
+            if (el === window) { el.scrollTo({ top: 0, left: 0, behavior: 'auto' }); return; }
+            if (typeof el.scrollTo === 'function') el.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+            else el.scrollTop = 0;
+        } catch (e) {
+            try { el.scrollTop = 0; } catch (e2) {}
+        }
+    });
 }
 
 function initToTopBtn() {
     var btn = document.getElementById('toTopBtn');
-    if (!btn) return;
+    if (!btn) {
+        // 兜底：按钮可能被后续插入 DOM，等 DOM 就绪后再试一次
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function () { initToTopBtn(); }, { once: true });
+        } else {
+            setTimeout(function () { initToTopBtn(); }, 0);
+        }
+        return;
+    }
+    if (btn.__toTopBound) return;
+    btn.__toTopBound = true;
     function onScroll() {
-        if (window.scrollY > 120) btn.classList.add('is-show');
+        if (currentScrollTop() > 120) btn.classList.add('is-show');
         else btn.classList.remove('is-show');
     }
+    // scroll 事件不冒泡，用捕获阶段才能收到任意元素（body / div）的滚动
+    document.addEventListener('scroll', onScroll, { passive: true, capture: true });
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 }
@@ -387,20 +438,6 @@ function renderSortArrows() {
         if (k === _filterState.sort) th.classList.add(_filterState.dir === 'asc' ? 'sorted-asc' : 'sorted-desc');
     });
 }
-// ── 表格密度切换（舒适/紧凑，存本地偏好）──
-function toggleDensity(mode) {
-    var tbl = document.getElementById('desktopTable');
-    if (tbl) tbl.classList.toggle('dense', mode === 'dense');
-    try { localStorage.setItem('inv_density', mode); } catch (e) {}
-    document.querySelectorAll('#densSeg button').forEach(function(b) {
-        b.classList.toggle('active', b.getAttribute('data-dens') === mode);
-    });
-}
-(function(){
-    var m = 'comfort';
-    try { m = localStorage.getItem('inv_density') || 'comfort'; } catch (e) {}
-    toggleDensity(m);
-})();
 function clearLocFilter() {
     _filterState.loc = '';
     _filterState.page = 1;

@@ -5,6 +5,8 @@ namespace App\Api;
 
 use App\Core\Response;
 use Modules\Inventory\Service\AttachmentService;
+use Modules\Inventory\Service\DatasheetBinder;
+use Modules\Inventory\Service\PartDatasheetLocalizer;
 use Modules\Inventory\Service\ThumbnailService;
 
 // AssetManager 提供出入库流水查询（listLogs）
@@ -67,6 +69,18 @@ final class AssetRoutes
 
             case 'delete_attachment':
                 self::handleDeleteAttachment($db, $uid, $dataUid);
+                break;
+
+            case 'datasheet_download':
+                self::handleDatasheetDownload($db, $uid, $dataUid);
+                break;
+
+            case 'datasheet_scan':
+                self::handleDatasheetScan($db, $uid, $dataUid);
+                break;
+
+            case 'datasheet_file':
+                self::handleDatasheetFile($db, $uid, $dataUid);
                 break;
 
             case 'duplicate_part':
@@ -220,6 +234,104 @@ final class AssetRoutes
 
         (new AttachmentService($db, $uid, $dataUid))->delete($id);
         Response::ok([], '删除成功');
+    }
+
+    /**
+     * POST asset.datasheet_download — 从立创下载规格书到本地并自动绑定
+     *
+     * @param part_id  指定物料；不给则批量处理全部立创物料
+     */
+    private static function handleDatasheetDownload(\PDO $db, int $uid, int $dataUid): void
+    {
+        self::requireEdit();
+        $partId = (int)($_POST['part_id'] ?? 0);
+        $ids    = $partId > 0 ? [$partId] : [];
+        $limit  = (int)($_POST['limit'] ?? 0);
+        $overwrite = (string)($_POST['overwrite'] ?? '') === '1';
+
+        $svc   = new PartDatasheetLocalizer($db, $dataUid, (int)\getWorkspaceId());
+        $stats = $svc->download($ids, ['overwrite' => $overwrite, 'limit' => $limit]);
+
+        Response::ok($stats, '已下载 ' . (int)$stats['downloaded'] . ' 份规格书');
+    }
+
+    /** POST asset.datasheet_scan — 扫描目录，按文件名里的立创编号自动绑定 */
+    private static function handleDatasheetScan(\PDO $db, int $uid, int $dataUid): void
+    {
+        self::requireEdit();
+        $dir   = trim((string)($_POST['dir'] ?? ''));
+        $limit = (int)($_POST['limit'] ?? 0);
+        $overwrite = (string)($_POST['overwrite'] ?? '') === '1';
+
+        $svc   = new DatasheetBinder($db, $dataUid, (int)\getWorkspaceId());
+        $stats = $svc->scan($dir, ['overwrite' => $overwrite, 'limit' => $limit]);
+
+        Response::ok($stats, '已绑定 ' . (int)$stats['bound'] . ' 份规格书');
+    }
+
+    /**
+     * GET asset.datasheet_file — 输出规格书文件
+     *
+     * 规格书可能存在应用目录之外（设置里配的绝对路径），
+     * 而且桌面版 nginx 把整个 uploads/ 禁了（deny all），
+     * 所以静态链接打不开 —— 统一走这个接口输出。
+     */
+    private static function handleDatasheetFile(\PDO $db, int $uid, int $dataUid): void
+    {
+        $path = trim((string)($_GET['path'] ?? ''));
+        if ($path === '') Response::error('缺少 path 参数');
+
+        $abs = self::resolveDatasheetPath($path);
+        if ($abs === null) Response::error('文件不存在或无权访问', 404);
+
+        $size = (int)filesize($abs);
+        $etag = '"' . md5($abs . '|' . $size . '|' . filemtime($abs)) . '"';
+        if (($_SERVER['HTTP_IF_NONE_MATCH'] ?? '') === $etag) {
+            \http_response_code(304);
+            exit;
+        }
+
+        \header('Content-Type: application/pdf');
+        \header('Content-Length: ' . $size);
+        \header('Content-Disposition: inline; filename="' . rawurlencode(basename($abs)) . '"');
+        \header('Cache-Control: private, max-age=600');
+        \header('ETag: ' . $etag);
+        \header('X-Content-Type-Options: nosniff');
+        \readfile($abs);
+        exit;
+    }
+
+    /**
+     * 把规格书路径解析为绝对路径，并确保它在允许的目录内
+     *
+     * 允许范围：应用根下（相对路径）与规格书保存目录（绝对路径）。
+     */
+    private static function resolveDatasheetPath(string $path): ?string
+    {
+        $path = trim($path);
+        if ($path === '' || str_contains($path, "\0")) return null;
+
+        $abs = $path;
+        if (!preg_match('~^(?:[A-Za-z]:[\\\\/]|/|\\\\\\\\)~', $path)) {
+            // 相对路径 → 相对应用根
+            $abs = PartDatasheetLocalizer::appRoot() . '/' . ltrim(str_replace('\\', '/', $path), '/');
+        }
+        $real = @realpath($abs);
+        if ($real === false || !is_file($real)) return null;
+
+        // 必须在允许目录内：规格书目录 或 应用根下的 uploads
+        $allowed = [];
+        $dsDir = @realpath(PartDatasheetLocalizer::resolveDir());
+        if ($dsDir !== false) $allowed[] = $dsDir;
+        $upDir = @realpath(PartDatasheetLocalizer::appRoot() . '/uploads');
+        if ($upDir !== false) $allowed[] = $upDir;
+
+        foreach ($allowed as $base) {
+            $base = rtrim(str_replace('\\', '/', $base), '/');
+            $realN = str_replace('\\', '/', $real);
+            if (str_starts_with($realN, $base . '/')) return $real;
+        }
+        return null;
     }
 
     /** POST asset.duplicate_part — 复制物料（stock=0 不复制库存） */
