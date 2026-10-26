@@ -98,7 +98,7 @@ function renderDesktopTable(parts) {
         if (comfy_) {
             html += '<td class="col-cover" onclick="event.stopPropagation()">'
                 + (r.image
-                    ? '<img class="cover-img" src="' + esc(lcscImg(attImgSrc(r.image, 260), 260)) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大">'
+                    ? '<img class="cover-img" src="' + esc(lcscImg(attImgSrc(r.image, 260))) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大">'
                     : '<span class="cover-ph">无图</span>')
                 + '</td>';
         }
@@ -151,10 +151,12 @@ function renderPagination(total, page, perPage, totalPage) {
     area.innerHTML = html;
 }
 
-// 立创商品图换尺寸：assets.lcsc.com/.../900x900/xxx.jpg → .../260x260/xxx.jpg
-function lcscImg(url, size) {
+// 立创商品图：assets.lcsc.com 只有一个可用规格（900x900，其余尺寸一律 403），
+// 因此**不做尺寸替换**，直接用原图 + CSS 控制显示大小。
+// attImgSrc() 对 http(s) 外链原样返回，正好适用。
+function lcscImg(url) {
     if (!url) return '';
-    return String(url).replace(/\/\d+x\d+\//, '/' + (size || 260) + 'x' + (size || 260) + '/');
+    return String(url);
 }
 
 // ── 排序（瀑布流下表头不可点，改由工具栏下拉驱动）──
