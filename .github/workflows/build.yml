@@ -1,0 +1,113 @@
+name: Build & Release LCSC (web)
+
+# 自动产出两类「web 版」产物（注意：不是作者那个 Windows 桌面 exe，那个打包器没开源，无法复刻）：
+#   1) Docker 镜像  -> 推到 GHCR (ghcr.io/<owner>/lcsc)
+#   2) 带 composer 依赖的 PHP 源码 zip -> 作为 artifact / release asset
+#
+# 触发方式：
+#   - 手动：Actions 标签页 -> Run workflow（可填镜像 tag、是否出镜像 / zip）
+#   - 打 tag：git tag v* 并 push
+#   - 发 release：published 事件自动出 zip 并上传到 release
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: 'Docker 镜像标签（如 1.2.0 或 latest）'
+        required: false
+        default: 'latest'
+      push_image:
+        description: '是否把 Docker 镜像推到 GHCR'
+        type: boolean
+        default: true
+      build_zip:
+        description: '是否出 web 源码 zip（含 composer 依赖）'
+        type: boolean
+        default: true
+  push:
+    tags: ['v*']
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+env:
+  IMAGE_NAME: lcsc
+
+jobs:
+  docker:
+    if: ${{ github.event_name != 'pull_request' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        if: ${{ github.event.inputs.push_image != 'false' }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ github.event.inputs.image_tag || 'latest' }}
+            type=ref,event=tag
+            type=semver,pattern={{version}},event=tag
+            type=semver,pattern={{major}}.{{minor}},event=tag
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./docker/Dockerfile
+          push: ${{ (github.event.inputs.push_image != 'false') && github.event_name != 'pull_request' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          platforms: linux/amd64,linux/arm64
+
+  web-zip:
+    if: ${{ github.event.inputs.build_zip != 'false' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring,zip
+          tools: composer
+
+      - name: Install composer deps
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Package web dist
+        run: node scripts/package-web.js
+
+      - name: Make web zip
+        run: |
+          VER=$(node -e "console.log(require('./version.json').version)")
+          cd web-dist && zip -r ../lcsc-web-$VER.zip . && cd ..
+          echo "ARTIFACT=lcsc-web-$VER.zip" >> "$GITHUB_ENV"
+
+      - name: Upload web zip (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: lcsc-web
+          path: lcsc-web-*.zip
+
+      - name: Upload to release
+        if: ${{ github.event_name == 'release' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          files: lcsc-web-*.zip
