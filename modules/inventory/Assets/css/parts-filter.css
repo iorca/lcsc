@@ -305,18 +305,18 @@
     }
 
     /* 每行 = 一个 grid：
-     *   上排：勾选 | 图片 | 商品型号 | 其他信息 | 库存 | 操作
-     *   下排：            描述（横跨主体列）
+     *   上排：勾选 | 图片 | 商品型号 | 其他信息(左) | 其他信息(右) | 库存 | 操作
+     *   下排：            描述（在型号正下方）
      */
     body.mode-comfy .inv-table tbody tr {
         display: grid;
-        grid-template-columns: 34px 92px 300px minmax(0, 1fr) 76px 104px;
+        grid-template-columns: 34px 92px 300px 170px 150px 76px 104px;
         grid-template-areas:
-            "cb    cover  model  info   stock acts"
-            "cb    cover  desc   desc   desc  desc";
+            "cb    cover  model  info1  info2  stock acts"
+            "cb    cover  desc   .      .      .     .";
         align-items: start;
         column-gap: 10px;
-        row-gap: 6px;
+        row-gap: 5px;
         padding: 12px 12px 12px 0;
         border-bottom: 1px solid rgba(127, 127, 127, .13);
         transition: background .12s;
@@ -343,7 +343,8 @@
     body.mode-comfy .inv-table tbody td.cb-col     { grid-area: cb; }
     body.mode-comfy .inv-table tbody td.col-cover  { grid-area: cover; }
     body.mode-comfy .inv-table tbody td.col-model  { grid-area: model; }
-    body.mode-comfy .inv-table tbody td.col-info   { grid-area: info; }
+    body.mode-comfy .inv-table tbody td.col-info   { grid-area: info1; }
+    body.mode-comfy .inv-table tbody td.col-info2  { grid-area: info2; }
     body.mode-comfy .inv-table tbody td.col-desc   { grid-area: desc; }
     body.mode-comfy .inv-table tbody td.col-stock  { grid-area: stock; }
     body.mode-comfy .inv-table tbody td.td-actions { grid-area: acts; }
@@ -395,9 +396,9 @@
 
 /* ══ 其他信息列：品牌 / 封装 / 类目 / 编号 / 库位 / 导入 ═══════════════ */
 .lcsc-info {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 3px 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
     font-size: 11.5px;
     min-width: 0;
 }
@@ -512,31 +513,37 @@
 
 .lcsc-type-link:hover { text-decoration: underline; }
 
-/* ══ 参数 / 描述区（横跨下排）════════════════════════════════════════ */
+/* ══ 参数 / 描述区（型号正下方）══════════════════════════════════════ */
 .lcsc-desc {
     font-size: 11.5px;
     color: var(--text2);
-    line-height: 1.7;
+    line-height: 1.65;
     min-width: 0;
+    max-height: 92px;
+    overflow: hidden;
 }
 
 .lcsc-desc .d-title {
     color: var(--text);
     font-size: 12.5px;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .lcsc-desc .d-params {
     display: flex;
     flex-wrap: wrap;
-    gap: 3px 10px;
+    gap: 1px 10px;
 }
 
 .lcsc-desc .d-param {
     display: inline-flex;
     align-items: baseline;
     gap: 4px;
+    white-space: nowrap;
 }
 
 .lcsc-desc .d-param .pk {
@@ -546,6 +553,20 @@
 .lcsc-desc .d-param .pv {
     color: var(--text2);
 }
+
+/* 参数项数多时折叠：默认只留前 N 项，点「更多」展开 */
+.lcsc-desc .d-params.is-collapsed .d-param:nth-child(n+7) {
+    display: none;
+}
+
+.lcsc-desc .d-more {
+    color: var(--accent);
+    cursor: pointer;
+    font-size: 11px;
+    margin-left: 4px;
+}
+
+.lcsc-desc .d-more:hover { text-decoration: underline; }
 
 /* ══ 图片 ═════════════════════════════════════════════════════════ */
 .lcsc-thumb {

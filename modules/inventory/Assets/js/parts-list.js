@@ -95,27 +95,35 @@ function renderDesktopTable(parts) {
             +   hotBadge
             + '</div>';
 
-        // ── 其他信息列：品牌 / 封装 / 类目 / 编号 / 库位 / 导入 ──
+        // ── 其他信息列：左块(品牌/封装/类目) + 右块(编号/库位/导入) ──
         var infoHtml =
             '<div class="lcsc-info">'
             +   '<div class="lcsc-info-item"><span class="k">品牌</span><span class="v">' + esc(r.brand || '—') + '</span></div>'
             +   '<div class="lcsc-info-item"><span class="k">封装</span><span class="v">' + esc(r.package || '—') + '</span></div>'
             +   '<div class="lcsc-info-item"><span class="k">类目</span><span class="v lcsc-type-link">' + catTxt + '</span></div>'
+            + '</div>';
+
+        var info2Html =
+            '<div class="lcsc-info">'
             +   '<div class="lcsc-info-item"><span class="k">编号</span><span class="v">' + codeHtml + '</span></div>'
             +   '<div class="lcsc-info-item"><span class="k">库位</span><span class="v">' + (r.location ? esc(r.location) : '—') + '</span></div>'
             +   '<div class="lcsc-info-item"><span class="k">导入</span><span class="v">' + (r.create_time ? esc(String(r.create_time).substring(0, 16).replace('T', ' ')) : '—') + '</span></div>'
             + '</div>';
 
-        // ── 描述区（横跨下排）：商品名称 + 立创参数表 ──
+        // ── 描述区（型号正下方）：商品名称 + 立创参数表（>6 项折叠）──
         var descHtml = '<div class="lcsc-desc">';
         if (r.product_name) descHtml += '<span class="d-title">' + esc(r.product_name) + '</span>';
         var pl = parseLcscParams(r.parameters);
         if (pl.length) {
-            descHtml += '<div class="d-params">';
+            var collapsed = pl.length > 6 ? ' is-collapsed' : '';
+            descHtml += '<div class="d-params' + collapsed + '">';
             pl.forEach(function(p){
                 descHtml += '<span class="d-param"><span class="pk">' + esc(p[0]) + '</span><span class="pv">' + esc(p[1]) + '</span></span>';
             });
             descHtml += '</div>';
+            if (collapsed) {
+                descHtml += '<span class="d-more" onclick="toggleLcscParams(this)">更多 ∨</span>';
+            }
         } else if (r.parameters_text) {
             descHtml += '<span class="d-param">参数：' + esc(r.parameters_text) + '</span>';
         }
@@ -138,6 +146,7 @@ function renderDesktopTable(parts) {
             + '</td>';
         html += '<td onclick="openDrawer(' + r.id + ')" class="col-model" data-label="型号">' + modelHtml + '</td>';
         html += '<td onclick="openDrawer(' + r.id + ')" class="col-info" data-label="其他信息">' + infoHtml + '</td>';
+        html += '<td onclick="openDrawer(' + r.id + ')" class="col-info2" data-label="其他信息">' + info2Html + '</td>';
         html += '<td onclick="openDrawer(' + r.id + ')" class="col-desc" data-label="描述">' + descHtml + '</td>';
         // 以下为紧凑模式（表格）用的列，宽屏下由 CSS 隐藏
         html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.package) + '" class="col-pkg td-ellipsis" data-label="封装">' + (r.package ? '<span class="pkg-badge">' + esc(r.package) + '</span>' : '<span class="ph-dash">—</span>') + '</td>';
@@ -186,6 +195,15 @@ function renderPagination(total, page, perPage, totalPage) {
     });
     html += '</select>';
     area.innerHTML = html;
+}
+
+/** 展开/收起参数表（默认只显示前 6 项） */
+function toggleLcscParams(el) {
+    if (!el) return;
+    var box = el.parentNode.querySelector('.d-params');
+    if (!box) return;
+    var collapsed = box.classList.toggle('is-collapsed');
+    el.textContent = collapsed ? '更多 ∨' : '收起 ∆';
 }
 
 /**

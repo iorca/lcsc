@@ -71,6 +71,7 @@ $listCols = array_values(array_filter([
     ['cls' => 'col-code',     'cond' => null],
     ['cls' => 'col-model',    'cond' => null],
     ['cls' => 'col-info',     'cond' => null],
+    ['cls' => 'col-info2',    'cond' => null],
     ['cls' => 'col-desc',     'cond' => null],
     ['cls' => 'col-pkg',      'cond' => null],
     ['cls' => 'col-cat',      'cond' => null],
@@ -300,6 +301,7 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         <th class="sortable" data-sort="platform_part_no" onclick="toggleSort(this)" title="点击排序">商品编号<span class="sort-arrow"></span></th>
         <th class="sortable" data-sort="model" onclick="toggleSort(this)" title="点击排序">型号<span class="sort-arrow"></span></th>
         <th class="col-info">其他信息</th>
+        <th class="col-info2">其他信息</th>
         <th class="col-desc">描述</th>
         <th>封装</th>
         <th>分类</th>
@@ -409,6 +411,10 @@ require __DIR__ . '/../../../ui/layouts/head.php';
                 <div class="lcsc-info-item"><span class="k">品牌</span><span class="v"><?=h($brandRaw !== '' ? $brandRaw : '—')?></span></div>
                 <div class="lcsc-info-item"><span class="k">封装</span><span class="v"><?=h($pkgRaw !== '' ? $pkgRaw : '—')?></span></div>
                 <div class="lcsc-info-item"><span class="k">类目</span><span class="v lcsc-type-link"><?=h($catText !== '' ? $catText : '—')?></span></div>
+            </div>
+        </td>
+        <td onclick="openDrawer(<?=$r['id']?>)" class="col-info2" data-label="其他信息">
+            <div class="lcsc-info">
                 <div class="lcsc-info-item"><span class="k">编号</span><span class="v"><?=$codeHtml?></span></div>
                 <div class="lcsc-info-item"><span class="k">库位</span><span class="v"><?=h($locRaw !== '' ? $locRaw : '—')?></span></div>
                 <div class="lcsc-info-item"><span class="k">导入</span><span class="v"><?=h($ctimeRaw !== '' ? substr(str_replace('T',' ',$ctimeRaw),0,16) : '—')?></span></div>
@@ -421,12 +427,20 @@ require __DIR__ . '/../../../ui/layouts/head.php';
                     // 立创参数表（parts.parameters 存 JSON：{"名":"值"}）
                     $pl = json_decode((string)($r['parameters'] ?? ''), true);
                     if (is_array($pl) && $pl) {
-                        echo '<div class="d-params">';
+                        $items = [];
                         foreach ($pl as $pk => $pv) {
                             if ($pv === '' || $pv === null) continue;
-                            echo '<span class="d-param"><span class="pk">'.h((string)$pk).'</span><span class="pv">'.h((string)$pv).'</span></span>';
+                            $items[] = [$pk, $pv];
+                        }
+                        $collapsed = count($items) > 6 ? ' is-collapsed' : '';
+                        echo '<div class="d-params'.$collapsed.'">';
+                        foreach ($items as $it) {
+                            echo '<span class="d-param"><span class="pk">'.h((string)$it[0]).'</span><span class="pv">'.h((string)$it[1]).'</span></span>';
                         }
                         echo '</div>';
+                        if ($collapsed) {
+                            echo '<span class="d-more" onclick="toggleLcscParams(this)">更多 ∨</span>';
+                        }
                     } else {
                         $paramRaw = (string)($r['parameters_text'] ?? '');
                         if ($paramRaw !== '') echo '<span class="d-param">参数：'.h($paramRaw).'</span>';
