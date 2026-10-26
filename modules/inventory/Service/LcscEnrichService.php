@@ -24,7 +24,9 @@ use Throwable;
 class LcscEnrichService
 {
     private const API_URL     = 'https://wmsc.lcsc.com/ftps/wm/product/detail?productCode=';
-    private const CACHE_PREFIX = 'lcsc:detail:';
+    // 缓存 key 带版本号：normalize() 的返回结构变化时（如新增 image 字段），
+    // 改这里即可让旧缓存自动失效并重拉，不必手动清库。
+    private const CACHE_PREFIX = 'lcsc:detail:v2:';
     private const CACHE_TTL    = 604800;   // 7 天
     private const TIMEOUT      = 10;
 
@@ -64,7 +66,7 @@ class LcscEnrichService
         if (empty($ids)) return $stats;
 
         $in  = implode(',', array_fill(0, count($ids), '?'));
-        $sql = "SELECT id, platform_id, platform_part_no, product_type, brand, package
+        $sql = "SELECT id, platform_id, platform_part_no, product_type, brand, package, image
                 FROM parts WHERE id IN ($in) AND user_id=?";
         if ($this->wsId > 0) $sql .= " AND workspace_id=?";
         $st = $this->db->prepare($sql);
@@ -116,6 +118,12 @@ class LcscEnrichService
                 $set[]    = 'package=?';
                 $params[] = $detail['package'];
                 $fields[] = 'package';
+            }
+            // 立创商品图：用于卡片封面 / 列表悬停预览
+            if (trim((string)($r['image'] ?? '')) === '' && !empty($detail['image'])) {
+                $set[]    = 'image=?';
+                $params[] = $detail['image'];
+                $fields[] = 'image';
             }
 
             if (empty($set)) { $stats['skipped']++; continue; }
@@ -210,6 +218,14 @@ class LcscEnrichService
                 if ($n !== '' && $v !== null) $params[(string)$n] = (string)$v;
             }
         }
+        // 立创商品图（productImages 数组首图）——用于卡片封面 / 悬停预览
+        $image = '';
+        if (!empty($raw['productImages']) && is_array($raw['productImages'])) {
+            $image = (string)($raw['productImages'][0] ?? '');
+        }
+        if ($image === '') {
+            $image = (string)($raw['image'] ?? '');
+        }
         return [
             // 保留立创英文原值 + 类目 id：中文类目名在 enrich() 回写时按
             // 「二级类目 id → 英文名精确匹配 → 关键词表」降级取，
@@ -217,6 +233,7 @@ class LcscEnrichService
             'product_type'      => (string)($raw['catalogName'] ?? $raw['categoryName'] ?? ''),
             'catalog_id'        => (int)($raw['catalogId'] ?? 0),
             'parent_catalog_id' => (int)($raw['parentCatalogId'] ?? 0),
+            'image'             => $image,
             'brand'        => (string)($raw['brandNameEn'] ?? $raw['brandName'] ?? $raw['brand'] ?? ''),
             'package'      => (string)($raw['encapStandard'] ?? $raw['encapsulation'] ?? $raw['package'] ?? ''),
             'model'        => (string)($raw['productModel'] ?? $raw['model'] ?? ''),

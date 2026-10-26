@@ -46,6 +46,8 @@ function renderDesktopTable(parts) {
     var cols_ = CFG.cols;
     // 图片开关：由 PHP 注入（站点级设置，默认关）。关闭时不输出图片 td ——
     var showImg_ = CFG.showImages ? 1 : 0;
+    // 显示模式：comfy=舒适（瀑布流+封面图）/ compact=紧凑（原表格，悬停出图）
+    var comfy_ = (CFG.viewMode === 'compact') ? 0 : 1;
     if (!parts || parts.length === 0) {
         var esAct = '';
         if (canEdit_) esAct += '<button class="btn btn-primary btn-sm" onclick="openAddModal()">＋ 添加元件</button>';
@@ -92,7 +94,16 @@ function renderDesktopTable(parts) {
                 ? '<td class="col-thumb" onclick="event.stopPropagation()"><img class="row-thumb" src="' + esc(attImgSrc(r.image, 160)) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大"></td>'
                 : '<td class="col-thumb"><span class="row-thumb-empty"></span></td>';
         }
-        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.ppn) + '" class="col-code td-ellipsis" data-label="商品编号">';
+        // 舒适模式：卡片封面图
+        if (comfy_) {
+            html += '<td class="col-cover" onclick="event.stopPropagation()">'
+                + (r.image
+                    ? '<img class="cover-img" src="' + esc(lcscImg(attImgSrc(r.image, 260), 260)) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大">'
+                    : '<span class="cover-ph">无图</span>')
+                + '</td>';
+        }
+        var imgAttr = r.image ? ' data-img="' + esc(attImgSrc(r.image, 400)) + '"' : '';
+        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.ppn) + '" class="col-code td-ellipsis" data-label="商品编号"' + imgAttr + '>';
         if (ppnUrl) html += '<a href="' + esc(ppnUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="code-blue u-underline">' + esc(r.ppn) + '</a>';
         else html += '<span class="code-blue">' + esc(r.ppn) + '</span>';
         html += '</td>';
@@ -140,6 +151,12 @@ function renderPagination(total, page, perPage, totalPage) {
     area.innerHTML = html;
 }
 
+// 立创商品图换尺寸：assets.lcsc.com/.../900x900/xxx.jpg → .../260x260/xxx.jpg
+function lcscImg(url, size) {
+    if (!url) return '';
+    return String(url).replace(/\/\d+x\d+\//, '/' + (size || 260) + 'x' + (size || 260) + '/');
+}
+
 // ── 排序（瀑布流下表头不可点，改由工具栏下拉驱动）──
 function changeSort(v) {
     var p = String(v || '').split(':');
@@ -156,6 +173,51 @@ function syncSortSelect() {
     if (sel.value !== v) sel.value = v;
 }
 
+// ── 显示模式：舒适（瀑布流+封面图）/ 紧凑（原表格，悬停出图）────────
+function setViewMode(mode) {
+    mode = (mode === 'compact') ? 'compact' : 'comfy';
+    try { localStorage.setItem('lcsc_view_mode', mode); } catch (e) {}
+    try { document.cookie = 'lcsc_view_mode=' + mode + ';path=/;max-age=' + (60 * 60 * 24 * 90); } catch (e) {}
+    document.body.classList.toggle('mode-comfy', mode === 'comfy');
+    document.body.classList.toggle('mode-compact', mode === 'compact');
+    document.querySelectorAll('.vms-btn').forEach(function (b) {
+        b.classList.toggle('is-on', b.getAttribute('data-mode') === mode);
+    });
+    loadPartsList();
+}
+
+// 紧凑模式：鼠标悬停编号/型号时浮出商品图
+function initImgTip() {
+    var tip = null;
+    function ensureTip() {
+        if (tip) return tip;
+        tip = document.createElement('div');
+        tip.className = 'img-tip';
+        tip.style.display = 'none';
+        document.body.appendChild(tip);
+        return tip;
+    }
+    document.addEventListener('mouseover', function (e) {
+        var td = e.target && e.target.closest ? e.target.closest('td[data-img]') : null;
+        if (!td) return;
+        var url = td.getAttribute('data-img');
+        if (!url) return;
+        var t = ensureTip();
+        t.innerHTML = '<img src="' + esc(url) + '" alt="">';
+        t.style.display = 'block';
+        var rect = td.getBoundingClientRect();
+        var top = rect.top + window.scrollY + rect.height + 8;
+        t.style.top = top + 'px';
+        t.style.left = Math.max(8, rect.left + window.scrollX) + 'px';
+    });
+    document.addEventListener('mouseout', function (e) {
+        var td = e.target && e.target.closest ? e.target.closest('td[data-img]') : null;
+        if (!td || !tip) return;
+        if (e.relatedTarget && td.contains(e.relatedTarget)) return;
+        tip.style.display = 'none';
+    });
+}
+
 // ── 回到顶部 ────────────────────────────────────────────────
 function scrollToTopBtn() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -165,7 +227,7 @@ function initToTopBtn() {
     var btn = document.getElementById('toTopBtn');
     if (!btn) return;
     function onScroll() {
-        if (window.scrollY > 260) btn.classList.add('is-show');
+        if (window.scrollY > 120) btn.classList.add('is-show');
         else btn.classList.remove('is-show');
     }
     window.addEventListener('scroll', onScroll, { passive: true });

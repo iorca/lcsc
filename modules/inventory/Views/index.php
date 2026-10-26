@@ -168,6 +168,10 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         <option value="model:asc">型号</option>
         <option value="location:asc">库位</option>
     </select>
+    <span class="view-mode-switch" title="显示模式">
+        <button type="button" class="vms-btn" data-mode="comfy" onclick="setViewMode('comfy')">舒适</button>
+        <button type="button" class="vms-btn" data-mode="compact" onclick="setViewMode('compact')">紧凑</button>
+    </span>
 </div>
 
 <!-- 立创式多维分类筛选：三个**并列**维度各占一行，值大号铺开，可点选多选 -->
@@ -1036,6 +1040,7 @@ window.PartsPageConfig = <?= json_encode([
     'globalThr'      => (int)$globalThr,
     'cols'           => $listColCount,   // 桌面端列数，唯一来源见视图上方 $listCols
     'showImages'     => $showImages,     // 图片开关（站点级设置）：JS 重绘 tbody 时据此决定是否出图片格
+    'viewMode'       => (string)($_GET['view'] ?? $_COOKIE['lcsc_view_mode'] ?? 'comfy'), // 舒适 / 紧凑
 
     'chartUrl'       => 'third_party/js/chart.umd.js?v=' . APP_VERSION . '.' . (is_file(__DIR__ . '/../../../third_party/js/chart.umd.js') ? filemtime(__DIR__ . '/../../../third_party/js/chart.umd.js') : '0'),
     'isAdmin'        => isAdmin(),

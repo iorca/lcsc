@@ -98,3 +98,16 @@
 (function(){
     try { initToTopBtn(); } catch (e) {}
 })();
+
+// ── 显示模式（舒适 / 紧凑）+ 紧凑模式悬停出图 ──
+(function(){
+    try {
+        var m = (CFG && CFG.viewMode) || 'comfy';
+        document.body.classList.toggle('mode-comfy', m === 'comfy');
+        document.body.classList.toggle('mode-compact', m === 'compact');
+        document.querySelectorAll('.vms-btn').forEach(function (b) {
+            b.classList.toggle('is-on', b.getAttribute('data-mode') === m);
+        });
+        initImgTip();
+    } catch (e) {}
+})();
