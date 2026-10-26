@@ -38,6 +38,30 @@ $extraTopbarRight = isPrimaryAdmin()
 
 $showImages = getSetting('parts_show_images', '0') === '1';
 
+// ── 立创式多维分类筛选：按一级维度（品牌 / 商品类型 / 封装格式）分组二级值 ──
+// 三个维度**并列**，各占一行；每个物料在每个维度下挂一个值节点。
+$dimOrder  = ['品牌', '商品类型', '封装格式'];
+$subsByPid = [];
+foreach ((array)$subCats as $sc) {
+    $pid = (int)($sc['parent_id'] ?? 0);
+    if ($pid > 0) $subsByPid[$pid][] = $sc;
+}
+$topByName = [];
+foreach ((array)$topCats as $tc) { $topByName[(string)$tc['name']] = $tc; }
+$dimRows = [];
+foreach ($dimOrder as $dn) {
+    if (!isset($topByName[$dn])) continue;
+    $tc = $topByName[$dn];
+    $dimRows[] = ['id' => (int)$tc['id'], 'name' => $dn, 'subs' => $subsByPid[(int)$tc['id']] ?? []];
+}
+// 其余一级分类（手工建的等）也作为附加维度列出
+foreach ((array)$topCats as $tc) {
+    $nm = (string)$tc['name'];
+    if (in_array($nm, $dimOrder, true)) continue;
+    $dimRows[] = ['id' => (int)$tc['id'], 'name' => $nm, 'subs' => $subsByPid[(int)$tc['id']] ?? []];
+}
+$dimLabels = array_column($dimRows, 'name');
+
 // ── 桌面端表格的列定义（**全项目唯一来源**）────────────────────────────
 
 $listCols = array_values(array_filter([
@@ -73,6 +97,7 @@ $ppnUrlOf = static function (array $r) use ($platById): string {
 };
 
 \App\Core\AssetManager::addCss('modules/inventory/Assets/css/parts.css');
+App\Core\AssetManager::addCss('modules/inventory/Assets/css/parts-filter.css');
 require __DIR__ . '/../../../ui/layouts/head.php';
 ?>
 <div class="main">
@@ -133,9 +158,46 @@ require __DIR__ . '/../../../ui/layouts/head.php';
     <?php endif; ?>
 </div>
 
+<!-- 立创式多维分类筛选：三个**并列**维度各占一行，值大号铺开，可点选多选 -->
+<?php if ($dimRows): ?>
+<div class="lcsc-filter" id="lcscFilter">
+    <div class="lcsc-filter-head">
+        <span class="lcsc-filter-title">分类筛选</span>
+        <span class="lcsc-filter-hint">同一维度内多选 =「或」，跨维度 =「且」</span>
+        <button type="button" class="lcsc-clear-all" onclick="clearLcscFilter()">清除全部</button>
+    </div>
+    <?php foreach ($dimRows as $di => $dim): ?>
+    <div class="lcsc-filter-row" data-dim="<?=$di?>">
+        <div class="lcsc-filter-label"><?=h($dim['name'])?></div>
+        <div class="lcsc-filter-body">
+            <div class="lcsc-filter-chips">
+                <?php foreach (array_slice($dim['subs'], 0, 14) as $sub): ?>
+                <button type="button" class="lcsc-chip" data-dim="<?=$di?>" data-cat-id="<?=(int)$sub['id']?>" data-cat-name="<?=h($sub['name'])?>" onclick="toggleLcscCat(<?=$di?>,<?=(int)$sub['id']?>)">
+                    <?=h($sub['name'])?><span class="lcsc-chip-cnt"><?=(int)($sub['cnt']??0)?></span>
+                </button>
+                <?php endforeach; ?>
+            </div>
+            <?php if (count($dim['subs']) > 14): ?>
+            <div class="lcsc-filter-more" id="lcscMore<?=$di?>" hidden>
+                <?php foreach (array_slice($dim['subs'], 14) as $sub): ?>
+                <button type="button" class="lcsc-chip" data-dim="<?=$di?>" data-cat-id="<?=(int)$sub['id']?>" data-cat-name="<?=h($sub['name'])?>" onclick="toggleLcscCat(<?=$di?>,<?=(int)$sub['id']?>)">
+                    <?=h($sub['name'])?><span class="lcsc-chip-cnt"><?=(int)($sub['cnt']??0)?></span>
+                </button>
+                <?php endforeach; ?>
+            </div>
+            <button type="button" class="lcsc-more-btn" id="lcscMoreBtn<?=$di?>" onclick="toggleLcscMore(<?=$di?>)">更多 ∨</button>
+            <?php endif; ?>
+        </div>
+        <div class="lcsc-filter-sel" id="lcscSel<?=$di?>"></div>
+        <button type="button" class="lcsc-dim-clear" id="lcscClear<?=$di?>" onclick="clearLcscDim(<?=$di?>)" disabled>清除</button>
+    </div>
+    <?php endforeach; ?>
+</div>
+<?php endif; ?>
+
 <!-- PC端：分类筛选专区（两行：一级大类 + 二级分类） -->
 <?php if($topCats || $allCats || $noCatCount>0): ?>
-<div class="cat-filter-box" id="catFilterBox">
+<div class="cat-filter-box is-hidden" id="catFilterBox">
     <!-- 第一行：一级大类 -->
     <div class="cat-filter-row" id="catRow1">
         <span class="cat-row-label">类目：</span>
@@ -950,6 +1012,8 @@ window.PartsPageConfig = <?= json_encode([
     'q'              => (string)($q ?? ''),
     'filter'         => (string)($filter ?? ''),
     'cat'            => (string)($catParam ?? ''),
+    'cats'           => (string)($_GET['cats'] ?? ''),
+    'dimLabels'      => $dimLabels,
     'plat'           => (int)($platId ?? 0),
     'loc'            => (string)($locFilter ?? ''),
     'page'           => (int)($page ?? 1),
@@ -979,7 +1043,7 @@ window.PartsPageConfig = <?= json_encode([
 // 依赖前面 5 个文件定义的全部函数，必须最后加载。
 
 $partsJsBase = 'modules/inventory/Assets/js/';
-$partsJsFiles = ['parts-core', 'parts-list', 'parts-modal', 'parts-drawer', 'parts-attachment', 'parts-batch', 'parts-init'];
+$partsJsFiles = ['parts-core', 'parts-list', 'parts-filter', 'parts-modal', 'parts-drawer', 'parts-attachment', 'parts-batch', 'parts-init'];
 foreach ($partsJsFiles as $pj) {
     $pjPath = __DIR__ . '/../Assets/js/' . $pj . '.js';
     echo '<script src="' . h($partsJsBase . $pj . '.js') . '?v='

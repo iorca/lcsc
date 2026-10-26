@@ -273,6 +273,37 @@ final class PartService
             $where[] = "p.status != 'deleted'";
         }
 
+        // ── 立创式多维筛选：cats = "12,15|3|8" ──
+        // 组间 AND（不同维度），组内 OR（同一维度多选），语义与立创筛选条一致。
+        // 每组自动展开其子树（选中一级维度时命中其下所有值）。
+        // ⚠️ 必须放在 $whereSql 拼接**之前**：where 的顺序与 $args 的顺序一一对应，
+        //    放晚了会出现占位符与参数数量不匹配（SQLSTATE[HY093]）。
+        $catsParam = trim((string)($params['cats'] ?? ''));
+        if ($catsParam !== '') {
+            $groups = array_values(array_filter(array_map('trim', explode('|', $catsParam)), fn($s) => $s !== ''));
+            if ($groups) {
+                $treeSvc = new \Modules\Category\Service\CategoryTreeService($this->db, $this->dataUid);
+                $flat    = $treeSvc->getFlatTree();
+                foreach ($groups as $grp) {
+                    $ids = array_values(array_filter(array_map('intval', explode(',', $grp)), fn($i) => $i > 0));
+                    if (!$ids) continue;
+                    $expanded = [];
+                    foreach ($ids as $cid) {
+                        if (!isset($flat[$cid])) continue;
+                        $expanded[] = $cid;
+                        foreach ($flat[$cid]['descendants'] as $did) {
+                            $expanded[] = $did;
+                        }
+                    }
+                    $expanded = array_values(array_unique($expanded));
+                    if (!$expanded) continue;
+                    $in = implode(',', array_fill(0, count($expanded), '?'));
+                    $where[] = "EXISTS (SELECT 1 FROM part_categories pc WHERE pc.part_id=p.id AND pc.category_id IN ($in))";
+                    $args    = array_merge($args, $expanded);
+                }
+            }
+        }
+
         $whereSql = implode(' AND ', $where);
 
         // 总数
@@ -315,12 +346,27 @@ final class PartService
         $list = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         // 分类映射（批量获取所有列表物料的分类）
+        // ⚠️「分类」列只放**语义分类**（商品类型等）：排除「品牌」「封装格式」两个维度——
+        // 它们分别已有独立列（品牌列、封装列），否则品牌信息会乱入分类列。
         $catMap = [];
         if (!empty($list)) {
             $ids = array_column($list, 'id');
             $inPlaceholders = implode(',', array_fill(0, count($ids), '?'));
-            $catStmt = $this->db->prepare("SELECT pc.part_id, c.name FROM part_categories pc JOIN categories c ON c.id=pc.category_id WHERE pc.part_id IN ({$inPlaceholders}) ORDER BY c.id ASC");
-            $catStmt->execute($ids);
+            $exclDims = [
+                \Modules\Category\Service\CategoryAutoClassifier::DIM_LABELS[\Modules\Category\Service\CategoryAutoClassifier::DIM_BRAND],
+                \Modules\Category\Service\CategoryAutoClassifier::DIM_LABELS[\Modules\Category\Service\CategoryAutoClassifier::DIM_PKG],
+            ];
+            $exclPlace = implode(',', array_fill(0, count($exclDims), '?'));
+            $catStmt = $this->db->prepare(
+                "SELECT pc.part_id, c.name
+                 FROM part_categories pc
+                 JOIN categories c ON c.id = pc.category_id
+                 LEFT JOIN categories cp ON cp.id = c.parent_id
+                 WHERE pc.part_id IN ({$inPlaceholders})
+                   AND (cp.id IS NULL OR cp.name NOT IN ({$exclPlace}))
+                 ORDER BY c.id ASC"
+            );
+            $catStmt->execute(array_merge($ids, $exclDims));
             while ($row = $catStmt->fetch(PDO::FETCH_ASSOC)) {
                 $catMap[$row['part_id']][] = $row['name'];
             }

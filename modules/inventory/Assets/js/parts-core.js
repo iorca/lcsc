@@ -6,6 +6,8 @@ var _filterState = {
     q: CFG.q || '',
     filter: CFG.filter || '',
     cat: CFG.cat || '',
+    // 立创式多维筛选：'12,15|3|8'（组间 AND，组内 OR）
+    cats: CFG.cats || '',
     plat: CFG.plat || 0,
     loc: CFG.loc || '',
     page: CFG.page || 1,

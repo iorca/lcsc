@@ -5,6 +5,7 @@ function loadPartsList() {
         + '&q=' + encodeURIComponent(_filterState.q)
         + '&filter=' + _filterState.filter
         + '&cat=' + encodeURIComponent(_filterState.cat)
+        + '&cats=' + encodeURIComponent(_filterState.cats)
         + '&plat=' + _filterState.plat
         + '&loc=' + encodeURIComponent(_filterState.loc)
         + '&page=' + _filterState.page
@@ -143,6 +144,7 @@ function buildFilterQueryString() {
     if (_filterState.q) parts.push('q=' + encodeURIComponent(_filterState.q));
     if (_filterState.filter) parts.push('filter=' + _filterState.filter);
     if (_filterState.cat) parts.push('cat=' + encodeURIComponent(_filterState.cat));
+    if (_filterState.cats) parts.push('cats=' + encodeURIComponent(_filterState.cats));
     if (_filterState.plat) parts.push('plat=' + _filterState.plat);
     if (_filterState.loc) parts.push('loc=' + encodeURIComponent(_filterState.loc));
     return parts.join('&');

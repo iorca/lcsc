@@ -135,6 +135,7 @@ final class PartsRoutes
         $params = [
             'q'        => $_GET['q'] ?? '',
             'cat'      => $_GET['cat'] ?? '',
+            'cats'     => $_GET['cats'] ?? '',
             'plat'     => $_GET['plat'] ?? '',
             'loc'      => $_GET['loc'] ?? '',
             'filter'   => $_GET['filter'] ?? '',

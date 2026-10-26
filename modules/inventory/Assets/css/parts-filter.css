@@ -1,0 +1,211 @@
+/* modules/inventory/Assets/css/parts-filter.css
+ * 立创式多维分类筛选条：三个并列维度（品牌 / 商品类型 / 封装格式）各占一行，
+ * 每行的值大号铺开、可点选多选。整体尺寸刻意做大，便于快速点选。
+ * 颜色全部走 currentColor / rgba，暗色主题自动适配。
+ */
+
+.lcsc-filter {
+    margin: 0 0 20px;
+    padding: 18px 24px 20px;
+    border: 1px solid rgba(127, 127, 127, .24);
+    border-radius: 16px;
+    background: rgba(127, 127, 127, .05);
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .05);
+}
+
+.lcsc-filter.has-filter {
+    border-color: rgba(59, 130, 246, .5);
+    background: rgba(59, 130, 246, .06);
+}
+
+/* ── 头部 ── */
+.lcsc-filter-head {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 6px;
+}
+
+.lcsc-filter-title {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.lcsc-filter-hint {
+    font-size: 13px;
+    opacity: .6;
+}
+
+.lcsc-clear-all {
+    margin-left: auto;
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 8px;
+    border: 1px solid rgba(127, 127, 127, .3);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+.lcsc-clear-all:hover {
+    border-color: rgba(220, 80, 80, .6);
+    color: #dc5050;
+}
+
+/* ── 维度行 ── */
+.lcsc-filter-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 18px;
+    padding: 12px 0;
+    border-top: 1px dashed rgba(127, 127, 127, .2);
+}
+
+.lcsc-filter-row:first-of-type {
+    border-top: none;
+}
+
+.lcsc-filter-label {
+    flex: 0 0 96px;
+    padding-top: 8px;
+    font-size: 16px;
+    font-weight: 700;
+    opacity: .88;
+}
+
+.lcsc-filter-body {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.lcsc-filter-chips,
+.lcsc-filter-more {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.lcsc-filter-more {
+    margin-top: 10px;
+}
+
+/* ── 值 chip（大号）── */
+.lcsc-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 9px 18px;
+    font-size: 15.5px;
+    line-height: 1.35;
+    border-radius: 11px;
+    border: 1px solid rgba(127, 127, 127, .3);
+    background: rgba(127, 127, 127, .07);
+    color: inherit;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .12s, color .15s;
+}
+
+.lcsc-chip:hover {
+    background: rgba(59, 130, 246, .14);
+    border-color: rgba(59, 130, 246, .55);
+    transform: translateY(-1px);
+}
+
+.lcsc-chip.is-on {
+    background: rgba(59, 130, 246, .92);
+    border-color: rgba(59, 130, 246, .92);
+    color: #fff;
+    font-weight: 600;
+}
+
+.lcsc-chip-cnt {
+    font-size: 12px;
+    opacity: .62;
+}
+
+.lcsc-chip.is-on .lcsc-chip-cnt {
+    opacity: .92;
+}
+
+/* ── 展开 / 清除 ── */
+.lcsc-more-btn {
+    margin-top: 10px;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(127, 127, 127, .26);
+    background: transparent;
+    color: inherit;
+    opacity: .8;
+    cursor: pointer;
+}
+
+.lcsc-more-btn:hover {
+    opacity: 1;
+    border-color: rgba(59, 130, 246, .5);
+}
+
+.lcsc-dim-clear {
+    flex: 0 0 auto;
+    margin-top: 8px;
+    font-size: 13px;
+    padding: 5px 12px;
+    border-radius: 8px;
+    border: 1px solid rgba(127, 127, 127, .26);
+    background: transparent;
+    color: inherit;
+    opacity: .75;
+    cursor: pointer;
+}
+
+.lcsc-dim-clear:disabled {
+    opacity: .3;
+    cursor: default;
+}
+
+.lcsc-dim-clear:not(:disabled):hover {
+    opacity: 1;
+    border-color: rgba(220, 80, 80, .6);
+    color: #dc5050;
+}
+
+/* ── 已选条件 ── */
+.lcsc-filter-sel {
+    flex: 0 1 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    max-width: 340px;
+    margin-top: 8px;
+}
+
+.lcsc-sel-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 13.5px;
+    border-radius: 8px;
+    background: rgba(59, 130, 246, .18);
+    border: 1px solid rgba(59, 130, 246, .45);
+    cursor: pointer;
+}
+
+.lcsc-sel-tag b {
+    font-weight: 700;
+    opacity: .7;
+}
+
+.lcsc-sel-tag:hover {
+    background: rgba(220, 80, 80, .18);
+    border-color: rgba(220, 80, 80, .5);
+}
+
+/* ── 窄屏：维度名与按钮换行 ── */
+@media (max-width: 900px) {
+    .lcsc-filter { padding: 14px 16px 16px; }
+    .lcsc-filter-row { flex-wrap: wrap; gap: 10px; }
+    .lcsc-filter-label { flex: 0 0 100%; padding-top: 0; }
+    .lcsc-filter-sel { max-width: 100%; }
+}
