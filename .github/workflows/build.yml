@@ -24,6 +24,10 @@ on:
         description: '是否出 web 源码 zip（含 composer 依赖）'
         type: boolean
         default: true
+      build_desktop:
+        description: '是否出 Windows 桌面版（launcher + 运行时，需 windows runner）'
+        type: boolean
+        default: true
   push:
     tags: ['v*']
   release:
@@ -38,7 +42,7 @@ env:
 
 jobs:
   docker:
-    if: ${{ github.event_name != 'pull_request' }}
+    if: ${{ github.event.inputs.push_image != 'false' && github.event_name != 'pull_request' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -114,3 +118,51 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: lcsc-web-*.zip
+
+  windows-desktop:
+    if: ${{ github.event.inputs.build_desktop != 'false' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Install NSIS
+        run: choco install nsis -y
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring,zip
+          tools: composer
+
+      - name: Install composer deps
+        run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+
+      - name: Build web-dist
+        run: node scripts/package-web.js
+
+      - name: Build launcher (windows)
+        run: |
+          cd desktop/launcher
+          go build -o ../launcher.exe .
+
+      - name: Download runtimes
+        shell: bash
+        run: cd desktop && pwsh -ExecutionPolicy Bypass -File ./fetch.ps1
+
+      - name: Package (NSIS + portable zip)
+        shell: bash
+        run: cd desktop && pwsh -ExecutionPolicy Bypass -File ./package.ps1
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: lcsc-windows
+          path: |
+            desktop/LCSC-portable.zip
+            desktop/LCSC-Setup-*.exe
