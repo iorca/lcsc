@@ -76,50 +76,79 @@ function renderDesktopTable(parts) {
         var sc = r.stock === 0 ? 's-zero' : (r.stock <= r.eff_threshold ? 's-low' : 's-ok');
         var rc = r.stock === 0 ? 'row-zero' : (r.stock <= r.eff_threshold ? 'row-low' : '');
         var ppnUrl = (r.platform_type === 'standard' && r.url_template) ? platformUrl(r.url_template, r.ppn) : '';
-        var catsHtml = (r.cats || []).map(function(ct) { return '<span class="cat-tag">' + esc(ct) + '</span>'; }).join('');
-        var pkgHtml = r.package ? '<span class="pkg-badge">' + esc(r.package) + '</span>' : '<span class="ph-dash">—</span>';
-        var catsHtmlFull = (r.cats && r.cats.length) ? catsHtml : '<span class="ph-dash">—</span>';
         var locHtml = r.location ? '<span class="loc-chip" title="' + esc(r.location) + '（点击可筛选同库位物料）" onclick="event.stopPropagation();filterByLocation(\'' + esc(r.location).replace(/'/g,'&#39;') + '\')">📍 <span class="loc-name">' + esc(r.location) + '</span></span>' : '<span class="loc-chip-empty">—</span>';
-        // 型号列第二行：商品描述（超长截断，悬停显示完整）；品牌已独立成列
-        var metaHtml = r.product_name
-            ? '<span class="model-sub td-ellipsis" title="' + esc(r.product_name) + '">' + esc(r.product_name) + '</span>'
-            : '';
-        var brandHtml = r.brand
-            ? '<span class="brand-txt">' + esc(r.brand) + '</span>'
-            : '<span class="ph-dash">—</span>';
+
+        // ── 立创式：主信息块 = 型号(黄高亮) + 品牌/封装/类目/编号 竖排 ──
+        var brandTxt = r.brand || '—';
+        var pkgTxt   = r.package || '—';
+        var catTxt   = (r.cats && r.cats.length) ? esc(r.cats.join('、')) : '—';
+        var codeHtml  = ppnUrl
+            ? '<a href="' + esc(ppnUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()">' + esc(r.ppn) + '</a>'
+            : esc(r.ppn || '—');
+
+        var hotBadge = '';
+        if (r.stock > 0 && r.stock <= (r.eff_threshold || 0)) hotBadge = '<span class="lcsc-badge b-blue">库存紧张</span>';
+        else if (r.stock === 0) hotBadge = '<span class="lcsc-badge">缺货</span>';
+        else if (r.stock >= 100) hotBadge = '<span class="lcsc-badge b-green">现货</span>';
+
+        var mainHtml =
+            '<div class="lcsc-main">'
+            + '<div class="lcsc-model-line">'
+            +   '<span class="lcsc-model" onclick="openDrawer(' + r.id + ')">' + esc(r.model || '—') + '</span>'
+            +   hotBadge
+            + '</div>'
+            + '<div class="lcsc-meta">'
+            +   '<div class="lcsc-meta-row"><span class="k">品牌：</span><span class="v">' + esc(brandTxt) + '</span></div>'
+            +   '<div class="lcsc-meta-row"><span class="k">封装：</span><span class="v">' + esc(pkgTxt) + '</span></div>'
+            +   '<div class="lcsc-meta-row"><span class="k">类目：</span><span class="v lcsc-type-link">' + catTxt + '</span></div>'
+            +   '<div class="lcsc-meta-row"><span class="k">编号：</span><span class="v">' + codeHtml + '</span></div>'
+            +   '<div class="lcsc-meta-row"><span class="k">库位：</span><span class="v">' + (r.location ? esc(r.location) : '—') + '</span></div>'
+            +   '<div class="lcsc-meta-row"><span class="k">导入：</span><span class="v">' + (r.create_time ? esc(String(r.create_time).substring(0, 16).replace('T', ' ')) : '—') + '</span></div>'
+            + '</div>'
+            + '</div>';
+
+        // ── 立创式：参数 / 描述区 ──
+        var descHtml =
+            '<div class="lcsc-desc">'
+            + (r.product_name ? '<span class="d-title">' + esc(r.product_name) + '</span>' : '')
+            + (r.parameters_text ? '<span class="d-param">参数：' + esc(r.parameters_text) + '</span>' : '')
+            + '</div>';
+
         html += '<tr class="' + rc + '" data-part-id="' + r.id + '">';
         if (isAdmin_) html += '<td class="cb-col" onclick="event.stopPropagation()"><input type="checkbox" class="part-cb" value="' + r.id + '" data-stock="' + r.stock + '" onchange="onPartCbChange(this)"></td>';
         if (showImg_) {
-            html += r.image
-                ? '<td class="col-thumb" onclick="event.stopPropagation()"><img class="row-thumb" src="' + esc(attImgSrc(r.image, 160)) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大"></td>'
-                : '<td class="col-thumb"><span class="row-thumb-empty"></span></td>';
+            html += '<td class="col-thumb" onclick="event.stopPropagation()"><img class="row-thumb" src="' + esc(attImgSrc(r.image, 160)) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大"></td>';
         }
-        // 舒适模式：卡片封面图
-        if (comfy_) {
-            html += '<td class="col-cover" onclick="event.stopPropagation()">'
-                + (r.image
-                    ? '<img class="cover-img" src="' + esc(lcscImg(attImgSrc(r.image, 260))) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大">'
-                    : '<span class="cover-ph">无图</span>')
-                + '</td>';
-        }
-        var imgAttr = r.image ? ' data-img="' + esc(attImgSrc(r.image, 400)) + '"' : '';
-        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.ppn) + '" class="col-code td-ellipsis" data-label="商品编号"' + imgAttr + '>';
-        if (ppnUrl) html += '<a href="' + esc(ppnUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="code-blue u-underline">' + esc(r.ppn) + '</a>';
-        else html += '<span class="code-blue">' + esc(r.ppn) + '</span>';
-        html += '</td>';
-        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.model) + '" class="col-model" data-label="型号"><span class="model-line"><span class="model-txt">' + esc(r.model) + '</span></span>' + metaHtml + '</td>';
-        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.package) + '" class="col-pkg td-ellipsis" data-label="封装">' + pkgHtml + '</td>';
-        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc((r.cats || []).join(', ')) + '" class="col-cat td-ellipsis" data-label="分类">' + catsHtmlFull + '</td>';
-        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.brand || '') + '" class="col-brand td-ellipsis" data-label="品牌">' + brandHtml + '</td>';
-        html += '<td onclick="openDrawer(' + r.id + ')" class="col-stock" data-label="库存"><span class="stock-num ' + sc + '" title="当前库存 ' + r.stock + (r.eff_threshold ? ' / 最低阈值 ' + r.eff_threshold : '') + '">' + r.stock + '</span>'
+        // 立创式缩略图（图片列）
+        html += '<td class="col-cover" onclick="event.stopPropagation()">'
+            + (r.image
+                ? '<div class="lcsc-thumb"><img src="' + esc(attImgSrc(r.image, 160)) + '" alt="" loading="lazy" onclick="event.stopPropagation();attPreview(\'' + esc(attImgSrc(r.image, 800)) + '\')" title="点击放大"></div>'
+                : '<div class="lcsc-thumb"><span class="ph">无图</span></div>')
+            + '</td>';
+
+        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.ppn) + '" class="col-code td-ellipsis" data-label="商品编号">'
+            + (ppnUrl ? '<a href="' + esc(ppnUrl) + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="code-blue u-underline">' + esc(r.ppn) + '</a>' : '<span class="code-blue">' + esc(r.ppn) + '</span>')
+            + '</td>';
+        html += '<td onclick="openDrawer(' + r.id + ')" class="col-model" data-label="型号">' + mainHtml + '</td>';
+        html += '<td onclick="openDrawer(' + r.id + ')" class="col-desc" data-label="参数/描述">' + descHtml + '</td>';
+        // 以下为紧凑模式（表格）用的列，宽屏下由 CSS 隐藏
+        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.package) + '" class="col-pkg td-ellipsis" data-label="封装">' + (r.package ? '<span class="pkg-badge">' + esc(r.package) + '</span>' : '<span class="ph-dash">—</span>') + '</td>';
+        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc((r.cats || []).join(', ')) + '" class="col-cat td-ellipsis" data-label="分类">' + ((r.cats && r.cats.length) ? (r.cats || []).map(function(ct){ return '<span class="cat-tag">' + esc(ct) + '</span>'; }).join('') : '<span class="ph-dash">—</span>') + '</td>';
+        html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.brand || '') + '" class="col-brand td-ellipsis" data-label="品牌">' + (r.brand ? '<span class="brand-txt">' + esc(r.brand) + '</span>' : '<span class="ph-dash">—</span>') + '</td>';
+
+        // 立创式库存区（只留数量，不显示价格）
+        html += '<td onclick="openDrawer(' + r.id + ')" class="col-stock" data-label="库存">'
+            + '<div class="lcsc-stock">'
+            +   '<span class="s-num ' + sc + '">' + r.stock + '</span>'
+            +   '<span class="s-unit">个</span>'
+            + '</div>'
             + (r.damaged > 0 ? '<span class="stk-tag red" title="不良品数量">不良' + r.damaged + '</span>' : '')
-            + (r.is_stale ? '<span class="stk-tag gray" title="90天无出入库">呆滞</span>' : '') + '</td>';
+            + (r.is_stale ? '<span class="stk-tag gray" title="90天无出入库">呆滞</span>' : '')
+            + '</td>';
         html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.location) + '" class="col-location td-ellipsis" data-label="库位">' + locHtml + '</td>';
         var ctimeTxt = r.create_time ? String(r.create_time).substring(0, 16).replace('T', ' ') : '';
-        var ctimeHtml = ctimeTxt
-            ? '<span class="ctime-txt" title="导入时间 ' + esc(r.create_time || '') + '">' + esc(ctimeTxt) + '</span>'
-            : '<span class="ph-dash">—</span>';
-        html += '<td onclick="openDrawer(' + r.id + ')" class="col-ctime" data-label="导入时间">' + ctimeHtml + '</td>';
+        html += '<td onclick="openDrawer(' + r.id + ')" class="col-ctime" data-label="导入时间">' + (ctimeTxt ? '<span class="ctime-txt" title="导入时间 ' + esc(r.create_time || '') + '">' + esc(ctimeTxt) + '</span>' : '<span class="ph-dash">—</span>') + '</td>';
+
         html += '<td class="td-actions" onclick="event.stopPropagation()"><div class="actions">';
         if (canEdit_) html += '<button class="btn btn-ghost btn-sm btn-stock" data-info="' + esc(JSON.stringify({id:r.id,model:r.model,ppn:r.ppn,location_id:r.location_id || '',stock:r.stock,damaged:r.damaged})) + '">出入库</button>';
         if (canEdit_) html += '<button class="btn btn-ghost btn-sm" data-part="' + esc(JSON.stringify(r)) + '" data-platform-type="' + esc(r.platform_type || 'standard') + '" onclick="openEditModal(this)">编辑</button>';
@@ -151,13 +180,11 @@ function renderPagination(total, page, perPage, totalPage) {
     area.innerHTML = html;
 }
 
-// 立创商品图：assets.lcsc.com 只有一个可用规格（900x900，其余尺寸一律 403），
-// 因此**不做尺寸替换**，直接用原图 + CSS 控制显示大小。
-// attImgSrc() 对 http(s) 外链原样返回，正好适用。
-function lcscImg(url) {
-    if (!url) return '';
-    return String(url);
-}
+// 商品图统一走 attImgSrc()：
+//   · 本地文件（uploads/...）→ 走 asset.thumb 接口取 webp 缩略图
+//   · http(s) 外链          → 原样返回
+// 立创图床（assets.lcsc.com）只有一个可用规格（900x900，其余一律 403），
+// 因此外链不做尺寸替换，直接用原图 + CSS 控制显示大小。
 
 // ── 排序（瀑布流下表头不可点，改由工具栏下拉驱动）──
 function changeSort(v) {

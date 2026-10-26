@@ -286,109 +286,321 @@
     background: rgba(30, 34, 44, .97);
 }
 
-/* ══ 物料列表 · 瀑布流卡片（仅舒适模式，宽屏生效）════════════════════
- * tbody 用 CSS 多列(columns)实现瀑布流，每行(tr)是一张卡片，
- * break-inside:avoid 保证卡片不被列边界拆断，列高自动均衡。
+/* ══ 物料列表 · 立创商城式行布局（宽屏生效）════════════════════════════
+ * 参考立创商城搜索结果列表的排布：
+ *   [图片] │ 型号/品牌/封装/类目/编号 │ 参数描述 │ 库存 │ 操作
+ * 用 table-layout:fixed + colgroup 定宽，各列内容垂直居中。
  * ───────────────────────────────────────────────────────────── */
-@media (min-width: 1100px) {
-    body.mode-comfy .inv-table table {
-        display: block;
-        width: 100%;
-    }
-
+@media (min-width: 1180px) {
+    /* 表头与 colgroup 在行布局下都用不上（宽度改由 grid 精确控制） */
     body.mode-comfy .inv-table colgroup,
     body.mode-comfy .inv-table thead {
         display: none;
     }
 
+    body.mode-comfy .inv-table table,
     body.mode-comfy .inv-table tbody {
         display: block;
-        column-count: 4;
-        column-gap: 12px;
-        padding: 2px 2px 0;
+        width: 100%;
     }
 
+    /* 每行 = 一个 grid：勾选 | 图片 | 主信息 | 参数描述 | 库存 | 操作 */
     body.mode-comfy .inv-table tbody tr {
-        position: relative;
         display: grid;
-        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-columns: 34px 92px 320px minmax(0, 1fr) 76px 104px;
         grid-template-areas:
-            "cover cover"
-            "code  stock"
-            "model model"
-            "pkg   cat"
-            "brand loc"
-            "ctime ctime"
-            "acts  acts";
-        gap: 5px 8px;
-        align-items: start;
-        break-inside: avoid;
-        -webkit-column-break-inside: avoid;
-        page-break-inside: avoid;
-        margin: 0 0 12px;
-        padding: 11px 13px 12px;
-        border-radius: 12px;
-        border: 1px solid rgba(127, 127, 127, .2);
-        background: rgba(255, 255, 255, .55);
-        box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
-        transition: box-shadow .15s, transform .15s;
+            "cb    cover  model  desc  stock acts";
+        align-items: center;
+        column-gap: 10px;
+        padding: 10px 12px 10px 0;
+        border-bottom: 1px solid rgba(127, 127, 127, .13);
+        transition: background .12s;
     }
 
     body.mode-comfy .inv-table tbody tr:hover {
-        box-shadow: 0 5px 16px rgba(0, 0, 0, .1);
-        transform: translateY(-1px);
+        background: rgba(59, 130, 246, .04);
     }
 
     body.mode-comfy .inv-table tbody td {
-        display: block;
-        border: none;
+        /* 主题表 .td-ellipsis 带 max-width:0，表格模式下做省略号用；
+           行布局下必须解除，否则内容被裁成 0 宽。 */
+        max-width: none;
+        width: auto;
+        height: auto;
+        vertical-align: middle;
         padding: 0;
+        border: none;
+        white-space: normal;
         background: transparent;
-        min-width: 0;
     }
 
-    /* 列位置：用 class 定位（不用 :nth-last-child —— 左侧可选列会打乱计数） */
-    body.mode-comfy .inv-table tbody td.col-cover    { grid-area: cover; margin: 0 0 4px; }
-    body.mode-comfy .inv-table tbody td.col-code     { grid-area: code; }
-    body.mode-comfy .inv-table tbody td.col-model    { grid-area: model; }
-    body.mode-comfy .inv-table tbody td.col-pkg      { grid-area: pkg; }
-    body.mode-comfy .inv-table tbody td.col-cat      { grid-area: cat; }
-    body.mode-comfy .inv-table tbody td.col-brand    { grid-area: brand; }
-    body.mode-comfy .inv-table tbody td.col-stock    { grid-area: stock; }
-    body.mode-comfy .inv-table tbody td.col-location { grid-area: loc; }
-    body.mode-comfy .inv-table tbody td.col-ctime    { grid-area: ctime; }
-    body.mode-comfy .inv-table tbody td.td-actions   { grid-area: acts; }
+    /* 区域分配（用 class 定位，不依赖列顺序） */
+    body.mode-comfy .inv-table tbody td.cb-col     { grid-area: cb; }
+    body.mode-comfy .inv-table tbody td.col-cover  { grid-area: cover; }
+    body.mode-comfy .inv-table tbody td.col-model  { grid-area: model; }
+    body.mode-comfy .inv-table tbody td.col-desc   { grid-area: desc; }
+    body.mode-comfy .inv-table tbody td.col-stock  { grid-area: stock; }
+    body.mode-comfy .inv-table tbody td.td-actions { grid-area: acts; }
 
-    /* 勾选框浮到卡片左上角；缩略图在卡片流里隐藏（封面图已承担该职责） */
-    body.mode-comfy .inv-table tbody td.cb-col {
-        position: absolute;
-        top: 10px;
-        left: 10px;
-    }
-    body.mode-comfy .inv-table tbody td.col-thumb { display: none; }
-
-    /* 卡片内文字排版 */
-    body.mode-comfy .inv-table tbody td.col-code .code-blue { font-size: 13px; }
-    body.mode-comfy .inv-table tbody td.col-model .model-txt { font-size: 13.5px; }
-    body.mode-comfy .inv-table tbody td.col-model .model-sub { font-size: 11px; }
+    /* 紧凑模式用的列：宽屏下隐藏（值已并入型号块的小字行） */
     body.mode-comfy .inv-table tbody td.col-pkg,
     body.mode-comfy .inv-table tbody td.col-cat,
     body.mode-comfy .inv-table tbody td.col-brand,
+    body.mode-comfy .inv-table tbody td.col-code,
     body.mode-comfy .inv-table tbody td.col-location,
-    body.mode-comfy .inv-table tbody td.col-ctime { font-size: 11.5px; }
-    body.mode-comfy .inv-table tbody td.col-ctime { opacity: .62; }
-    body.mode-comfy .inv-table tbody td.col-stock .stock-num { font-size: 15px; }
-    body.mode-comfy .inv-table tbody td.td-actions .actions { flex-wrap: wrap; gap: 4px; }
-    body.mode-comfy .inv-table tbody td.td-actions .btn { font-size: 11px; padding: 3px 8px; }
+    body.mode-comfy .inv-table tbody td.col-ctime {
+        display: none;
+    }
+
+    /* 勾选框列 */
+    body.mode-comfy .inv-table tbody td.cb-col {
+        text-align: center;
+    }
+
+    /* 图片列 */
+    body.mode-comfy .inv-table tbody td.col-cover {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+    }
+
+    /* 库存列 */
+    body.mode-comfy .inv-table tbody td.col-stock {
+        text-align: center;
+    }
+
+    /* 操作列 */
+    body.mode-comfy .inv-table tbody td.td-actions {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    /* 缩略图列在行布局下不需要（封面图已承担） */
+    body.mode-comfy .inv-table tbody td.col-thumb { display: none; }
 }
 
-/* 卡片封面 */
+/* ══ 立创式主信息块：型号大标题 + 元信息行 ═══════════════════════════ */
+.lcsc-main {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    min-width: 0;
+}
+
+.lcsc-model-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* 型号：立创是柠檬黄高亮 + 下划线 */
+.lcsc-model {
+    font-size: 15px;
+    font-weight: 700;
+    color: #ffcc00 !important;
+    text-decoration: underline;
+    text-decoration-color: rgba(255, 204, 0, .6);
+    text-underline-offset: 3px;
+    cursor: pointer;
+    word-break: break-all;
+}
+
+.lcsc-model:hover { color: #ffd733 !important; }
+
+[data-theme="dark"] .lcsc-model { color: #ffd633 !important; }
+
+/* 角标：热销 / 库存紧张 */
+.lcsc-badge {
+    display: inline-block;
+    padding: 1px 6px;
+    border-radius: 3px;
+    font-size: 10.5px;
+    line-height: 16px;
+    color: #fff;
+    background: #e5484d;
+    flex: 0 0 auto;
+}
+
+.lcsc-badge.b-blue  { background: #3b82f6; }
+.lcsc-badge.b-green { background: #16a34a; }
+.lcsc-badge.b-gray  { background: #94a3b8; }
+
+/* 元信息行：品牌 / 封装 / 类目 / 编号 —— 立创那种「标签：值」的竖排 */
+.lcsc-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    font-size: 11.5px;
+    color: var(--text2);
+    min-width: 0;
+}
+
+.lcsc-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+}
+
+.lcsc-meta-row > .k {
+    color: var(--text3);
+    flex: 0 0 auto;
+}
+
+.lcsc-meta-row > .v {
+    color: var(--text2);
+    overflow: visible;
+    white-space: normal;
+    word-break: break-all;
+}
+
+.lcsc-meta-row > .v a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.lcsc-meta-row > .v a:hover { text-decoration: underline; }
+
+/* 分类标签（立创是蓝色文字链接） */
+.lcsc-type-link {
+    color: var(--accent);
+    cursor: pointer;
+}
+
+.lcsc-type-link:hover { text-decoration: underline; }
+
+/* ══ 参数 / 描述区 ═════════════════════════════════════════════════ */
+.lcsc-desc {
+    font-size: 11.5px;
+    color: var(--text2);
+    line-height: 1.65;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.lcsc-desc .d-title {
+    color: var(--text);
+    font-size: 12.5px;
+    margin-bottom: 2px;
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.lcsc-desc .d-param {
+    color: var(--text3);
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ══ 图片 ═════════════════════════════════════════════════════════ */
+.lcsc-thumb {
+    position: relative;
+    width: 78px;
+    height: 78px;
+    border: 1px solid rgba(127, 127, 127, .16);
+    border-radius: 6px;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.lcsc-thumb img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.lcsc-thumb .ph {
+    font-size: 11px;
+    color: var(--text3);
+    opacity: .6;
+}
+
+.lcsc-thumb .tag-hot {
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: #e5484d;
+    color: #fff;
+    font-size: 10px;
+    line-height: 15px;
+    padding: 0 4px;
+    border-radius: 0 0 4px 0;
+}
+
+/* ══ 库存区（立创是阶梯价 + 数量框，这里做数量展示）══════════════════ */
+.lcsc-stock {
+    display: flex;
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: center;
+    gap: 2px;
+}
+
+.lcsc-stock .s-num {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.lcsc-stock .s-num.s-zero { color: #e5484d; }
+.lcsc-stock .s-num.s-low  { color: #d97706; }
+.lcsc-stock .s-num.s-ok   { color: #16a34a; }
+
+.lcsc-stock .s-unit {
+    font-size: 11px;
+    color: var(--text3);
+}
+
+/* ══ 操作区 ═══════════════════════════════════════════════════════ */
+body.mode-comfy .inv-table tbody td.td-actions .actions {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-end;
+}
+
+body.mode-comfy .inv-table tbody td.td-actions .btn {
+    font-size: 11.5px;
+    padding: 3px 8px;
+    width: 74px;
+    text-align: center;
+}
+
+body.mode-comfy .inv-table tbody td.td-actions .btn-stock {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: #fff;
+}
+
+body.mode-comfy .inv-table tbody td.td-actions .btn-stock:hover {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+[data-theme="dark"] body.mode-comfy .inv-table tbody td.td-actions .btn-stock {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+/* ══ 兼容：旧的 .cover-img / .cover-ph 保留给紧凑模式 ══════════════ */
 .cover-img {
     display: block;
-    width: 100%;
-    height: 108px;
+    max-width: 100%;
+    max-height: 108px;
     object-fit: contain;
-    background: rgba(127, 127, 127, .06);
+    object-position: center;
     border-radius: 8px;
 }
 

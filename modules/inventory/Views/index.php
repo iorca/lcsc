@@ -67,8 +67,10 @@ $dimLabels = array_column($dimRows, 'name');
 $listCols = array_values(array_filter([
     ['cls' => 'col-cb',       'cond' => isAdmin()],
     ['cls' => 'col-thumb',    'cond' => $showImages],
+    ['cls' => 'col-cover',    'cond' => null],
     ['cls' => 'col-code',     'cond' => null],
     ['cls' => 'col-model',    'cond' => null],
+    ['cls' => 'col-desc',     'cond' => null],
     ['cls' => 'col-pkg',      'cond' => null],
     ['cls' => 'col-cat',      'cond' => null],
     ['cls' => 'col-brand',    'cond' => null],
@@ -293,8 +295,10 @@ require __DIR__ . '/../../../ui/layouts/head.php';
     <thead><tr>
         <?php if(isAdmin()): ?><th class="cb-col"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)" title="全选"></th><?php endif; ?>
         <?php if($showImages): ?><th class="col-thumb">图片</th><?php endif; ?>
+        <th class="col-cover">图片</th>
         <th class="sortable" data-sort="platform_part_no" onclick="toggleSort(this)" title="点击排序">商品编号<span class="sort-arrow"></span></th>
         <th class="sortable" data-sort="model" onclick="toggleSort(this)" title="点击排序">型号<span class="sort-arrow"></span></th>
+        <th class="col-desc">参数/描述</th>
         <th>封装</th>
         <th>分类</th>
         <th class="sortable" data-sort="brand" onclick="toggleSort(this)" title="点击排序">品牌<span class="sort-arrow"></span></th>
@@ -336,6 +340,7 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         $brandRaw = (string)$r['brand'];
         $locRaw = (string)$r['location'];
         $catsRaw = implode('、', $catMap[$r['id']] ?? []);
+        $ctimeRaw = (string)($r['create_time'] ?? '');
     ?>
     <tr class="<?=$rc?>" data-part-id="<?=$r['id']?>">
         <?php if(isAdmin()): ?>
@@ -344,12 +349,13 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         </td>
         <?php endif; ?>
         <?php
-
-
+        // 封面图与缩略图共用一份解析（外链原样返回，本地文件走缩略图接口）
+        $imgRaw   = (string)($r['image'] ?? '');
+        $bigUrl   = $imgRaw !== '' ? \Modules\Inventory\Components\PartDetail::thumbUrl($imgRaw, 800) : '';
+        // 封面用 260 规格：本地走 asset.thumb 生成 webp，外链原样返回
+        $coverUrl = $imgRaw !== '' ? \Modules\Inventory\Components\PartDetail::thumbUrl($imgRaw, 160) : '';
         if ($showImages) {
-            $imgRaw   = (string)($r['image'] ?? '');
             $thumbUrl = $imgRaw !== '' ? \Modules\Inventory\Components\PartDetail::thumbUrl($imgRaw, 160) : '';
-            $bigUrl   = $imgRaw !== '' ? \Modules\Inventory\Components\PartDetail::thumbUrl($imgRaw, 800) : '';
         }
         ?>
         <?php if($showImages): ?>
@@ -363,6 +369,26 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         <?php endif; ?>
         <?php
               ?>
+        <!-- 立创式缩略图 -->
+        <td class="col-cover"<?=$imgRaw!==''?' onclick="event.stopPropagation()"':''?>>
+            <?php if($coverUrl!==''): ?>
+                <div class="lcsc-thumb"><img src="<?=h($coverUrl)?>" alt="" loading="lazy" onclick="event.stopPropagation();attPreview('<?=h($bigUrl)?>')" title="点击放大"></div>
+            <?php else: ?>
+                <div class="lcsc-thumb"><span class="ph">无图</span></div>
+            <?php endif; ?>
+        </td>
+        <?php
+            // 立创式主信息块：型号(黄高亮) + 品牌/封装/类目/编号 竖排
+            $catText   = implode('、', $catMap[$r['id']] ?? []);
+            $hotBadge  = '';
+            $thr       = $r['eff_threshold'] ?? $globalThr;
+            if ((int)$r['stock'] === 0)       $hotBadge = '<span class="lcsc-badge">缺货</span>';
+            elseif ((int)$r['stock'] <= (int)$thr) $hotBadge = '<span class="lcsc-badge b-blue">库存紧张</span>';
+            elseif ((int)$r['stock'] >= 100)  $hotBadge = '<span class="lcsc-badge b-green">现货</span>';
+            $codeHtml  = $ppnUrl !== ''
+                ? '<a href="'.h($ppnUrl).'" target="_blank" rel="noopener" onclick="event.stopPropagation()">'.h($ppnRaw).'</a>'
+                : h($ppnRaw !== '' ? $ppnRaw : '—');
+        ?>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($ppnRaw)?>" class="col-code td-ellipsis" data-label="商品编号">
             <?php if($ppnUrl!==''): ?>
             <a href="<?=h($ppnUrl)?>" target="_blank" rel="noopener" onclick="event.stopPropagation()" class="code-blue u-underline"><?=formatPpn($ppnRaw)?></a>
@@ -371,16 +397,42 @@ require __DIR__ . '/../../../ui/layouts/head.php';
             <?php endif; ?>
         </td>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($modelRaw)?>" class="col-model" data-label="型号">
-            <span class="model-line"><span class="model-txt"><?=h($modelRaw)?></span></span>
-            <?php if($nameRaw!==''): ?>
-            <span class="model-sub td-ellipsis" title="<?=h($nameRaw)?>"><?=h($nameRaw)?></span>
-            <?php endif; ?>
+            <div class="lcsc-main">
+                <div class="lcsc-model-line">
+                    <span class="lcsc-model" onclick="openDrawer(<?=$r['id']?>)"><?=h($modelRaw !== '' ? $modelRaw : '—')?></span>
+                    <?=$hotBadge?>
+                </div>
+                <div class="lcsc-meta">
+                    <div class="lcsc-meta-row"><span class="k">品牌：</span><span class="v"><?=h($brandRaw !== '' ? $brandRaw : '—')?></span></div>
+                    <div class="lcsc-meta-row"><span class="k">封装：</span><span class="v"><?=h($pkgRaw !== '' ? $pkgRaw : '—')?></span></div>
+                    <div class="lcsc-meta-row"><span class="k">类目：</span><span class="v lcsc-type-link"><?=h($catText !== '' ? $catText : '—')?></span></div>
+                    <div class="lcsc-meta-row"><span class="k">编号：</span><span class="v"><?=$codeHtml?></span></div>
+                    <div class="lcsc-meta-row"><span class="k">库位：</span><span class="v"><?=h($locRaw !== '' ? $locRaw : '—')?></span></div>
+                    <div class="lcsc-meta-row"><span class="k">导入：</span><span class="v"><?=h($ctimeRaw !== '' ? substr(str_replace('T',' ',$ctimeRaw),0,16) : '—')?></span></div>
+                </div>
+            </div>
+        </td>
+        <td onclick="openDrawer(<?=$r['id']?>)" class="col-desc" data-label="参数/描述">
+            <div class="lcsc-desc">
+                <?php if($nameRaw!==''): ?><span class="d-title"><?=h($nameRaw)?></span><?php endif; ?>
+                <?php $paramRaw = (string)($r['parameters_text'] ?? ''); ?>
+                <?php if($paramRaw!==''): ?><span class="d-param">参数：<?=h($paramRaw)?></span><?php endif; ?>
+            </div>
         </td>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($pkgRaw)?>" class="col-pkg td-ellipsis" data-label="封装"><?php if($pkgRaw!==''): ?><span class="pkg-badge"><?=h($pkgRaw)?></span><?php else: ?><span class="ph-dash">—</span><?php endif; ?></td>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($catsRaw)?>" class="col-cat td-ellipsis" data-label="分类"><?php if($catsRaw!==''): foreach($catMap[$r['id']]??[] as $ct) echo '<span class="cat-tag">'.h($ct).'</span>'; else: ?><span class="ph-dash">—</span><?php endif; ?></td>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($brandRaw)?>" class="col-brand td-ellipsis" data-label="品牌"><?php if($brandRaw!==''): ?><span class="brand-txt"><?=h($brandRaw)?></span><?php else: ?><span class="ph-dash">—</span><?php endif; ?></td>
-        <td onclick="openDrawer(<?=$r['id']?>)" class="col-stock" data-label="库存"><span class="stock-num <?=$sc?>" title="当前库存 <?=(int)$r['stock']?><?=($r['eff_threshold'] ?? $globalThr) ? ' / 最低阈值 '.($r['eff_threshold'] ?? $globalThr) : ''?>"><?=$r['stock']?></span><?php if((int)($r['damaged']??0)>0): ?><span class="stk-tag red" title="不良品数量">不良<?=(int)$r['damaged']?></span><?php endif; ?><?php if(!empty($r['is_stale'])): ?><span class="stk-tag gray" title="90天无出入库">呆滞</span><?php endif; ?></td>
+        <td onclick="openDrawer(<?=$r['id']?>)" class="col-stock" data-label="库存">
+            <div class="lcsc-stock">
+                <span class="s-num <?=$sc?>"><?=$r['stock']?></span>
+                <span class="s-unit">个</span>
+            </div>
+            <?php if((int)($r['damaged']??0)>0): ?><span class="stk-tag red" title="不良品数量">不良<?=(int)$r['damaged']?></span><?php endif; ?>
+            <?php if(!empty($r['is_stale'])): ?><span class="stk-tag gray" title="90天无出入库">呆滞</span><?php endif; ?>
+        </td>
         <td onclick="openDrawer(<?=$r['id']?>)" title="<?=h($locRaw)?>" class="col-location td-ellipsis" data-label="库位"><?php if($locRaw!==''): ?><span class="loc-chip" title="<?=h($locRaw)?>（点击可筛选同库位物料）" onclick="event.stopPropagation();filterByLocation('<?=h($locRaw)?>')">📍 <span class="loc-name"><?=h($locRaw)?></span></span><?php else: ?><span class="loc-chip-empty">—</span><?php endif; ?></td>
+        <?php $ctimeRaw = (string)($r['create_time'] ?? ''); ?>
+        <td onclick="openDrawer(<?=$r['id']?>)" class="col-ctime" data-label="导入时间"><?php if($ctimeRaw!==''): ?><span class="ctime-txt" title="导入时间 <?=h($ctimeRaw)?>"><?=h(substr(str_replace('T',' ',$ctimeRaw),0,16))?></span><?php else: ?><span class="ph-dash">—</span><?php endif; ?></td>
         <td class="td-actions" onclick="event.stopPropagation()">
             <div class="actions">
                 <button class="btn btn-ghost btn-sm btn-stock" data-info="<?=$stockInfo?>">出入库</button>
@@ -438,6 +490,7 @@ require __DIR__ . '/../../../ui/layouts/head.php';
     <button class="btn btn-ghost btn-sm" onclick="autoClassifyParts()" title="按「品牌 / 商品类型 → 封装格式」自动建两级分类树；未选中时处理全部未分类物料">🏷 规则归类</button>
     <button class="btn btn-ghost btn-sm" onclick="lcscEnrichParts()" title="按立创编号回查并补全商品类型（订单详情表没有「商品类型」列时用）">🔄 立创补全</button>
     <button class="btn btn-ghost btn-sm" onclick="batchAiClassify()" title="调用大模型自动判定商品类型 / 品牌 / 封装">🤖 AI 分类</button>
+    <button class="btn btn-ghost btn-sm" onclick="localizeImages()" title="把立创图床的商品图下载到本地，断网也能显示">🖼 图片本地化</button>
     <button class="btn btn-ghost btn-sm" onclick="batchSetLocation()">设置库位</button>
     <button class="btn btn-ghost btn-sm" onclick="batchSetRemark()">设置备注</button>
     <button class="btn btn-ghost btn-sm" onclick="batchSetThreshold()">📉 批量阈值</button>

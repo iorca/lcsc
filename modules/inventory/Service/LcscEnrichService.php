@@ -120,10 +120,15 @@ class LcscEnrichService
                 $fields[] = 'package';
             }
             // 立创商品图：用于卡片封面 / 列表悬停预览
+            // 直接下载到本地 uploads/parts/，parts.image 存相对路径，
+            // 不依赖立创图床（外链在内网/断网/限流时不可用）。
             if (trim((string)($r['image'] ?? '')) === '' && !empty($detail['image'])) {
-                $set[]    = 'image=?';
-                $params[] = $detail['image'];
-                $fields[] = 'image';
+                $localPath = $this->localizeImage((string)$detail['image'], $pid, $code);
+                if ($localPath !== null) {
+                    $set[]    = 'image=?';
+                    $params[] = $localPath;
+                    $fields[] = 'image';
+                }
             }
 
             if (empty($set)) { $stats['skipped']++; continue; }
@@ -264,5 +269,16 @@ class LcscEnrichService
         } catch (Throwable $e) {
             return false;
         }
+    }
+
+    /**
+     * 把立创图床的图片下载到本地，返回 uploads/ 下的相对路径
+     * （下载失败返回 null：此时不写 image，物料保持无图，不影响其它字段补全）
+     */
+    private function localizeImage(string $url, int $partId, string $code): ?string
+    {
+        if ($url === '') return null;
+        $loc = new PartImageLocalizer($this->db, $this->dataUid, $this->wsId);
+        return $loc->downloadOne($url, $partId, $code);
     }
 }

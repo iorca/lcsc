@@ -7,6 +7,7 @@ use App\Core\Response;
 use Modules\Category\Service\CategoryAutoClassifier;
 use Modules\Inventory\Service\AiClassifierService;
 use Modules\Inventory\Service\LcscEnrichService;
+use Modules\Inventory\Service\PartImageLocalizer;
 
 /**
  * 分类相关 API
@@ -14,6 +15,7 @@ use Modules\Inventory\Service\LcscEnrichService;
  *   classify.auto        规则自动归类（品牌/商品类型 → 封装格式 建两级分类树）
  *   classify.lcsc_enrich 按立创编号批量补全商品类型（及缺失的品牌/封装）
  *   classify.ai           调用大模型自动判定商品类型/品牌/封装
+ *   classify.localize_images 把立创图床的图片下载到本地（脱离外网依赖）
  */
 final class ClassifyRoutes
 {
@@ -32,6 +34,9 @@ final class ClassifyRoutes
                 break;
             case 'ai':
                 self::handleAi($db, $uid, $dataUid);
+                break;
+            case 'localize_images':
+                self::handleLocalizeImages($db, $uid, $dataUid);
                 break;
             default:
                 Response::error('未知 classify 方法：' . $method, 404);
@@ -123,6 +128,26 @@ final class ClassifyRoutes
         \traceLog($uid, 'ai_classify', 'part', 0,
             "AI分类 识别:{$res['checked']} 成功:{$res['updated']} 失败:{$res['failed']}");
         Response::ok($res, 'AI 识别完成：成功 ' . $res['updated'] . ' / ' . $res['checked'] . ' 项');
+    }
+
+    // ── 图片本地化（脱离立创图床依赖）──────────────────────────
+
+    private static function handleLocalizeImages(\PDO $db, int $uid, int $dataUid): void
+    {
+        if (!\hasPermission('can_edit')) Response::error('无编辑权限', 403);
+
+        $ids   = self::readIds();
+        $limit = (int)($_POST['limit'] ?? 500);
+
+        $svc = new PartImageLocalizer($db, $dataUid, (int)\getWorkspaceId());
+        $res = $svc->localize($ids, [
+            'limit'     => max(1, $limit),
+            'overwrite' => !empty($_POST['overwrite']),
+        ]);
+
+        \traceLog($uid, 'localize_images', 'part', 0,
+            "图片本地化 检查:{$res['checked']} 下载:{$res['localized']} 跳过:{$res['skipped']} 失败:{$res['failed']}");
+        Response::ok($res, '图片本地化完成：下载 ' . $res['localized'] . ' / ' . $res['checked'] . ' 项');
     }
 
     // ── 公共：读 POST 里的 ids[] ────────────────────────────────

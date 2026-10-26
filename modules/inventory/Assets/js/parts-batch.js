@@ -285,6 +285,23 @@ function lcscEnrichParts(){
     });
 }
 
+// ── 图片本地化：把立创图床的商品图下载到本地 uploads/parts/ ──
+// 目的：摆脱对外网图床的依赖（内网 / 断网 / 图床限流时也能显示商品图），
+// 落地后 parts.image 存本地相对路径，前端自动走 asset.thumb 取 webp 缩略图。
+function localizeImages(){
+    var ids = getSelectedIds();
+    var formData = new FormData();
+    formData.append('action', 'classify.localize_images');
+    formData.append('_csrf', LCSC.csrf);
+    if (ids.length) { ids.forEach(function(id){ formData.append('ids[]', id); }); }
+    LCSC.post('api.php', formData, function(data, msg){
+        LCSC.toast(msg || '图片本地化完成', 'success');
+        loadPartsList();
+    }, function(msg){
+        LCSC.toast(msg, 'error');
+    });
+}
+
 // ── AI 智能分类：调大模型判定商品类型 / 品牌 / 封装 ──
 function batchAiClassify(){
     var ids = getSelectedIds();
