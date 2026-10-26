@@ -110,20 +110,16 @@ function renderDesktopTable(parts) {
             +   '<div class="lcsc-info-item"><span class="k">导入</span><span class="v">' + (r.create_time ? esc(String(r.create_time).substring(0, 16).replace('T', ' ')) : '—') + '</span></div>'
             + '</div>';
 
-        // ── 描述区（型号正下方）：商品名称 + 立创参数表（>6 项折叠）──
+        // ── 描述区（型号下方）：商品名称 + 立创参数表（全部展开，不折叠）──
         var descHtml = '<div class="lcsc-desc">';
         if (r.product_name) descHtml += '<span class="d-title">' + esc(r.product_name) + '</span>';
         var pl = parseLcscParams(r.parameters);
         if (pl.length) {
-            var collapsed = pl.length > 6 ? ' is-collapsed' : '';
-            descHtml += '<div class="d-params' + collapsed + '">';
+            descHtml += '<div class="d-params">';
             pl.forEach(function(p){
                 descHtml += '<span class="d-param"><span class="pk">' + esc(p[0]) + '</span><span class="pv">' + esc(p[1]) + '</span></span>';
             });
             descHtml += '</div>';
-            if (collapsed) {
-                descHtml += '<span class="d-more" onclick="toggleLcscParams(this)">更多 ∨</span>';
-            }
         } else if (r.parameters_text) {
             descHtml += '<span class="d-param">参数：' + esc(r.parameters_text) + '</span>';
         }

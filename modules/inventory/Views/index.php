@@ -427,20 +427,12 @@ require __DIR__ . '/../../../ui/layouts/head.php';
                     // 立创参数表（parts.parameters 存 JSON：{"名":"值"}）
                     $pl = json_decode((string)($r['parameters'] ?? ''), true);
                     if (is_array($pl) && $pl) {
-                        $items = [];
+                        echo '<div class="d-params">';
                         foreach ($pl as $pk => $pv) {
                             if ($pv === '' || $pv === null) continue;
-                            $items[] = [$pk, $pv];
-                        }
-                        $collapsed = count($items) > 6 ? ' is-collapsed' : '';
-                        echo '<div class="d-params'.$collapsed.'">';
-                        foreach ($items as $it) {
-                            echo '<span class="d-param"><span class="pk">'.h((string)$it[0]).'</span><span class="pv">'.h((string)$it[1]).'</span></span>';
+                            echo '<span class="d-param"><span class="pk">'.h((string)$pk).'</span><span class="pv">'.h((string)$pv).'</span></span>';
                         }
                         echo '</div>';
-                        if ($collapsed) {
-                            echo '<span class="d-more" onclick="toggleLcscParams(this)">更多 ∨</span>';
-                        }
                     } else {
                         $paramRaw = (string)($r['parameters_text'] ?? '');
                         if ($paramRaw !== '') echo '<span class="d-param">参数：'.h($paramRaw).'</span>';

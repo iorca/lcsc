@@ -306,24 +306,20 @@
 
     /* 每行 = 一个 grid：
      *   上排：勾选 | 图片 | 商品型号 | 其他信息(左) | 其他信息(右) | 库存 | 操作
-     *   下排：            描述（在型号正下方）
+     *   下排：            描述（横跨型号+左块，给足展示空间）
      */
     body.mode-comfy .inv-table tbody tr {
         display: grid;
         grid-template-columns: 34px 92px 300px 170px 150px 76px 104px;
         grid-template-areas:
             "cb    cover  model  info1  info2  stock acts"
-            "cb    cover  desc   .      .      .     .";
+            "cb    cover  desc   desc   .      .     .";
         align-items: start;
-        column-gap: 10px;
-        row-gap: 5px;
-        padding: 12px 12px 12px 0;
+        column-gap: 5px;
+        row-gap: 8px;
+        padding: 14px 14px 14px 0;
         border-bottom: 1px solid rgba(127, 127, 127, .13);
         transition: background .12s;
-    }
-
-    body.mode-comfy .inv-table tbody tr:hover {
-        background: rgba(59, 130, 246, .04);
     }
 
     body.mode-comfy .inv-table tbody td {
@@ -336,7 +332,21 @@
         padding: 0;
         border: none;
         white-space: normal;
+        /* 主题里 `tbody tr:hover td{background:var(--row-hover)}` 会给**每个单元格**
+           上色 —— 行布局下就变成一块块诡异色块。这里让单元格保持透明，
+           悬停高亮统一交给整行（tr）承担。 */
         background: transparent;
+    }
+
+    /* 悬停高亮：整行一块淡底，不要按单元格分块 */
+    body.mode-comfy .inv-table tbody tr:hover,
+    body.mode-comfy .inv-table tbody tr.row-hover {
+        background: rgba(59, 130, 246, .05);
+    }
+
+    body.mode-comfy .inv-table tbody tr:hover td,
+    body.mode-comfy .inv-table tbody tr.row-hover td {
+        background: transparent !important;
     }
 
     /* 区域分配（用 class 定位，不依赖列顺序） */
@@ -398,8 +408,8 @@
 .lcsc-info {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    font-size: 11.5px;
+    gap: 5px;
+    font-size: 12px;
     min-width: 0;
 }
 
@@ -437,9 +447,9 @@
 
 .lcsc-type-link:hover { text-decoration: underline; }
 
-/* 型号：立创是柠檬黄高亮 + 下划线 */
+/* 型号：立创是柠檬黄高亮 + 下划线（按主人要求放大 1.2 倍：15px → 18px） */
 .lcsc-model {
-    font-size: 15px;
+    font-size: 18px;
     font-weight: 700;
     color: #ffcc00 !important;
     text-decoration: underline;
@@ -513,36 +523,32 @@
 
 .lcsc-type-link:hover { text-decoration: underline; }
 
-/* ══ 参数 / 描述区（型号正下方）══════════════════════════════════════ */
+/* ══ 参数 / 描述区（型号下方，横跨型号+左块）══════════════════════════ */
 .lcsc-desc {
-    font-size: 11.5px;
+    font-size: 12px;
     color: var(--text2);
-    line-height: 1.65;
+    line-height: 1.85;
     min-width: 0;
-    max-height: 92px;
-    overflow: hidden;
+    /* 不限高：商品描述有足够空间完整展示 */
 }
 
 .lcsc-desc .d-title {
     color: var(--text);
-    font-size: 12.5px;
-    margin-bottom: 2px;
+    font-size: 13px;
+    margin-bottom: 3px;
     display: block;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
 }
 
 .lcsc-desc .d-params {
     display: flex;
     flex-wrap: wrap;
-    gap: 1px 10px;
+    gap: 2px 14px;
 }
 
 .lcsc-desc .d-param {
     display: inline-flex;
     align-items: baseline;
-    gap: 4px;
+    gap: 5px;
     white-space: nowrap;
 }
 
@@ -553,20 +559,6 @@
 .lcsc-desc .d-param .pv {
     color: var(--text2);
 }
-
-/* 参数项数多时折叠：默认只留前 N 项，点「更多」展开 */
-.lcsc-desc .d-params.is-collapsed .d-param:nth-child(n+7) {
-    display: none;
-}
-
-.lcsc-desc .d-more {
-    color: var(--accent);
-    cursor: pointer;
-    font-size: 11px;
-    margin-left: 4px;
-}
-
-.lcsc-desc .d-more:hover { text-decoration: underline; }
 
 /* ══ 图片 ═════════════════════════════════════════════════════════ */
 .lcsc-thumb {
