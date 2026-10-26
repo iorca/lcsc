@@ -161,7 +161,11 @@ jobs:
           cd desktop/launcher
           # 注入 exe 图标 + Windows manifest（go-winres 生成 .syso 资源文件，
           # 文件名必须以 _windows_amd64.syso 结尾 Go 才会自动嵌入）
-          go install github.com/tc-hib/winres-bin/cmd/go-winres@latest
+          # ⚠️ 模块路径必须是 github.com/tc-hib/go-winres（模块根即 main 包）。
+          #    之前写的 github.com/tc-hib/winres-bin/cmd/go-winres 仓库根本不存在，
+          #    git 会把它当成私有库要求用户名 → CI 报 "terminal prompts disabled"，
+          #    go-winres 没装上 → 后续命令报 "not recognized" → 整个 job 失败。
+          go install github.com/tc-hib/go-winres@v0.3.3
           go-winres make --in winres.json --out rsrc_windows_amd64.syso
           go build -o ../launcher.exe .
 
