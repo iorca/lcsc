@@ -34,7 +34,10 @@ function Fetch($name, $url, $topDir, $dest) {
 Fetch "nginx" "https://nginx.org/download/nginx-$NGINX_VER.zip" "nginx-$NGINX_VER" (Join-Path $runtime "nginx")
 
 # php（8.3 NTS x64，含 php-cgi.exe）
-Fetch "php" "https://windows.php.net/downloads/releases/php-$PHP_VER-nts-Win32-vs16-x64.zip" "php" (Join-Path $runtime "php")
+# 注意：windows.php.net 的 releases/ 只保留最新几个小版本，旧版本已移到
+# releases/archives/；8.3.12 不在 releases/ 顶层（404），故走 archives/ 路径。
+# 该 URL 会 302 重定向到 CDN，Invoke-WebRequest 默认跟随，可正常下载。
+Fetch "php" "https://windows.php.net/downloads/releases/archives/php-$PHP_VER-nts-Win32-vs16-x64.zip" "php" (Join-Path $runtime "php")
 
 # mariadb（Windows x64 zip，含 bin/mariadbd.exe）
 Fetch "mariadb" "https://archive.mariadb.org/mariadb-$MARIADB_VER/winx64-packages/mariadb-$MARIADB_VER-winx64.zip" "mariadb-$MARIADB_VER-winx64" (Join-Path $runtime "mariadb")
