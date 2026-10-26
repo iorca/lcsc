@@ -156,6 +156,18 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         <?php endforeach; ?>
     </select>
     <?php endif; ?>
+    <select onchange="changeSort(this.value)" class="filter-select" id="sortSel" title="排序方式">
+        <option value="update_time:desc">最近更新</option>
+        <option value="create_time:desc">导入时间（新→旧）</option>
+        <option value="create_time:asc">导入时间（旧→新）</option>
+        <option value="brand:asc">品牌名称</option>
+        <option value="brand:desc">品牌名称（倒序）</option>
+        <option value="stock:desc">库存（多→少）</option>
+        <option value="stock:asc">库存（少→多）</option>
+        <option value="platform_part_no:asc">商品编号</option>
+        <option value="model:asc">型号</option>
+        <option value="location:asc">库位</option>
+    </select>
 </div>
 
 <!-- 立创式多维分类筛选：三个**并列**维度各占一行，值大号铺开，可点选多选 -->
@@ -163,7 +175,6 @@ require __DIR__ . '/../../../ui/layouts/head.php';
 <div class="lcsc-filter" id="lcscFilter">
     <div class="lcsc-filter-head">
         <span class="lcsc-filter-title">分类筛选</span>
-        <span class="lcsc-filter-hint">同一维度内多选 =「或」，跨维度 =「且」</span>
         <button type="button" class="lcsc-clear-all" onclick="clearLcscFilter()">清除全部</button>
     </div>
     <?php foreach ($dimRows as $di => $dim): ?>
@@ -1050,5 +1061,8 @@ foreach ($partsJsFiles as $pj) {
         . h(APP_VERSION . '.' . filemtime($pjPath)) . '"></script>' . "\n";
 }
 ?>
+
+<!-- 回到顶部悬浮按钮 -->
+<button type="button" class="to-top-btn" id="toTopBtn" onclick="scrollToTopBtn()" title="回到顶部" aria-label="回到顶部">↑</button>
 
 </body></html>

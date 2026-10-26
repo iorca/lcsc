@@ -17,6 +17,7 @@ function loadPartsList() {
         var rows = (data.list || []).map(normalizeRow);
         updateStats(data.stats);
         renderSortArrows();
+        syncSortSelect();
         renderDesktopTable(rows);
         renderPagination(data.total, data.page, data.per_page, data.total_page);
         updateUrl();
@@ -137,6 +138,38 @@ function renderPagination(total, page, perPage, totalPage) {
     });
     html += '</select>';
     area.innerHTML = html;
+}
+
+// ── 排序（瀑布流下表头不可点，改由工具栏下拉驱动）──
+function changeSort(v) {
+    var p = String(v || '').split(':');
+    _filterState.sort = p[0] || 'update_time';
+    _filterState.dir  = p[1] || 'desc';
+    _filterState.page = 1;
+    loadPartsList();
+}
+
+function syncSortSelect() {
+    var sel = document.getElementById('sortSel');
+    if (!sel) return;
+    var v = _filterState.sort + ':' + _filterState.dir;
+    if (sel.value !== v) sel.value = v;
+}
+
+// ── 回到顶部 ────────────────────────────────────────────────
+function scrollToTopBtn() {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function initToTopBtn() {
+    var btn = document.getElementById('toTopBtn');
+    if (!btn) return;
+    function onScroll() {
+        if (window.scrollY > 260) btn.classList.add('is-show');
+        else btn.classList.remove('is-show');
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
 }
 
 function buildFilterQueryString() {

@@ -1,16 +1,16 @@
 /* modules/inventory/Assets/css/parts-filter.css
  * 立创式多维分类筛选条：三个并列维度（品牌 / 商品类型 / 封装格式）各占一行，
- * 每行的值大号铺开、可点选多选。整体尺寸刻意做大，便于快速点选。
+ * 每行的值铺开、可点选多选。整体尺寸按 0.7 倍设计（紧凑不占地方）。
  * 颜色全部走 currentColor / rgba，暗色主题自动适配。
  */
 
 .lcsc-filter {
-    margin: 0 0 20px;
-    padding: 18px 24px 20px;
+    margin: 0 0 14px;
+    padding: 12px 16px 13px;
     border: 1px solid rgba(127, 127, 127, .24);
-    border-radius: 16px;
+    border-radius: 11px;
     background: rgba(127, 127, 127, .05);
-    box-shadow: 0 6px 24px rgba(0, 0, 0, .05);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, .05);
 }
 
 .lcsc-filter.has-filter {
@@ -22,26 +22,21 @@
 .lcsc-filter-head {
     display: flex;
     align-items: center;
-    gap: 14px;
-    margin-bottom: 6px;
+    gap: 10px;
+    margin-bottom: 3px;
 }
 
 .lcsc-filter-title {
-    font-size: 18px;
-    font-weight: 700;
-    letter-spacing: .5px;
-}
-
-.lcsc-filter-hint {
     font-size: 13px;
-    opacity: .6;
+    font-weight: 700;
+    letter-spacing: .4px;
 }
 
 .lcsc-clear-all {
     margin-left: auto;
-    font-size: 13px;
-    padding: 6px 14px;
-    border-radius: 8px;
+    font-size: 11px;
+    padding: 4px 10px;
+    border-radius: 6px;
     border: 1px solid rgba(127, 127, 127, .3);
     background: transparent;
     color: inherit;
@@ -57,8 +52,8 @@
 .lcsc-filter-row {
     display: flex;
     align-items: flex-start;
-    gap: 18px;
-    padding: 12px 0;
+    gap: 12px;
+    padding: 7px 0;
     border-top: 1px dashed rgba(127, 127, 127, .2);
 }
 
@@ -67,9 +62,9 @@
 }
 
 .lcsc-filter-label {
-    flex: 0 0 96px;
-    padding-top: 8px;
-    font-size: 16px;
+    flex: 0 0 62px;
+    padding-top: 5px;
+    font-size: 11.5px;
     font-weight: 700;
     opacity: .88;
 }
@@ -83,22 +78,22 @@
 .lcsc-filter-more {
     display: flex;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 6px;
 }
 
 .lcsc-filter-more {
-    margin-top: 10px;
+    margin-top: 7px;
 }
 
-/* ── 值 chip（大号）── */
+/* ── 值 chip ── */
 .lcsc-chip {
     display: inline-flex;
     align-items: center;
-    gap: 7px;
-    padding: 9px 18px;
-    font-size: 15.5px;
-    line-height: 1.35;
-    border-radius: 11px;
+    gap: 4px;
+    padding: 4px 10px;
+    font-size: 11px;
+    line-height: 1.5;
+    border-radius: 7px;
     border: 1px solid rgba(127, 127, 127, .3);
     background: rgba(127, 127, 127, .07);
     color: inherit;
@@ -120,7 +115,7 @@
 }
 
 .lcsc-chip-cnt {
-    font-size: 12px;
+    font-size: 9px;
     opacity: .62;
 }
 
@@ -130,10 +125,10 @@
 
 /* ── 展开 / 清除 ── */
 .lcsc-more-btn {
-    margin-top: 10px;
-    font-size: 13px;
-    padding: 5px 12px;
-    border-radius: 8px;
+    margin-top: 6px;
+    font-size: 9.5px;
+    padding: 3px 8px;
+    border-radius: 5px;
     border: 1px solid rgba(127, 127, 127, .26);
     background: transparent;
     color: inherit;
@@ -148,10 +143,10 @@
 
 .lcsc-dim-clear {
     flex: 0 0 auto;
-    margin-top: 8px;
-    font-size: 13px;
-    padding: 5px 12px;
-    border-radius: 8px;
+    margin-top: 5px;
+    font-size: 9.5px;
+    padding: 3px 8px;
+    border-radius: 5px;
     border: 1px solid rgba(127, 127, 127, .26);
     background: transparent;
     color: inherit;
@@ -175,18 +170,18 @@
     flex: 0 1 auto;
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    max-width: 340px;
-    margin-top: 8px;
+    gap: 5px;
+    max-width: 230px;
+    margin-top: 5px;
 }
 
 .lcsc-sel-tag {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 5px 12px;
-    font-size: 13.5px;
-    border-radius: 8px;
+    gap: 4px;
+    padding: 3px 8px;
+    font-size: 9.5px;
+    border-radius: 5px;
     background: rgba(59, 130, 246, .18);
     border: 1px solid rgba(59, 130, 246, .45);
     cursor: pointer;
@@ -202,10 +197,147 @@
     border-color: rgba(220, 80, 80, .5);
 }
 
-/* ── 窄屏：维度名与按钮换行 ── */
+/* ── 窄屏 ── */
 @media (max-width: 900px) {
-    .lcsc-filter { padding: 14px 16px 16px; }
-    .lcsc-filter-row { flex-wrap: wrap; gap: 10px; }
+    .lcsc-filter { padding: 10px 12px 11px; }
+    .lcsc-filter-row { flex-wrap: wrap; gap: 8px; }
     .lcsc-filter-label { flex: 0 0 100%; padding-top: 0; }
     .lcsc-filter-sel { max-width: 100%; }
+}
+
+/* ══ 回到顶部悬浮按钮 ══ */
+.to-top-btn {
+    position: fixed;
+    right: 22px;
+    bottom: 26px;
+    z-index: 90;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(127, 127, 127, .3);
+    background: rgba(255, 255, 255, .92);
+    color: #333;
+    font-size: 19px;
+    line-height: 1;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .16);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    transition: opacity .18s, transform .18s;
+}
+
+.to-top-btn.is-show {
+    display: inline-flex;
+}
+
+.to-top-btn:hover {
+    transform: translateY(-2px);
+    border-color: rgba(59, 130, 246, .6);
+    color: #3b82f6;
+}
+
+[data-theme="dark"] .to-top-btn {
+    background: rgba(30, 34, 44, .94);
+    color: #d6dae4;
+}
+
+/* ══ 物料列表 · 瀑布流卡片视图（宽屏）════════════════════════════
+ * 表格在宽屏下改为卡片流：tbody 用 CSS 多列(columns)实现瀑布流，
+ * 每行(tr)是一个卡片，break-inside:avoid 保证不被拆断。
+ * 表头隐藏 → 排序改由工具栏的「排序」下拉提供。
+ * ───────────────────────────────────────────────────────────── */
+@media (min-width: 1100px) {
+    .inv-table table {
+        display: block;
+        width: 100%;
+    }
+
+    .inv-table colgroup,
+    .inv-table thead {
+        display: none;
+    }
+
+    .inv-table tbody {
+        display: block;
+        column-count: 4;
+        column-gap: 12px;
+        padding: 2px 2px 0;
+    }
+
+    .inv-table tbody tr {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-areas:
+            "code  stock"
+            "model model"
+            "pkg   cat"
+            "brand loc"
+            "ctime ctime"
+            "acts  acts";
+        gap: 5px 8px;
+        align-items: start;
+        break-inside: avoid;
+        -webkit-column-break-inside: avoid;
+        page-break-inside: avoid;
+        margin: 0 0 12px;
+        padding: 11px 13px 12px;
+        border-radius: 12px;
+        border: 1px solid rgba(127, 127, 127, .2);
+        background: rgba(255, 255, 255, .55);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, .04);
+        transition: box-shadow .15s, transform .15s;
+    }
+
+    .inv-table tbody tr:hover {
+        box-shadow: 0 5px 16px rgba(0, 0, 0, .1);
+        transform: translateY(-1px);
+    }
+
+    .inv-table tbody td {
+        display: block;
+        border: none;
+        padding: 0;
+        background: transparent;
+        min-width: 0;
+    }
+
+    /* 列位置（用 :nth-last-child 反向定位，不受左侧可选列影响） */
+    .inv-table tbody td:nth-last-child(9) { grid-area: code; }
+    .inv-table tbody td:nth-last-child(8) { grid-area: model; }
+    .inv-table tbody td:nth-last-child(7) { grid-area: pkg; }
+    .inv-table tbody td:nth-last-child(6) { grid-area: cat; }
+    .inv-table tbody td:nth-last-child(5) { grid-area: brand; }
+    .inv-table tbody td:nth-last-child(4) { grid-area: stock; }
+    .inv-table tbody td:nth-last-child(3) { grid-area: loc; }
+    .inv-table tbody td:nth-last-child(2) { grid-area: ctime; }
+    .inv-table tbody td:last-child { grid-area: acts; }
+
+    /* 勾选框浮到卡片左上角；缩略图在卡片流里隐藏 */
+    .inv-table tbody td.cb-col {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+    }
+    .inv-table tbody td.col-thumb { display: none; }
+
+    /* 卡片内的文字排版 */
+    .inv-table tbody td.col-code .code-blue { font-size: 13px; }
+    .inv-table tbody td.col-model .model-txt { font-size: 13.5px; }
+    .inv-table tbody td.col-model .model-sub { font-size: 11px; }
+    .inv-table tbody td.col-pkg,
+    .inv-table tbody td.col-cat,
+    .inv-table tbody td.col-brand,
+    .inv-table tbody td.col-location,
+    .inv-table tbody td.col-ctime { font-size: 11.5px; }
+    .inv-table tbody td.col-ctime { opacity: .62; }
+    .inv-table tbody td.col-stock .stock-num { font-size: 15px; }
+    .inv-table tbody td.td-actions .actions { flex-wrap: wrap; gap: 4px; }
+    .inv-table tbody td.td-actions .btn { font-size: 11px; padding: 3px 8px; }
+}
+
+[data-theme="dark"] .inv-table tbody tr {
+    background: rgba(40, 45, 56, .55);
+    border-color: rgba(127, 127, 127, .22);
 }

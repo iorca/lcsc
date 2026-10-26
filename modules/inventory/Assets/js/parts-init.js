@@ -91,5 +91,10 @@
 
 // ── 初始状态同步（筛选 chip 高亮 / 排序箭头 / 筛选状态标签，仅视觉同步）──
 (function(){
-    try { syncFilterChips(); renderSortArrows(); } catch (e) {}
+    try { syncFilterChips(); renderSortArrows(); syncSortSelect(); } catch (e) {}
+})();
+
+// ── 回到顶部悬浮按钮 ──
+(function(){
+    try { initToTopBtn(); } catch (e) {}
 })();
