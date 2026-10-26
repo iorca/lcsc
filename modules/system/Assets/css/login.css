@@ -1,0 +1,97 @@
+/* login.css — 登录页面样式（统一对齐全局 Design System： */
+
+:root,[data-theme=dark]{
+    --bg:#0f1117;--surface:#191c29;--surface2:#212437;--border:#2a2e45;--border2:#343857;
+    --accent:#4f8ef7;--accent-dim:rgba(79,142,247,.13);
+    --red:#ef4444;--red-dim:rgba(239,68,68,.1);
+    --text:#dde3f0;--text2:#7a86a8;--text3:#4e5878;
+    --shadow:0 4px 24px rgba(0,0,0,.45);
+}
+[data-theme=light]{
+    --bg:#F8FAFC;--surface:#ffffff;--surface2:#F1F5F9;--border:#E5E7EB;--border2:#D8DEE8;
+    --accent:#2563eb;--accent-dim:rgba(37,99,235,.09);
+    --red:#DC2626;--red-dim:rgba(220,38,38,.10);
+    --text:#1F2937;--text2:#6B7280;--text3:#9CA3AF;
+    --shadow:0 4px 20px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{
+    background:var(--bg);color:var(--text);
+    font-family:'Noto Sans SC',system-ui,-apple-system,sans-serif;
+    min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    padding:20px;padding-bottom:40px;
+}
+/* 背景装饰 */
+body::before{
+    content:'';position:fixed;inset:0;z-index:-1;
+    background:
+        radial-gradient(circle at 20% 30%,var(--accent-dim) 0%,transparent 50%),
+        radial-gradient(circle at 80% 70%,var(--accent-dim) 0%,transparent 50%);
+    opacity:.6;
+}
+.box{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:6px;padding:32px 28px;width:100%;max-width:380px;
+    box-shadow:var(--shadow);
+    animation:fadeInUp .4s ease;
+}
+@keyframes fadeInUp{
+    from{opacity:0;transform:translateY(12px);}
+    to{opacity:1;transform:translateY(0);}
+}
+.logo{text-align:center;margin-bottom:26px;}
+.logo-title{
+    font-size:20px;font-weight:700;color:var(--accent);
+    letter-spacing:2px;
+}
+.logo-sub{font-size:12px;color:var(--text2);margin-top:4px;letter-spacing:.5px;}
+.form-group{margin-bottom:16px;}
+.form-group label{
+    display:block;font-size:12px;color:var(--text2);
+    margin-bottom:6px;font-weight:500;letter-spacing:.2px;
+}
+.form-group input{
+    width:100%;height:36px;background:var(--surface2);border:1px solid var(--border);
+    color:var(--text);padding:8px 12px;border-radius:6px;
+    font-size:14px;outline:none;
+    transition:border-color .15s,box-shadow .15s;
+    font-family:inherit;
+}
+.form-group input:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-dim);
+}
+.form-group input::placeholder{color:var(--text3);}
+.form-group input:disabled{opacity:.5;cursor:not-allowed;}
+/* 密码可见切换（明暗主题均可辨识） */
+.pw-wrap{position:relative}
+.pw-wrap input{padding-right:42px}
+.pw-toggle{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:28px;height:28px;border:1px solid var(--border);border-radius:6px;background:var(--surface);color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:14px;line-height:1;transition:all .15s}
+.pw-toggle:hover{border-color:var(--accent);background:var(--accent-dim);color:var(--accent)}
+.btn{
+    width:100%;height:36px;padding:0 16px;border-radius:6px;border:none;
+    background:var(--accent);color:#fff;font-size:14px;font-weight:600;
+    cursor:pointer;margin-top:8px;font-family:inherit;
+    transition:filter .15s,box-shadow .15s,transform .1s;
+    letter-spacing:.5px;
+    display:inline-flex;align-items:center;justify-content:center;
+}
+.btn:hover{filter:brightness(1.06);box-shadow:0 2px 8px var(--accent-dim);}
+.btn:active{transform:translateY(1px);}
+.btn:disabled{opacity:.5;cursor:not-allowed;pointer-events:none;}
+.error{
+    background:var(--red-dim);border:1px solid rgba(220,38,38,.3);
+    color:var(--red);padding:10px 14px;border-radius:6px;
+    font-size:13px;margin-bottom:16px;
+    display:flex;align-items:center;gap:6px;
+}
+.footer-links{
+    text-align:center;margin-top:20px;font-size:12px;color:var(--text2);
+}
+.footer-links a{color:var(--accent);text-decoration:none;transition:opacity .15s;}
+.footer-links a:hover{opacity:.8;text-decoration:underline;}
+/* 移动端紧凑 */
+@media(max-width:480px){
+    .box{max-width:100%;padding:28px 20px;}
+}

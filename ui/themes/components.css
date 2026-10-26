@@ -1,0 +1,93 @@
+/* components.css — 全局统一组件规范（V3.3 页面整合配套） */
+
+/* 1. 统一数据表格 .data-table（配合 .table-wrap 容器使用） */
+.data-table{width:100%;border-collapse:collapse;font-size:var(--fs-md);}
+.data-table thead th{
+  background:var(--surface2);color:var(--text2);font-size:var(--fs-sm);
+  font-weight:600;letter-spacing:.4px;text-transform:uppercase;
+  padding:9px 12px;text-align:left;border-bottom:1px solid var(--border);
+  white-space:nowrap;
+}
+.data-table tbody td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.data-table tbody tr{transition:background .12s;}
+.data-table tbody tr:hover{background:var(--surface2);}
+.data-table tbody tr:last-child td{border-bottom:none;}
+.data-table .num{text-align:right;font-family:var(--font-mono);}
+.data-table .mono{font-family:var(--font-mono);font-size:var(--fs-base);}
+.data-table .muted{color:var(--text2);font-size:var(--fs-md);}
+
+/* 2. 统一查询栏 .filter-bar */
+.filter-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:14px;}
+.filter-bar .filter-input,.filter-bar .filter-select,.filter-bar .filter-date{
+  padding:6px 10px;border:1px solid var(--border);border-radius:6px;
+  background:var(--surface2);color:var(--text);font-size:var(--fs-md);font-family:inherit;
+  transition:border-color .15s;
+}
+.filter-bar .filter-input:focus,.filter-bar .filter-select:focus,.filter-bar .filter-date:focus{
+  outline:none;border-color:var(--accent);
+}
+.filter-bar .filter-input{width:180px;}
+.filter-bar .filter-select{min-width:120px;}
+.filter-bar .filter-actions{margin-left:auto;display:flex;gap:8px;}
+@media(max-width:768px){
+  .filter-bar .filter-input,.filter-bar .filter-select{width:100%;flex:1 1 40%;}
+  .filter-bar .filter-actions{margin-left:0;width:100%;}
+}
+
+.stat-card .stat-label{font-size:var(--fs-sm);color:var(--text2);letter-spacing:.3px;margin-bottom:4px;}
+.stat-card .stat-value{font-family:var(--font-mono);font-size:22px;font-weight:600;line-height:1;}
+.stat-card.c-blue .stat-value{color:var(--accent);}
+.stat-card.c-green .stat-value{color:var(--green);}
+.stat-card.c-red .stat-value{color:var(--red);}
+.stat-card.c-yellow .stat-value{color:var(--yellow);}
+.stat-card.c-purple .stat-value{color:var(--purple);}
+.stat-card.stat-clickable{cursor:pointer;user-select:none;transition:border-color .15s,background .15s;-webkit-tap-highlight-color:transparent;}
+.stat-card.stat-clickable:active{transform:scale(.98);}
+.stat-card.filter-active{border-color:var(--accent);background:var(--accent-dim);}
+
+/* 统计卡片网格容器 */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.stat-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px;}
+@media(max-width:768px){
+  .stat-grid,.stat-grid-3{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .stat-card .stat-value{font-size:20px;}
+}
+
+/* 4. 空状态增强 .empty-block（图标 + 文字 + 引导操作） */
+.empty-block{text-align:center;padding:44px 20px;color:var(--text2);}
+.empty-block .empty-icon{font-size:32px;margin-bottom:10px;opacity:.65;}
+.empty-block .empty-title{font-size:var(--fs-md);color:var(--text2);margin-bottom:6px;}
+.empty-block .empty-desc{font-size:var(--fs-sm);color:var(--text3);margin-bottom:14px;}
+.empty-block .empty-action{display:inline-flex;}
+
+/* 5. 页面级 Tab 条 .view-tabs（流水中心视图切换等） */
+.view-tabs{display:flex;gap:0;margin-bottom:16px;border-bottom:2px solid var(--border);flex-wrap:wrap;}
+.view-tabs .view-tab{
+  padding:8px 16px;text-decoration:none;color:var(--text2);font-size:var(--fs-md);
+  border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .15s;
+}
+/* button 形态（JS 切换面板的页面级 Tab：checklist 等） */
+.view-tabs button.view-tab{
+  border-left:none;border-right:none;border-top:none;background:none;cursor:pointer;font-family:inherit;
+}
+.view-tabs .view-tab:hover{color:var(--text);}
+.view-tabs .view-tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600;}
+.view-panel{display:none;}
+.view-panel.active{display:block;}
+
+/* 6. 工具栏 .toolbar（页面头部右侧操作按钮组） */
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.toolbar .toolbar-spacer{margin-left:auto;}
+
+/* 7. 卡片容器 .card-group（分组卡片布局：导出中心等） */
+.card-group{display:grid;gap:14px;}
+.card-group .card-item{
+  background:var(--surface);border:1px solid var(--border);border-radius:6px;
+  padding:16px 18px;box-shadow:0 1px 3px var(--shadow);transition:border-color .15s;
+}
+.card-group .card-item:hover{border-color:var(--border2);}
+.card-group .card-item .card-title{font-size:var(--fs-md);font-weight:600;color:var(--text);margin-bottom:6px;}
+.card-group .card-item .card-desc{font-size:var(--fs-sm);color:var(--text2);margin-bottom:12px;line-height:1.5;}
+
+/* 8. 显隐工具类 .is-hidden */
+.is-hidden{display:none !important;}

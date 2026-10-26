@@ -1,0 +1,375 @@
+/* checklist.css — 库存盘点页面样式（V1.2 专业化优化） */
+
+/* 步骤区块 */
+.check-section{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--card-radius);
+    padding:20px;margin-bottom:16px;
+    transition:border-color var(--transition-base);
+}
+.check-section:hover{border-color:var(--border2);}
+
+/* 信息说明区块（Excel 模式使用说明，P11 语义化） */
+.check-section.check-section-info{
+    background:var(--accent-dim);
+    border-color:rgba(79,142,247,.3);
+}
+.check-section.check-section-info h3{color:var(--accent);}
+.check-section.check-section-info .check-info-line{margin-bottom:8px;}
+.check-section h3{
+    margin:0 0 12px 0;font-size:var(--fs-2xl);color:var(--text);
+}
+.check-section p{
+    font-size:var(--fs-md);color:var(--text2);
+    line-height:1.6;margin:0 0 14px 0;
+}
+
+/* 步骤编号与标题 */
+.step-num{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:28px;height:28px;border-radius:50%;
+    background:var(--accent-dim);color:var(--accent);
+    font-weight:700;font-size:var(--fs-lg);
+    margin-right:8px;flex-shrink:0;
+}
+.step-title{
+    display:flex;align-items:center;
+    font-size:15px;font-weight:600;color:var(--text);
+    margin-bottom:10px;
+}
+
+/* 筛选行 */
+.check-filter-row{
+    display:flex;gap:10px;flex-wrap:wrap;
+    align-items:center;margin-bottom:14px;
+}
+.check-filter-row label{font-size:var(--fs-md);color:var(--text2);}
+.check-filter-row select,
+.check-filter-row input{
+    padding:6px 10px;border:1px solid var(--border);
+    border-radius:6px;background:var(--surface2);
+    color:var(--text);font-size:var(--fs-md);font-family:inherit;
+    transition:border-color var(--transition-base);
+}
+.check-filter-row select:focus,
+.check-filter-row input:focus{
+    border-color:var(--accent);
+    outline:none;
+}
+
+/* 视图层行内 style 外置 */
+
+.check-filter-row input.cs-w120{width:120px;}
+.check-filter-row input.cs-w140{width:140px;}
+.check-filter-row input.cs-w160{width:160px;}
+.check-filter-row input.cs-w170{width:170px;}
+
+.cs-session-list{margin-top:8px;}
+
+.cs-file-hidden{display:none;}
+
+.check-section-info .check-info-line.is-last{margin-bottom:0;}
+
+.stale-loading{display:none;padding:36px 0;text-align:center;color:var(--text3);font-size:13px;}
+.stale-muted{color:var(--text3);}
+.stale-loading.is-on{display:block;}
+
+/* P7 在线盘点：盘点单列表（固定列宽 + 横向滚动兜底） */
+
+/* 工具行：状态筛选 + 排序方式 */
+.cs-list-tools{
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    margin-bottom:10px;
+}
+.cs-list-tools select{
+    padding:5px 9px;border:1px solid var(--border);
+    border-radius:6px;background:var(--surface2);
+    color:var(--text);font-size:var(--fs-md);font-family:inherit;
+    transition:border-color var(--transition-base);
+}
+.cs-list-tools select:focus{border-color:var(--accent);outline:none;}
+
+/* 表格容器：窄屏横向滚动（不挤压列） */
+.cs-table-wrap{overflow-x:auto;}
+
+/* 盘点单表：标题列弹性，其余固定列宽（colgroup） */
+.cs-session-table{table-layout:fixed;width:100%;min-width:860px;}
+.cs-session-table .cs-col-title{width:auto;}       /* 弹性占满剩余 */
+.cs-session-table .cs-col-status{width:80px;}
+.cs-session-table .cs-col-progress{width:110px;}
+.cs-session-table .cs-col-diff{width:100px;}
+.cs-session-table .cs-col-creator{width:110px;}
+.cs-session-table .cs-col-time{width:130px;}
+.cs-session-table .cs-col-ops{width:230px;}
+
+/* 单元格语义类：标题截断（title 属性兜底看全文）+ 操作列不换行 */
+.cs-session-table .cs-cell-title{
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.cs-session-table .cs-cell-sub{
+    font-size:11px;color:var(--text2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.cs-session-table .cs-cell-ops{
+    white-space:nowrap;text-align:right;
+}
+
+/* check-session.js 的 HTML 拼接所需类 */
+
+/* 整块提示 / 空态：加载中、无数据、无差异 */
+.cs-note{
+    padding:24px 0;text-align:center;color:var(--text2);
+}
+.cs-note.is-loading{padding:30px 0;color:var(--text3);font-size:var(--fs-sm);}
+
+/* 段落式说明（差异单确认区） */
+.cs-text{padding:16px 0;color:var(--text2);}
+.cs-text.is-tight{padding:0;margin-bottom:6px;}
+.cs-text.is-danger{margin:14px 0 6px;color:var(--red);}
+
+.cs-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px;}
+.cs-bar.is-spaced{gap:12px;margin:10px 0;}
+.cs-bar.is-centered{gap:6px;justify-content:center;margin-top:12px;}
+.cs-bar.is-actions{gap:10px;margin-top:16px;}
+.cs-flex-1{flex:1;}
+
+/* 统计小片（总数 / 已盘 / 差异 / 跳过） */
+.cs-chip{
+    padding:6px 14px;border-radius:8px;
+    background:var(--surface2);border:1px solid var(--border);
+    text-align:center;
+}
+.cs-chip-label{font-size:11px;color:var(--text2);}
+.cs-chip-value{font-family:var(--font-mono);font-weight:600;}
+.cs-chip-value.is-up,.cs-diff.is-up{color:var(--green);}
+.cs-chip-value.is-down,.cs-diff.is-down{color:var(--red);}
+.cs-chip-value.is-zero,.cs-diff.is-zero{color:var(--text2);}
+
+.cs-status{font-weight:600;}
+.cs-status.is-counting{color:var(--accent);}
+.cs-status.is-confirmed{color:var(--green);}
+.cs-status.is-cancelled{color:var(--text2);}
+
+.cs-diff{font-weight:600;}
+.cs-diff-warn{color:var(--red);}
+
+/* 型号单元格内的次要行（商品编号 · 品牌） */
+.cs-sub{font-size:11px;color:var(--text2);}
+
+/* 步骤标题尾部的补充说明（#编号 标题（状态）） */
+.cs-step-tail{font-weight:400;color:var(--text2);font-size:var(--fs-sm);}
+
+/* 盘点页筛选按钮组 */
+.cs-pills{display:inline-flex;gap:6px;flex-wrap:wrap;margin-right:8px;}
+
+/* 盘点页输入框（搜索框 / 实盘数） */
+.cs-input{
+    padding:6px 9px;border:1px solid var(--border);border-radius:var(--btn-radius);
+    background:var(--surface2);color:var(--text);font-family:inherit;
+}
+.cs-input-search{width:150px;}
+.cs-input-count{
+    width:70px;text-align:center;
+    padding:4px 6px;border-radius:5px;
+    border:1px solid var(--border);background:var(--surface2);color:var(--text);
+}
+
+/* 表格单元格对齐（th / td 通用） */
+.cs-table .ta-l{text-align:left;}
+.cs-table .ta-c{text-align:center;}
+.cs-table .ta-r{text-align:right;}
+
+/* 结果显示 */
+.check-result{
+    margin-top:14px;padding:12px;
+    border-radius:8px;background:var(--surface2);
+    display:none;
+}
+.check-result.success{
+    border:1px solid var(--green);display:block;
+    background:var(--green-dim);
+}
+.check-result.error{
+    border:1px solid var(--red);display:block;
+    background:var(--red-dim);
+}
+.check-result pre{
+    margin:8px 0 0 0;font-size:var(--fs-base);
+    white-space:pre-wrap;word-break:break-all;
+    color:var(--text2);max-height:200px;overflow-y:auto;
+}
+
+/* 拖拽上传区 */
+#dropZone{
+    border:2px dashed var(--border);
+    border-radius:var(--card-radius);
+    padding:40px 20px;text-align:center;
+    transition:all var(--transition-base);cursor:pointer;
+    background:var(--surface2);
+}
+#dropZone:hover,#dropZone.dragover{
+    border-color:var(--accent);
+    background:var(--accent-dim);
+}
+#dropZone .drop-icon{font-size:48px;margin-bottom:10px;}
+#dropZone .drop-title{
+    font-size:var(--fs-2xl);font-weight:600;
+    color:var(--text);margin-bottom:6px;
+}
+#dropZone .drop-desc{font-size:var(--fs-md);color:var(--text2);}
+
+/* P8 呆滞物料专区（stale.php） */
+
+/* 汇总条 */
+.stale-summary{
+    display:flex;gap:12px;flex-wrap:wrap;
+    margin-bottom:14px;
+}
+/* 分页容器（P11 语义化） */
+.stale-pager{
+    display:flex;gap:6px;flex-wrap:wrap;
+    justify-content:center;margin-top:12px;
+}
+.stale-chip{
+    display:flex;flex-direction:column;align-items:center;
+    padding:8px 18px;border-radius:8px;
+    background:var(--surface2);border:1px solid var(--border);
+}
+.stale-chip-label{font-size:var(--fs-md);color:var(--text2);}
+.stale-chip-val{
+    font-family:var(--font-mono);font-weight:600;
+    font-size:var(--fs-2xl);color:var(--text);
+}
+
+/* 清单表：固定列宽（物料列弹性） */
+.stale-table{table-layout:fixed;width:100%;min-width:900px;}
+.stale-table .stale-col-cb{width:44px;}
+.stale-table .stale-col-part{width:auto;}
+.stale-table .stale-col-loc{width:110px;}
+.stale-table .stale-col-num{width:90px;}
+.stale-table .stale-col-time{width:130px;}
+.stale-table .stale-col-money{width:120px;}
+.stale-table .stale-col-status{width:90px;}
+.stale-table .stale-cell-part{
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.stale-table .stale-cell-part a{color:var(--accent);text-decoration:none;}
+.stale-table .stale-cell-part a:hover{text-decoration:underline;}
+
+/* 已处理行弱化显示 */
+.stale-table .stale-row-processed{opacity:0.55;}
+
+/* 呆滞天数徽标：≥180 天加深警示 */
+.stale-days-badge{
+    display:inline-block;padding:2px 8px;border-radius:10px;
+    background:var(--accent-dim);color:var(--accent);
+    font-weight:600;font-size:var(--fs-md);
+}
+.stale-days-badge.stale-days-hot{
+    background:var(--red-dim);color:var(--red);
+}
+
+/* 状态徽标 */
+.stale-badge-active{
+    color:var(--red);font-weight:600;font-size:var(--fs-md);
+}
+.stale-badge-processed{
+    color:var(--green);font-weight:600;font-size:var(--fs-md);
+}
+
+/* 已处理开关标签 */
+.stale-switch-label{
+    display:inline-flex;align-items:center;gap:6px;
+    font-size:var(--fs-md);color:var(--text2);cursor:pointer;
+}
+
+/* stale.js 的表格渲染 */
+.stale-table th.ta-l,.stale-table td.ta-l{text-align:left;}
+.stale-table th.ta-c,.stale-table td.ta-c{text-align:center;}
+.stale-table th.ta-r,.stale-table td.ta-r{text-align:right;}
+
+/* 无结果空态（图标 + 主文案 + 调整提示） */
+.stale-empty{padding:40px 0;text-align:center;color:var(--text3);}
+.stale-empty-ico{font-size:34px;margin-bottom:10px;}
+.stale-empty-sub{font-size:12px;margin-top:4px;}
+
+.page-info.is-tight{padding:0 2px;}
+.stale-switch-label input{accent-color:var(--accent);}
+
+/* 呆滞专区 · 视图切换 / 分档统计 / 下钻 / 聚合表 */
+
+/* 视图切换：清单 / 按库位 / 按分类 */
+.stale-viewseg{
+    display:inline-flex;gap:4px;padding:4px;margin-bottom:12px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:var(--pill-radius);
+}
+.stale-seg{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:6px 14px;border:0;border-radius:var(--pill-radius);
+    background:transparent;color:var(--text2);
+    font-size:var(--fs-md);font-family:inherit;cursor:pointer;
+    transition:background var(--transition-fast),color var(--transition-fast);
+}
+.stale-seg:hover{color:var(--text);}
+.stale-seg.is-on{background:var(--surface);color:var(--accent);font-weight:var(--fw-medium);box-shadow:var(--shadow-sm);}
+
+/* 下钻过滤提示条 */
+.stale-drill{
+    display:flex;align-items:center;gap:8px;
+    margin-bottom:10px;padding:7px 12px;
+    background:var(--accent-dim);border:1px solid var(--accent);
+    border-radius:var(--btn-radius);
+    font-size:var(--fs-md);color:var(--accent);
+}
+.stale-drill.is-hidden{display:none;}
+.stale-drill-x{
+    margin-left:2px;padding:0 7px;line-height:1.5;
+    border:1px solid transparent;border-radius:50%;
+    background:transparent;color:inherit;font-size:var(--fs-md);cursor:pointer;
+}
+.stale-drill-x:hover{border-color:currentColor;}
+
+/* 分档统计：三档积压分布（数量 + 占用资金），按呆滞时长递增加深警示色 */
+.stale-buckets{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:stretch;}
+.stale-bucket-head{
+    display:flex;align-items:center;padding:8px 12px;
+    font-size:var(--fs-sm);color:var(--text3);
+    background:var(--surface2);border:1px dashed var(--border);border-radius:8px;
+}
+.stale-bucket{
+    flex:1;min-width:150px;
+    padding:10px 14px;border-radius:8px;
+    background:var(--surface2);border:1px solid var(--border);
+    border-left:3px solid var(--border2);
+}
+.stale-bucket .sb-label{font-size:var(--fs-sm);color:var(--text2);}
+.stale-bucket .sb-count{
+    font-family:var(--font-mono);font-size:var(--fs-2xl);font-weight:700;
+    color:var(--text);line-height:1.3;
+}
+.stale-bucket .sb-unit{font-size:var(--fs-sm);font-weight:400;color:var(--text3);}
+.stale-bucket .sb-val{font-size:var(--fs-sm);color:var(--text3);font-family:var(--font-mono);}
+/* 三档警示色走「黄 → 橙（黄红混合）→ 红」的递进，只用既有 token， */
+.stale-bucket.sb-mid   {border-left-color:var(--yellow);}
+.stale-bucket.sb-long  {border-left-color:color-mix(in srgb, var(--red) 55%, var(--yellow));}
+.stale-bucket.sb-oldest{border-left-color:var(--red);}
+.stale-bucket.sb-oldest .sb-count{color:var(--red);}
+
+/* 聚合表：占比条 + 行操作列 */
+.stale-table .stale-col-act{width:110px;}
+.stale-table .stale-col-gname{width:auto;}
+.stale-table .stale-col-gnum{width:110px;}
+.stale-table .stale-col-gbar{width:180px;}
+.stale-table .stale-col-gact{width:110px;}
+.stale-group-table{min-width:640px;}
+.stale-bar{display:flex;align-items:center;gap:8px;min-width:0;}
+.stale-bar-fill{
+    display:block;height:8px;border-radius:4px;
+    background:var(--accent);flex:0 1 auto;max-width:120px;
+}
+.stale-bar em{font-style:normal;font-size:var(--fs-sm);color:var(--text3);font-family:var(--font-mono);}
+
+/* 聚合视图下隐藏只属于清单的控件（排序 / 导出 / 批量标记 / 分页） */
+.is-group-view .stale-list-only{display:none !important;}
+.is-group-view .stale-pager{display:none;}

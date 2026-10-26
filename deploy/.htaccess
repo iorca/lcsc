@@ -1,0 +1,16 @@
+# ── 禁止直接访问本目录 ──
+#
+# 本目录放的是**服务器部署配置**（nginx.conf 含 root 路径、fastcgi_pass、
+# 域名），属内部部署信息。虽无凭据，但不该被公开下载。
+#
+# 与 Nginx 侧等价的规则是 `deploy/nginx.conf` 里的第 14 条
+# `location ^~ /deploy/ { deny all; }` —— 两侧都要有。
+#
+# 注意：本目录在 Web 根内**必须可读**（Nginx 部署者要复制 nginx.conf 走）；
+# 禁的是「经 Web 访问」，不是「文件系统不可读」。
+
+RewriteEngine On
+RewriteRule ^.*$ - [F,L]
+
+# 兜底：禁止目录列表
+Options -Indexes

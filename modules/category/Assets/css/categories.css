@@ -1,0 +1,152 @@
+/* categories.css — 分类管理页 */
+
+/* 输入框一键清除（新增/重命名/合并目标/大类管理） */
+.cat-clear-wrap{position:relative;display:block;min-width:0;}
+.cat-clear-wrap input{width:100%;padding-right:34px;}
+.cat-clear-btn{
+    position:absolute;right:6px;top:50%;transform:translateY(-50%);
+    width:22px;height:22px;padding:0;border:0;border-radius:50%;
+    display:none;align-items:center;justify-content:center;
+    background:var(--surface3);color:var(--text3);cursor:pointer;
+    transition:background var(--transition-fast),color var(--transition-fast);
+}
+.cat-clear-btn:hover{background:var(--border);color:var(--text);}
+.cat-clear-wrap.has-value .cat-clear-btn{display:flex;}
+.cat-clear-btn:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+
+/* 搜索栏一键清除 */
+.search-box .cat-search-clear{
+    position:absolute;right:5px;top:50%;transform:translateY(-50%);
+    width:24px;height:24px;padding:0;border:0;border-radius:50%;
+    display:none;align-items:center;justify-content:center;
+    background:var(--surface3);color:var(--text3);cursor:pointer;
+    transition:background var(--transition-fast),color var(--transition-fast);
+}
+.search-box .cat-search-clear:hover{background:var(--border);color:var(--text);}
+.search-box.has-value .cat-search-clear{display:flex;}
+.search-box.has-value input{padding-right:34px;}
+
+/* 列表：层级缩进 + 树形视觉 */
+.cat-list-table td{vertical-align:middle;}
+.cat-list-table tbody tr.row-selected td{background:var(--row-selected) !important;}
+
+.cat-name-cell{display:flex;align-items:center;gap:6px;min-width:0;}
+/* 缩进：每级一条竖线，末级用箭头点表示「还有下级」的层级递进 */
+.cat-indent{display:inline-flex;align-items:center;flex-shrink:0;}
+.cat-indent-step{
+    width:12px;height:16px;flex-shrink:0;
+    border-left:1px solid var(--border2);
+    margin-right:4px;
+}
+.cat-indent-step:last-child:not(:only-child){border-left-style:dashed;}
+.cat-name{font-weight:500;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* 子类计数：紧凑胶囊，提示该分类还有多少下级 */
+.cat-sub-count{
+    flex-shrink:0;font-size:var(--fs-xs);font-family:var(--font-mono);
+    color:var(--text3);background:var(--surface2);
+    border:1px solid var(--border);border-radius:var(--pill-radius);
+    padding:1px 7px;
+}
+.cat-top-tag{
+    flex-shrink:0;font-size:var(--fs-xs);
+    color:var(--purple);background:var(--purple-dim);
+    border:1px solid var(--purple);border-radius:var(--pill-radius);
+    padding:1px 7px;
+}
+.stat-card.stat-clickable:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+/* 上级分类：等宽字体 + 超长省略，完整路径走 title 与全局 Tooltip */
+.cat-parent{
+    font-family:var(--font-mono);font-size:var(--fs-base);color:var(--text2);
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--btn-radius);padding:2px 8px;
+    display:inline-block;max-width:220px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle;
+}
+.cat-parent-none{font-size:var(--fs-base);color:var(--text3);}
+
+/* 主要库位 */
+.cat-loc{
+    font-family:var(--font-mono);font-size:var(--fs-base);color:var(--accent);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    display:inline-block;max-width:160px;vertical-align:middle;
+}
+.cat-loc-more{font-size:var(--fs-xs);color:var(--text3);margin-left:3px;}
+
+/* 弱化文字：空值 / 「继承全局」/「仅查看」 */
+.cat-muted{font-size:var(--fs-base);color:var(--text3);}
+
+/* 操作列：按钮固定右对齐，不随列宽变化漂移 */
+.cat-actions-col{width:190px;text-align:right;white-space:nowrap;}
+.cat-actions-col .actions{display:flex;gap:4px;justify-content:flex-end;align-items:center;}
+.cat-actions-col .btn.is-disabled{opacity:.4;cursor:not-allowed;}
+
+/* 批量操作弹窗内的「本次影响范围」提示 */
+.cat-batch-summary{
+    background:var(--surface2);border:1px solid var(--border);
+    border-left:3px solid var(--accent);
+    border-radius:var(--btn-radius);padding:8px 12px;margin-bottom:14px;
+    font-size:var(--fs-base);color:var(--text2);line-height:1.7;
+}
+.cat-batch-summary b{color:var(--accent);font-family:var(--font-mono);}
+.cat-batch-names{
+    display:block;margin-top:2px;font-size:var(--fs-sm);color:var(--text3);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+
+/* 移动分类弹窗：说明文字 */
+.cat-move-hint{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:var(--btn-radius);padding:8px 12px;margin-bottom:14px;
+    font-size:var(--fs-sm);color:var(--text2);line-height:1.7;
+}
+
+/* 一级大类管理弹窗 */
+.cat-topcat-hint{
+    background:var(--surface2);border:1px solid var(--border);
+    border-left:3px solid var(--purple);
+    border-radius:var(--btn-radius);padding:9px 12px;margin-bottom:16px;
+    font-size:var(--fs-base);color:var(--text2);line-height:1.7;
+}
+.topcat-add-form{display:flex;gap:8px;margin-bottom:16px;}
+.topcat-add-form .cat-clear-wrap{flex:1;min-width:0;}
+.topcat-add-form input{
+    flex:1;min-width:0;background:var(--surface2);border:1px solid var(--border);
+    color:var(--text);padding:8px 12px;border-radius:var(--btn-radius);
+    font-size:var(--fs-md);outline:none;height:36px;
+    transition:border-color var(--transition-base),box-shadow var(--transition-base);
+}
+.topcat-add-form input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+.topcat-add-form .cat-clear-wrap input{padding-right:34px;}
+
+.topcat-item{
+    display:flex;align-items:center;gap:8px;
+    padding:11px 14px;border:1px solid var(--border);
+    border-radius:var(--btn-radius);margin-bottom:8px;background:var(--surface2);
+    transition:border-color var(--transition-base),background var(--transition-base);
+}
+.topcat-item:hover{border-color:var(--border2);background:var(--surface3);}
+.topcat-item.topcat-default{border-style:dashed;background:var(--surface3);}
+.topcat-item-name{
+    flex:1;min-width:0;font-size:var(--fs-md);font-weight:500;color:var(--text);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.topcat-item-count{font-size:var(--fs-sm);color:var(--text3);font-family:var(--font-mono);flex-shrink:0;}
+.topcat-item-tag{
+    font-size:var(--fs-xs);color:var(--text3);flex-shrink:0;
+    padding:2px 7px;border:1px solid var(--border);border-radius:var(--pill-radius);
+}
+
+/* 响应式：窄屏隐藏次要列，表格横向滚动由 .table-wrap 承担 */
+@media(max-width:768px){
+    .cat-list-table{table-layout:auto !important;width:100% !important;}
+    .cat-list-table th,.cat-list-table td{padding:8px 8px !important;font-size:var(--fs-base) !important;}
+    /* 隐藏：低库存阈值(5)、主要库位(6) */
+    .cat-list-table th:nth-child(5),.cat-list-table td:nth-child(5),
+    .cat-list-table th:nth-child(6),.cat-list-table td:nth-child(6){display:none !important;}
+    .cat-actions-col{width:auto;}
+    .cat-actions-col .actions{gap:4px;}
+    .cat-actions-col .btn{padding:4px 8px !important;font-size:var(--fs-sm) !important;}
+    .cat-sub-count{display:none;}
+    .topcat-add-form{flex-wrap:wrap;}
+}

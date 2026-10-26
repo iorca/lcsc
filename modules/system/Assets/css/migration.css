@@ -1,0 +1,59 @@
+/* 独立数据库迁移页（P1） */
+
+.mig-box{width:100%;max-width:920px;margin-left:auto;margin-right:auto;}
+
+/* 版本状态条 */
+.mig-versions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 16px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--card-radius);margin-bottom:18px;}
+.mig-ver-item{display:flex;flex-direction:column;gap:2px;}
+.mig-ver-label{font-size:var(--fs-sm);color:var(--text3);}
+.mig-ver-no{font-size:var(--fs-xl);font-weight:var(--fw-semibold);color:var(--text);}
+.mig-ver-arrow{color:var(--text3);font-size:var(--fs-xl);}
+.mig-state{margin-left:auto;}
+
+/* 迁移路径 */
+.mig-path{margin:0 0 18px;padding-left:20px;color:var(--text2);font-size:var(--fs-md);}
+.mig-path li{margin-bottom:4px;}
+.mig-path-arrow{color:var(--text3);margin:0 6px;}
+
+/* 数据规模 */
+.mig-scan{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;margin-bottom:18px;}
+.mig-scan-item{display:flex;flex-direction:column;gap:2px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);}
+.mig-scan-no{font-family:var(--font-mono);font-size:var(--fs-xl);font-weight:var(--fw-semibold);color:var(--accent);}
+.mig-scan-label{font-size:var(--fs-sm);color:var(--text2);}
+
+/* 结构变更 */
+.mig-diff{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.mig-diff-row{display:flex;gap:12px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);}
+.mig-diff-key{flex:0 0 112px;font-size:var(--fs-sm);color:var(--text3);}
+.mig-diff-val{flex:1;min-width:0;display:flex;flex-wrap:wrap;gap:8px;font-size:var(--fs-md);color:var(--text);}
+.mig-col-group{display:inline-flex;align-items:center;gap:4px;font-size:var(--fs-sm);color:var(--text2);}
+.mig-code{font-family:var(--font-mono);font-size:var(--fs-sm);padding:1px 6px;background:var(--surface3);border:1px solid var(--border);border-radius:4px;color:var(--text);}
+.mig-code-dim{opacity:.55;}
+.mig-muted{color:var(--text3);font-size:var(--fs-sm);}
+
+/* 执行区 */
+.mig-run{display:flex;flex-wrap:wrap;align-items:center;gap:14px;margin-bottom:18px;}
+.mig-confirm{display:inline-flex;align-items:center;gap:8px;font-size:var(--fs-md);color:var(--text);cursor:pointer;user-select:none;}
+.mig-hint{flex:1 1 100%;font-size:var(--fs-sm);color:var(--text2);line-height:1.6;}
+.mig-hint code{font-family:var(--font-mono);font-size:var(--fs-xs);padding:1px 5px;background:var(--surface3);border-radius:4px;color:var(--text);}
+
+/* 执行结果（内联渲染，不使用嵌套弹窗） */
+.mig-result{margin-bottom:18px;padding:14px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--card-radius);}
+.mig-res-line{font-size:var(--fs-md);color:var(--text2);margin-bottom:6px;}
+.mig-res-line code{font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--text);}
+.mig-res-steps,.mig-res-msgs{margin:0 0 10px;padding-left:20px;font-size:var(--fs-sm);color:var(--text2);}
+.mig-res-steps li,.mig-res-msgs li{margin-bottom:3px;}
+
+.mig-history-summary{max-width:340px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2);}
+
+/* 返回入口（独立整页） */
+.mig-back{margin-top:18px;font-size:var(--fs-md);color:var(--text2);}
+.mig-back a{color:var(--accent);}
+.mig-back a:hover{text-decoration:underline;}
+
+/* 移动端：单列收窄 */
+@media(max-width:768px){
+  .mig-diff-row{flex-direction:column;gap:4px;}
+  .mig-diff-key{flex:0 0 auto;}
+  .mig-state{margin-left:0;}
+}

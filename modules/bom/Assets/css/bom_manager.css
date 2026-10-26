@@ -1,0 +1,716 @@
+/* bom_manager.css — BOM 管理页面样式 */
+
+/* 页面基调：去掉外层大卡片的厚重感，内容直接落在表面上 */
+.main .glass-box:has(#bomHeadBar),
+.main .glass-box:has(#bomProjectList){
+    padding:0;background:transparent;border:none;box-shadow:none;
+}
+
+/* ① 项目头：标识区 + 关键指标簇 */
+.bom-hero{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:20px;flex-wrap:wrap;
+    padding:2px 2px 14px;
+    border-bottom:1px solid var(--border);
+}
+.bom-hero-id{display:flex;align-items:flex-start;gap:12px;min-width:0;flex:1 1 320px}
+.bom-back{
+    display:inline-flex;align-items:center;gap:3px;flex:none;
+    margin-top:4px;padding:3px 9px 3px 6px;border-radius:var(--btn-radius);
+    font-size:var(--fs-base);color:var(--text2);text-decoration:none;
+    background:var(--surface2);border:1px solid var(--border);
+    transition:color var(--transition-base),border-color var(--transition-base),background var(--transition-base);
+}
+.bom-back:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-dim)}
+.bom-hero-txt{min-width:0}
+.bom-hero-name{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.bom-hero-name h2{
+    margin:0;font-size:var(--fs-3xl);font-weight:var(--fw-bold);
+    line-height:1.25;letter-spacing:-.2px;
+    max-width:46vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bom-hero-n{
+    display:inline-flex;align-items:baseline;gap:3px;flex:none;
+    padding:2px 8px;border-radius:var(--pill-radius);
+    background:var(--surface2);border:1px solid var(--border);
+    font-size:var(--fs-sm);color:var(--text2);
+}
+.bom-hero-n b{font-family:var(--font-mono);font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--text)}
+.bom-hero-sub{font-size:var(--fs-base);color:var(--text2);line-height:1.6;margin-top:3px;max-width:70ch}
+
+/* 指标簇：标签在上、数值在下，靠留白分隔而不是画框 */
+.bom-kpis{display:flex;align-items:stretch;gap:2px;flex:none;flex-wrap:wrap}
+.bom-kpi{
+    display:flex;flex-direction:column;gap:1px;
+    padding:2px 16px;min-width:96px;
+    border-left:1px solid var(--border);
+}
+.bom-kpi:first-child{border-left:none}
+.bom-kpi-k{
+    display:inline-flex;align-items:center;gap:3px;
+    font-size:var(--fs-xs);color:var(--text3);
+    letter-spacing:.5px;white-space:nowrap;
+}
+.bom-kpi-v{
+    display:inline-flex;align-items:baseline;gap:2px;
+    font-family:var(--font-mono);font-size:19px;font-weight:var(--fw-semibold);
+    line-height:1.25;color:var(--text);
+}
+.bom-kpi-v i{font-style:normal;font-size:var(--fs-sm);color:var(--text3);font-family:var(--font-sans)}
+.bom-kpi-v b{font-weight:inherit}
+.bom-kpi-v.is-green{color:var(--green)}
+.bom-kpi.is-danger .bom-kpi-v{color:var(--red)}
+.bom-kpi.is-ok .bom-kpi-v{color:var(--green)}
+.bom-kpi-tag{
+    margin-top:2px;padding:0 6px;border-radius:4px;align-self:flex-start;
+    background:var(--yellow-dim);color:var(--yellow);
+    font-size:var(--fs-xs);line-height:16px;white-space:nowrap;
+}
+.bom-kpi-input input{
+    width:52px;height:24px;padding:0 5px;
+    border:1px solid var(--border);border-radius:4px;
+    background:var(--surface2);color:var(--text);
+    font-family:var(--font-mono);font-size:var(--fs-md);text-align:right;
+}
+.bom-kpi-input input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+
+/* ② 吸顶控制条：状态分段筛选 + 版本切换 */
+.bom-sticky{
+    position:sticky;top:0;z-index:30;
+    background:var(--bg,var(--surface));
+    padding:10px 2px;margin-bottom:4px;
+}
+html:has(#bomStickyBar) body{overflow-x:clip}
+
+.bom-controlbar{display:flex;align-items:center;gap:10px 16px;flex-wrap:wrap}
+
+/* 分段控件：整体一个底槽，选中项用白底+阴影「浮起」 */
+.bom-seg{
+    display:inline-flex;align-items:center;gap:2px;
+    padding:3px;border-radius:8px;
+    background:var(--surface2);border:1px solid var(--border);
+}
+.bom-seg-all,.bom-seg-i,.bom-ver-i{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:4px 11px;border:none;border-radius:5px;
+    background:transparent;color:var(--text2);
+    font-family:inherit;font-size:var(--fs-base);line-height:1.5;
+    cursor:pointer;white-space:nowrap;
+    transition:background var(--transition-base),color var(--transition-base),box-shadow var(--transition-base);
+}
+.bom-seg-all:hover,.bom-seg-i:hover,.bom-ver-i:hover{color:var(--text)}
+.bom-seg-all.active,.bom-seg-i.active,.bom-ver-i.active{
+    background:var(--surface);color:var(--text);font-weight:var(--fw-medium);
+    box-shadow:0 1px 2px rgba(0,0,0,.10);
+}
+.bom-seg-dot{
+    width:6px;height:6px;border-radius:50%;flex:none;
+    background:var(--seg-c,var(--text3));
+}
+.bom-seg-i b{
+    font-family:var(--font-mono);font-size:var(--fs-md);
+    font-weight:var(--fw-semibold);color:var(--text);
+}
+.bom-seg-i.active{color:var(--seg-c,var(--text))}
+.bom-seg-i.active b{color:var(--seg-c,var(--text))}
+.bom-seg-i span{color:var(--text2)}
+
+/* 版本条 */
+.bom-verbar{display:inline-flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.bom-ver-label{font-size:var(--fs-base);color:var(--text3);flex:none}
+.bom-seg-ver{padding:2px}
+.bom-ver-i{padding:3px 10px;font-size:var(--fs-base)}
+.bom-ver-i b{font-family:var(--font-mono);font-weight:var(--fw-semibold)}
+.bom-ver-i span{font-size:var(--fs-xs);color:var(--text3)}
+.bom-ver-i.is-draft b{color:var(--green)}
+.bom-ver-i.active{box-shadow:0 1px 2px rgba(0,0,0,.10),inset 0 0 0 1px var(--accent)}
+.bom-ver-actions{display:inline-flex;align-items:center;gap:5px}
+.bom-ver-more{padding:3px 8px;font-size:var(--fs-md);line-height:1}
+
+.bom-hint-line{
+    margin-top:8px;padding:6px 11px;border-radius:var(--btn-radius);
+    background:var(--yellow-dim);border-left:2px solid var(--yellow);
+    font-size:var(--fs-base);color:var(--text2);
+}
+.bom-hint-line b{color:var(--text)}
+
+/* ③ 操作栏 */
+.bom-actionbar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:12px 2px 10px;
+}
+.bom-action-l{display:inline-flex;align-items:center;gap:7px}
+
+/* 出库命令簇：唯一一处「实心」控件，视觉焦点 */
+.bom-checkout{
+    display:inline-flex;align-items:center;gap:10px;
+    margin-left:auto;padding:5px 5px 5px 12px;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;box-shadow:var(--shadow-sm);
+}
+.bom-checkout-fields{display:inline-flex;align-items:center;gap:10px}
+.bom-field{display:inline-flex;flex-direction:column;gap:2px;min-width:0}
+.bom-field>span{
+    display:inline-flex;align-items:center;gap:3px;
+    font-size:var(--fs-xs);color:var(--text3);letter-spacing:.4px;white-space:nowrap;
+}
+.bom-field input,.bom-field select{
+    height:28px;padding:0 8px;
+    border:1px solid var(--border);border-radius:5px;
+    background:var(--surface2);color:var(--text);
+    font-family:inherit;font-size:var(--fs-base);
+}
+.bom-field input{width:62px;font-family:var(--font-mono)}
+.bom-field input:focus,.bom-field select:focus{
+    outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);
+}
+.bom-field.is-inline{flex-direction:row;align-items:center;gap:6px}
+.bom-field.is-inline input{width:56px}
+.bom-checkout-btn{height:30px;padding:0 14px}
+
+.bom-more{position:relative}
+.bom-more-menu{
+        display:none;
+    position:absolute;right:0;top:calc(100% + 6px);
+    min-width:212px;z-index:var(--z-dropdown,210);
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;box-shadow:var(--shadow-lg);
+    padding:5px;
+}
+.bom-more-menu a,.bom-more-menu button{
+    display:block;width:100%;text-align:left;
+    padding:7px 10px;border:0;border-radius:5px;background:transparent;
+    color:var(--text);font-family:inherit;font-size:var(--fs-base);
+    line-height:1.5;cursor:pointer;text-decoration:none;
+}
+.bom-more-menu a:hover,.bom-more-menu button:hover{background:var(--surface2)}
+.bom-more-menu form{margin:0}
+.bom-more-danger{color:var(--red)!important}
+.bom-more-danger:hover{background:var(--red-dim)!important}
+.bom-more-group{
+    padding:8px 10px 4px;font-size:var(--fs-xs);color:var(--text3);
+    letter-spacing:.6px;
+}
+.bom-more-group:first-child{padding-top:3px}
+
+/* ④ 明细表 */
+/* 编辑弹窗：清单信息 / 物料参数 分区 */
+.bom-edit-sec{margin-bottom:16px}
+.bom-edit-sec + .bom-edit-sec{
+    padding-top:14px;border-top:1px dashed var(--border);
+}
+.bom-edit-sec-h{
+    display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+    margin-bottom:10px;font-size:var(--fs-base);
+    font-weight:var(--fw-semibold);color:var(--text);
+}
+.bom-edit-sec-h::before{
+    content:'';width:3px;height:12px;border-radius:2px;
+    background:var(--accent);align-self:center;
+}
+.bom-edit-sec-tip{font-size:var(--fs-sm);font-weight:var(--fw-normal);color:var(--text3)}
+.bom-desktop-table .table-wrap,
+.bom-table-wrap{border-radius:8px}
+.bom-table{font-size:var(--fs-md)}
+.bom-table thead th{
+    background:var(--surface2);color:var(--text2);
+    font-size:var(--fs-sm);font-weight:var(--fw-semibold);
+    text-transform:none;letter-spacing:.2px;
+    padding:9px 12px;border-bottom:1px solid var(--border);
+}
+.bom-table tbody td{
+    padding:10px 12px;border-top:1px solid var(--border);vertical-align:top;
+}
+.bom-table tbody tr:first-child td{border-top:none}
+.bom-table tbody tr:hover td{background:var(--row-hover)}
+.bom-table tbody tr[data-status="not_found"] td:first-child{box-shadow:inset 2px 0 0 var(--red)}
+.bom-table tbody tr[data-status="insufficient"] td:first-child{box-shadow:inset 2px 0 0 var(--yellow)}
+
+.bom-col-chk{width:38px;padding-left:14px!important}
+.bom-col-part{width:26%}
+.bom-col-brand{width:15%}
+.bom-col-cat{width:9%}
+.bom-col-note{width:15%}
+.bom-col-qty{width:76px}
+.bom-col-status{width:104px}
+.bom-col-act{width:210px}
+
+/* 首屏骨架屏 */
+.bom-skel-row td{padding:16px 14px;border-top:1px solid var(--border)}
+.bom-skel-bar{
+    display:block;height:14px;border-radius:4px;
+    background:linear-gradient(90deg,var(--surface2) 25%,var(--surface3) 37%,var(--surface2) 63%);
+    background-size:400% 100%;animation:bomSkelShimmer 1.4s ease infinite;
+}
+.bom-skel-row:nth-child(2) .bom-skel-bar{width:90%}
+.bom-skel-row:nth-child(3) .bom-skel-bar{width:74%}
+.bom-skel-row:nth-child(4) .bom-skel-bar{width:96%}
+.bom-skel-row:nth-child(5) .bom-skel-bar{width:68%}
+@keyframes bomSkelShimmer{0%{background-position:100% 0}100%{background-position:0 0}}
+
+.bom-p-main{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.bom-p-no{
+    font-family:var(--font-mono);font-size:var(--fs-base);
+    color:var(--text);text-decoration:none;white-space:nowrap;
+}
+a.bom-p-no{color:var(--accent)}
+a.bom-p-no:hover{text-decoration:underline}
+.bom-p-model{
+    font-family:var(--font-mono);font-size:var(--fs-md);
+    font-weight:var(--fw-semibold);color:var(--text);
+}
+.bom-p-name{
+    margin-top:2px;font-size:var(--fs-base);color:var(--text2);
+    line-height:1.5;max-width:46ch;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bom-b-name{font-size:var(--fs-base);color:var(--text);line-height:1.5}
+.bom-b-sub{
+    margin-top:2px;font-size:var(--fs-sm);color:var(--text3);
+    font-family:var(--font-mono);line-height:1.5;
+}
+.bom-cat{
+    display:inline-block;padding:0 6px;border-radius:4px;
+    background:var(--surface2);color:var(--text2);
+    font-family:var(--font-sans);font-size:var(--fs-xs);line-height:16px;
+}
+.bom-qty{
+    font-family:var(--font-mono);font-size:15px;
+    font-weight:var(--fw-semibold);color:var(--text);
+}
+.bom-n-ref{
+    font-family:var(--font-mono);font-size:var(--fs-sm);color:var(--text2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bom-n-rmk{
+    margin-top:2px;font-size:var(--fs-sm);color:var(--text3);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bom-dim{color:var(--text3)}
+
+/* 状态：色点 + 文字，比彩色 badge 安静 */
+.bom-st{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:var(--fs-base);line-height:1.6;white-space:nowrap;
+}
+.bom-st i{width:6px;height:6px;border-radius:50%;flex:none;background:currentColor}
+.bom-st.ok{color:var(--green)}
+.bom-st.warn{color:var(--yellow)}
+.bom-st.err{color:var(--red)}
+.bom-st.unbound{color:var(--purple)}
+
+/* 行内操作：直接用全局 .btn 体系（带框），与库存页等全站保持一致 */
+.bom-row-acts{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.bom-card-foot{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+
+/* ⑤ 缺料分析 */
+.bom-panel{margin-top:18px;padding:0}
+.bom-panel-head{
+    display:flex;align-items:flex-end;justify-content:space-between;
+    gap:12px;flex-wrap:wrap;padding-bottom:12px;
+}
+.bom-panel-title h3{
+    margin:0;font-size:var(--fs-xl);font-weight:var(--fw-semibold);
+    line-height:1.3;letter-spacing:-.1px;
+}
+.bom-panel-sub{margin-top:3px;font-size:var(--fs-base);color:var(--text2)}
+.bom-panel-actions{display:inline-flex;align-items:center;gap:8px}
+.bom-summary-danger{color:var(--red);font-weight:var(--fw-semibold)}
+.bom-summary-ok{color:var(--green);font-weight:var(--fw-semibold)}
+
+.bom-metrics{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:1px;background:var(--border);
+    border:1px solid var(--border);border-radius:8px;overflow:hidden;
+}
+.bom-metric{
+    display:flex;flex-direction:column;gap:2px;
+    padding:11px 14px;background:var(--surface);
+}
+.bom-metric-k{font-size:var(--fs-xs);color:var(--text3);letter-spacing:.4px}
+.bom-metric-v{
+    display:inline-flex;align-items:baseline;gap:2px;
+    font-family:var(--font-mono);font-size:18px;
+    font-weight:var(--fw-semibold);line-height:1.25;color:var(--text);
+}
+.bom-metric-v i{font-style:normal;font-size:var(--fs-sm);color:var(--text3);font-family:var(--font-sans)}
+.bom-metric-v.is-warn{color:var(--yellow)}
+.bom-metric-v.is-danger{color:var(--red)}
+.bom-metric-v.is-ok{color:var(--green)}
+
+.bom-capacity{
+    display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;
+    margin:12px 0;padding:9px 13px;border-radius:var(--btn-radius);
+    background:var(--surface2);border-left:2px solid var(--accent);
+    font-size:var(--fs-base);color:var(--text2);
+}
+.bom-capacity b{color:var(--text);font-weight:var(--fw-semibold)}
+.bom-capacity-sub{color:var(--text3);font-size:var(--fs-sm)}
+.bom-capacity.warn{background:var(--yellow-dim);border-left-color:var(--yellow);color:var(--text2)}
+
+.bom-shortage-wrap{border-radius:8px}
+/* 缺料明细表容器（出库失败弹窗内）。限高滚动，防止长列表把弹窗撑出视口 */
+.bco-shortage-wrap{margin-top:12px;max-height:260px;overflow-y:auto;}
+.bom-shortage-table{font-size:var(--fs-base)}
+.bom-shortage-table th{
+    text-align:left;padding:8px 12px;background:var(--surface2);
+    font-size:var(--fs-sm);color:var(--text2);text-transform:none;white-space:nowrap;
+}
+.bom-shortage-table td{padding:8px 12px;border-top:1px solid var(--border)}
+.bom-shortage-table tbody tr{cursor:default}
+.bom-shortage-table tbody tr:hover td{background:var(--row-hover)}
+.bom-shortage-table .ta-r{text-align:right}
+.bom-shortage-table .gap{color:var(--red);font-weight:var(--fw-semibold);font-family:var(--font-mono)}
+.bom-shortage-table .alt{color:var(--green);font-family:var(--font-mono)}
+.bom-s-model{font-family:var(--font-mono);font-weight:var(--fw-medium);color:var(--text)}
+.bom-s-no{font-family:var(--font-mono);color:var(--text2);font-size:var(--fs-sm)}
+.bom-s-pkg{font-family:var(--font-mono);color:var(--text2);font-size:var(--fs-sm)}
+.bom-empty-row{text-align:center;color:var(--text2);padding:22px 0!important}
+
+.bom-import-box{
+    display:none;margin-bottom:12px;padding:12px 14px;border-radius:8px;
+    font-size:var(--fs-base);line-height:1.7;
+}
+.bom-import-box.is-on{display:block;}
+.bom-import-box.is-ok{background:rgba(34,197,94,.06);border:1px solid rgba(34,197,94,.3);}
+.bom-import-box.is-bad{background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.3);}
+.bom-imp-msg{margin-bottom:6px;font-weight:var(--fw-semibold);}
+.bom-imp-msg.is-ok{color:var(--green);}
+.bom-imp-msg.is-bad{color:var(--red);}
+.bom-imp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.bom-imp-cell{background:var(--surface2);border-radius:6px;padding:8px 10px;text-align:center;}
+.bom-imp-cell-v{font-size:18px;font-weight:var(--fw-semibold);}
+.bom-imp-cell-v.is-ok{color:var(--green);}
+.bom-imp-cell-v.is-warn{color:var(--yellow);}
+.bom-imp-cell-v.is-muted{color:var(--text2);}
+.bom-imp-cell-k{font-size:var(--fs-xs);color:var(--text3);}
+.bom-imp-tip{margin-top:6px;font-size:var(--fs-sm);color:var(--text2);}
+.bom-imp-go{margin-top:8px;}
+
+/* 一键出库结果弹窗（bom-checkout.js） */
+.bco-result-msg{font-size:var(--fs-sm);line-height:1.8;color:var(--text2);}
+.bco-stat-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px;}
+.bco-stat{background:var(--surface2);border-radius:7px;padding:9px 12px;}
+.bco-stat-k{font-size:var(--fs-xs);color:var(--text3);}
+.bco-stat-v{font-size:18px;font-weight:var(--fw-semibold);color:var(--text);}
+.bco-stat-v.is-alt{color:var(--green);}
+.bco-truncated{margin-top:8px;font-size:var(--fs-xs);color:var(--text3);}
+
+/* ⑥ 项目列表 / 移动端 / 弹窗 */
+.bom-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.bom-grid>.bom-card{
+    display:flex;flex-direction:column;gap:10px;
+    padding:15px 16px;border-radius:10px;
+    background:var(--surface);border:1px solid var(--border);
+    box-shadow:var(--shadow-sm);
+    transition:border-color var(--transition-base),box-shadow var(--transition-base),transform var(--transition-base);
+}
+.bom-grid>.bom-card:hover{
+    border-color:var(--border2);box-shadow:var(--shadow-md);transform:translateY(-1px);
+}
+.bom-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.bom-card-name{
+    font-size:var(--fs-lg);font-weight:var(--fw-semibold);
+    color:var(--text);text-decoration:none;line-height:1.4;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.bom-card-name:hover{color:var(--accent)}
+.bom-card-tags{display:inline-flex;align-items:center;gap:4px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+.bom-tag{
+    display:inline-block;padding:1px 7px;border-radius:4px;
+    background:var(--surface2);color:var(--text2);
+    font-size:var(--fs-xs);line-height:17px;white-space:nowrap;
+}
+.bom-tag.is-production{background:var(--green-dim);color:var(--green)}
+.bom-tag.is-testing{background:var(--yellow-dim);color:var(--yellow)}
+.bom-tag.is-archived{background:var(--surface2);color:var(--text3)}
+.bom-tag.is-p1{background:var(--yellow-dim);color:var(--yellow)}
+.bom-tag.is-p2{background:var(--red-dim);color:var(--red)}
+.bom-card-desc{
+    font-size:var(--fs-base);color:var(--text2);line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.bom-card-meta{
+    display:flex;align-items:stretch;gap:0;flex-wrap:wrap;
+    padding:9px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+}
+.bom-card-metric{
+    display:flex;flex-direction:column;gap:1px;
+    padding:0 12px;border-left:1px solid var(--border);min-width:0;
+}
+.bom-card-metric:first-child{padding-left:0;border-left:none}
+.bom-card-metric span{font-size:var(--fs-xs);color:var(--text3);white-space:nowrap}
+.bom-card-metric b{
+    font-family:var(--font-mono);font-size:var(--fs-md);
+    font-weight:var(--fw-semibold);color:var(--text);white-space:nowrap;
+}
+.bom-card-metric b.is-accent{color:var(--accent)}
+.bom-card-foot{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+
+/* 项目列表筛选条 */
+.bom-filter-bar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 14px}
+.bom-filter-input,.bom-filter-select{
+    height:36px;padding:0 12px;font-size:var(--fs-md);
+    background:var(--surface2);color:var(--text);
+    border:1px solid var(--border);border-radius:var(--btn-radius);
+    transition:border-color var(--transition-base),box-shadow var(--transition-base);
+}
+.bom-filter-input{flex:1 1 220px;min-width:160px}
+.bom-filter-input::placeholder{color:var(--text3)}
+.bom-filter-input:focus,.bom-filter-select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.bom-filter-select{flex:none;max-width:180px}
+.bom-filter-count{margin-left:auto;font-size:var(--fs-sm);color:var(--text2);white-space:nowrap}
+/* 权重高于 `.bom-grid>.bom-card`，确保被筛掉的卡片确实隐藏 */
+.bom-grid>.bom-card.is-filtered-out{display:none}
+.bom-filter-empty{padding:36px 0;text-align:center;color:var(--text3);font-size:var(--fs-md)}
+@media(max-width:768px){
+    .bom-filter-input{flex-basis:100%}
+    .bom-filter-select{flex:1 1 45%;max-width:none}
+    .bom-filter-count{width:100%;margin-left:0}
+}
+
+/* 移动端：表格行重排为卡片 */
+@media(max-width:768px){
+    .bom-desktop-table{overflow:visible !important}
+    .bom-desktop-table .table-wrap{overflow:visible !important}
+    .bom-table thead{display:none}
+    .bom-table,.bom-table tbody,.bom-table tr,.bom-table td{display:block;width:auto;min-width:0;max-width:none}
+    /* 行 = 卡片：卡头（勾选 + 状态徽标右对齐）一行，其余字段行流 + 换行 */
+    .bom-table tbody tr{
+        display:flex;flex-wrap:wrap;align-items:center;gap:4px 8px;
+        border:1px solid var(--border);border-radius:10px;background:var(--surface);
+        padding:10px 12px;margin-bottom:10px;box-shadow:none !important;height:auto !important;
+    }
+    .bom-col-chk{order:1;flex:none;width:auto;padding-left:0 !important}
+    .bom-col-chk input{width:16px;height:16px;accent-color:var(--accent);cursor:pointer}
+    .bom-col-status{order:2;flex:none;width:auto;margin-left:auto;display:flex;align-items:center}
+    .bom-col-status::before{content:none}
+    /* 字段行：各占一整行，字段名由 ::before 读 data-label */
+    .bom-col-part{order:3}
+    .bom-col-brand{order:4}
+    .bom-col-cat{order:5}
+    .bom-col-qty{order:6}
+    .bom-col-note{order:7}
+    .bom-col-part,.bom-col-brand,.bom-col-cat,.bom-col-qty,.bom-col-note{
+        flex:0 0 100%;display:flex;gap:8px;align-items:baseline;
+        padding:0;height:auto !important;white-space:normal;overflow:visible;max-width:none;
+    }
+    .bom-col-part{display:block}   /* 物料格内含编号/型号/名称/缺字段 chips 多块，块排更稳 */
+    .bom-col-part::before,.bom-col-brand::before,.bom-col-cat::before,
+    .bom-col-qty::before,.bom-col-note::before{
+        content:attr(data-label);flex:none;min-width:56px;
+        font-size:var(--fs-xs);font-weight:400;color:var(--text3);
+    }
+    .bom-col-part::before{display:block}   /* display:block 的子级 ::before 也要成行内块 */
+    /* 物料格内部：编号+型号换行铺开（原卡头只放编号，现全量展示在首字段行） */
+    .bom-p-main{flex-wrap:wrap;gap:4px 8px}
+    .bom-p-name{white-space:normal}
+    /* 品牌/封装、位号/备注 内部改行内流（原为上下两块） */
+    .bom-col-brand .bom-b-name,.bom-col-brand .bom-b-sub{display:inline-block;margin-right:8px}
+    .bom-col-note .bom-n-ref,.bom-col-note .bom-n-rmk{display:inline-block;margin-right:8px}
+    /* 操作按钮行（卡底） */
+    .bom-col-act{
+        order:9;flex:0 0 100%;width:auto;padding:0;margin-top:4px;
+        padding-top:8px !important;border-top:1px solid var(--border);
+        text-align:left;white-space:normal;
+    }
+    .bom-col-act::before{content:none}
+    .bom-row-acts{justify-content:flex-start;flex-wrap:wrap;gap:6px}
+    .bom-row-acts .bom-inline-form{margin:0}
+        .bom-skel-row td{flex:0 0 100%;width:100%;padding:0}
+
+    /* 原「双容器切换」media 的其余布局压缩规则（保留） */
+    .bom-hero{padding-bottom:12px}
+    .bom-hero-name h2{font-size:var(--fs-2xl);max-width:100%}
+    .bom-kpis{width:100%;gap:0}
+    .bom-kpi{padding:6px 12px;min-width:0;flex:1 1 33%}
+    .bom-kpi:nth-child(3){border-left:1px solid var(--border)}
+    .bom-kpi-v{font-size:17px}
+    .bom-controlbar{gap:8px}
+    .bom-seg{width:100%;justify-content:space-between}
+    .bom-seg-all,.bom-seg-i{flex:1;justify-content:center;padding:5px 6px}
+    .bom-verbar{margin-left:0;width:100%}
+    .bom-checkout{margin-left:0;width:100%;flex-wrap:wrap;justify-content:space-between}
+    .bom-metrics{grid-template-columns:1fr}
+}
+
+/* 待补行缺失字段 chip */
+.pm-chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+.pm-chip{
+    display:inline-block;padding:0 6px;border-radius:4px;
+    background:var(--yellow-dim);border:1px solid rgba(245,158,11,.30);
+    color:var(--yellow);font-size:var(--fs-xs);line-height:17px;white-space:nowrap;
+}
+
+/* 批量补全按钮：PC 端专属 */
+.bom-pc-only{display:none!important}
+@media(min-width:769px){.bom-pc-only{display:block!important}}
+
+/* 移动端卡片 */
+.bom-card-header{display:flex;align-items:center;gap:8px}
+.bom-card-header .bom-st{margin-left:auto}
+.bom-card-code{font-family:var(--font-mono);font-size:var(--fs-base);color:var(--text);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bom-card-code a{color:var(--accent);text-decoration:none}
+.bom-card-body{display:flex;flex-direction:column;gap:4px;padding:8px 0;border-top:1px solid var(--border);font-size:var(--fs-base)}
+.bom-card-row{display:flex;align-items:baseline;gap:6px}
+.bom-card-label{flex:none;min-width:34px;font-size:var(--fs-sm);color:var(--text3)}
+/* 同一行里的第二个字段标签（品牌 / 分类）—— 与首字段拉开距离 */
+.bom-card-label.is-spaced{margin-left:16px;}
+/* 行内删除表单：与相邻按钮同行。 */
+.bom-row-acts .bom-inline-form{flex:none;}
+.bom-card-footer{
+    display:flex;align-items:center;gap:4px;flex-wrap:wrap;
+    padding-top:8px;border-top:1px solid var(--border);
+}
+
+/* 摘要区：当前编辑草稿 + 正在查看（查看只读时双行） */
+.bom-ver-summary{display:flex;flex-direction:column;gap:4px;padding:12px 14px;margin-bottom:14px;border:1px solid var(--border);border-radius:10px;background:var(--surface2)}
+.bom-ver-sum-line{display:flex;align-items:center;gap:8px;flex-wrap:wrap;font-size:var(--fs-md);color:var(--text)}
+.bom-ver-sum-line.is-readonly{font-size:var(--fs-sm);color:var(--text3)}
+/* 摘要行首标签（当前编辑 / 正在查看） */
+.bom-ver-sum-k{flex:none;font-size:var(--fs-sm);color:var(--text3)}
+/* 功能说明（四步主线）：常显，每条本身即入口（点击展开对应内联表单） */
+.bom-ver-guide{display:flex;flex-direction:column;gap:2px;padding:8px;margin-bottom:14px;border:1px solid var(--border);border-radius:10px;background:var(--surface2)}
+.bom-ver-guide-item{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:7px;cursor:pointer;transition:background var(--transition-base)}
+.bom-ver-guide-item:hover{background:var(--surface3)}
+.bom-ver-step{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent-dim);color:var(--accent);font-size:var(--fs-sm);font-weight:var(--fw-semibold);display:flex;align-items:center;justify-content:center}
+.bom-ver-guide-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.bom-ver-guide-txt strong{font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--text)}
+.bom-ver-guide-txt span{font-size:var(--fs-sm);color:var(--text3);overflow-wrap:anywhere}
+.bom-ver-go{flex:none;color:var(--text3);font-size:var(--fs-lg);line-height:1}
+.bom-ver-drawer .drawer-header h3{font-size:var(--fs-xl);font-weight:var(--fw-semibold)}
+.bom-ver-action{display:none;margin-bottom:14px;padding:14px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;background:var(--surface2)}
+.bom-ver-action.is-on{display:block}
+.bom-ver-form-t{display:block;margin-bottom:11px;font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--text)}
+.bom-ver-form-btns{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+#bomVerAction .bom-diff-result{max-height:none}
+/* 版本时间线 */
+.bom-ver-timeline{display:flex;flex-direction:column;gap:8px}
+.bom-ver-row{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface)}
+.bom-ver-row.is-viewing{border-color:var(--accent);background:var(--accent-dim)}
+.bom-ver-row.is-draft{border-left:3px solid var(--accent)}
+.bom-ver-row-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.bom-ver-row-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+.bom-ver-no{font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--text)}
+.bom-ver-badge{flex:none;padding:2px 9px;border-radius:10px;font-size:var(--fs-sm);line-height:1.5}
+.bom-ver-badge.is-draft{background:var(--accent-dim);color:var(--accent)}
+.bom-ver-badge.is-released{background:var(--green-dim);color:var(--green)}
+.bom-ver-badge.is-archived{background:var(--surface3);color:var(--text3)}
+/* 描述：最多两行、超出省略，不铺满整行也不与操作按钮抢宽 */
+.bom-ver-desc{font-size:var(--fs-sm);color:var(--text2);overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+/* 发布时间：靠右挂在版本号那一行的末尾 */
+.bom-ver-time{flex:none;margin-left:auto;font-size:var(--fs-xs);color:var(--text3)}
+.bom-ver-row-acts{display:flex;gap:5px;flex:none;flex-wrap:wrap;justify-content:flex-end}
+@media(min-width:769px){.drawer.bom-ver-drawer{width:min(640px,100vw)}}
+@media(max-width:768px){
+  .bom-ver-row{flex-direction:column;align-items:stretch;gap:9px}
+  .bom-ver-row-acts{justify-content:flex-start}
+}
+
+/* 版本差异表 */
+.bom-diff-group{border:1px solid var(--border);border-radius:8px;background:var(--surface2)}
+.bom-diff-summary{cursor:pointer;font-weight:600;}
+/* 组标题行下方留白（原 table 的 `margin-top:6px`） */
+.bom-diff-table{margin-top:6px;}
+.data-table.bom-diff-tb{font-size:var(--fs-sm);}
+/* 折叠组之间的间距 */
+.bom-diff-group.is-spaced{margin-bottom:6px;}
+/* 差异表上方一行「A → B」摘要 */
+.bom-diff-summary-bar{margin-bottom:10px;font-size:var(--fs-sm);color:var(--text2);}
+.bom-diff-none{padding:20px;text-align:center;color:var(--text3);}
+.bom-diff-table td,#diffResult .data-table td{padding:7px 10px}
+.bom-diff-add td{background:rgba(34,197,94,.06)}
+.bom-diff-del td{background:rgba(239,68,68,.06)}
+.bom-diff-chg td{background:rgba(245,158,11,.07)}
+
+
+/* 项目说明行（描述为空时隐藏） */
+.bom-hero-sub.is-empty{display:none !important;}
+
+/* 「启用版本管理」的复选标签 */
+.form-group label.bom-ver-toggle{gap:8px;cursor:pointer;}
+
+/* 项目扩项字段区（平台 / 类型 / 状态 / 优先级） */
+.bom-extra-fields{display:none;border-top:1px dashed var(--border);padding-top:12px;margin-top:4px;}
+.bom-extra-fields.is-on{display:block;}
+
+/* 弹窗内的必填星号 */
+.bom-req-star{color:var(--red);}
+
+/* 编辑弹窗「物料参数」分区（该行无 part 数据时整段隐藏） */
+.bom-edit-sec-tog{display:none;}
+.bom-edit-sec-tog.is-on{display:block;}
+
+/* 状态分段控件的语义色（替代原行内 `--seg-c`） */
+.bom-seg-i[data-status="ok"]{--seg-c:var(--green);}
+.bom-seg-i[data-status="insufficient"]{--seg-c:var(--yellow);}
+/* 未绑定：紫色，与「库存不足」黄 / 「未匹配」红（已收敛，见视图注释）区分 */
+.bom-seg-i[data-status="unbound"]{--seg-c:var(--purple);}
+.bom-seg-tip{margin-left:2px;font-size:10px;color:var(--text3);cursor:help;font-style:normal}
+
+.bom-more-menu.is-on{display:block;}
+
+/* 结果列表滚动框（添加物料 / 替代料两处共用，仅限高不同） */
+.bom-result-box{max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:7px;background:var(--surface);}
+.bom-result-box.is-tall{max-height:380px;}
+.bom-result-list{padding:6px;}
+
+/* 列表内的「加载中」与「加载更多」 */
+.bom-result-loading{display:none;text-align:center;padding:14px;color:var(--text3);font-size:12px;}
+.bom-result-loading.is-on{display:block;}
+.bom-result-more{display:none;text-align:center;padding:10px;color:var(--accent);font-size:12px;cursor:pointer;}
+.bom-result-more.is-on{display:block;}
+
+/* 分页行（页码信息 + 跳转框） */
+.bom-pager{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:12px;color:var(--text3);}
+.page-jump input.bom-page-input{width:54px;}
+
+/* 已选物料提示条 */
+.bom-sel-box{display:none;background:var(--green-dim);border:1px solid rgba(34,197,94,.3);border-radius:7px;padding:10px 13px;margin-top:12px;font-size:13px;}
+.bom-sel-box.is-on{display:block;}
+.bom-sel-box-title{color:var(--green);font-weight:600;margin-bottom:4px;}
+.bom-sel-box-info{color:var(--text2);}
+
+/* 导入弹窗：文件名条 / 进度区 / 进度条 */
+.bom-imp-file{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:9px 13px;margin-bottom:12px;font-size:13px;}
+.bom-imp-file.is-on{display:block;}
+.bom-imp-prog{display:none;margin-bottom:12px;}
+.bom-imp-prog.is-on{display:block;}
+/* 进度条上方的「状态 + 百分比」行 */
+.bom-imp-prog-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;font-size:12px;color:var(--text2);}
+/* 进度条轨道 */
+.bom-imp-track{height:8px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);overflow:hidden;}
+.bom-imp-bar{width:0%;height:100%;background:linear-gradient(90deg,var(--accent),var(--green));transition:width .3s ease;}
+.bom-imp-done{display:none;}
+.bom-imp-done.is-on{display:inline-flex;}
+
+/* 替代料弹窗：当前物料信息条 */
+.bom-alt-cur{background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:10px 13px;font-size:13px;}
+.bom-alt-cur-info{color:var(--text2);}
+.bom-alt-hint{margin-top:8px;font-size:12px;color:var(--text3);min-height:18px;}
+
+/* 发布版本弹窗的版本说明行 */
+.bom-rel-label{font-size:13px;color:var(--text2);margin-bottom:12px;}
+
+/* 版本对比弹窗：顶部两个版本选择器 + 结果区 */
+.bom-diff-bar{display:flex;gap:10px;align-items:flex-end;}
+.bom-diff-result{margin-top:14px;max-height:420px;overflow:auto;}
+
+/* 「查看清单」链接（项目卡片） */
+.btn.bom-view-link{color:var(--accent);font-weight:600;}
+
+/* 项目卡片里的位号（小字等宽） */
+.mono.bom-ref-txt{font-size:11px;}
+
+/* 弹窗宽度（8 个弹窗各有定制宽度，组件库三档不够用） */
+.modal.bom-modal-narrow{max-width:460px;}
+.modal.bom-modal-mid{max-width:620px;}
+.modal.bom-modal-wide{max-width:680px;}
+.modal.bom-modal-xwide{max-width:760px;}
+
+@media(max-width:600px){
+  .modal.bom-modal-narrow,
+  .modal.bom-modal-mid,
+  .modal.bom-modal-wide,
+  .modal.bom-modal-xwide{max-width:100%;}
+}

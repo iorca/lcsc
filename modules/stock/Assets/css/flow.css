@@ -1,0 +1,201 @@
+/* 流水中心 — 统一导航 + 内容区无感刷新（模块级样式，仅流水中心加载） */
+
+/* 今日概览统计卡（固定区，不参与局部刷新） */
+.sc-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.sc-stat{
+    display:block;text-decoration:none;color:inherit;
+    background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    padding:13px 16px;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent;
+    transition:border-color .15s ease,background .15s ease,transform .15s ease;
+}
+.sc-stat:hover{border-color:var(--border2);}
+.sc-stat:active{transform:scale(.98);}
+.sc-stat .stat-label{font-size:11px;color:var(--text2);letter-spacing:.3px;margin-bottom:5px;}
+.sc-stat .stat-value{font-family:var(--font-mono);font-size:22px;font-weight:600;line-height:1;}
+.sc-stat.c-green .stat-value{color:var(--green);}
+.sc-stat.c-red .stat-value{color:var(--red);}
+.sc-stat.c-blue .stat-value{color:var(--accent);}
+.sc-stat.c-yellow .stat-value{color:var(--yellow);}
+.sc-stat.filter-active{border-color:var(--accent);background:var(--accent-dim);}
+.sc-stat.filter-active.c-green{border-color:var(--green);background:var(--green-dim);}
+.sc-stat.filter-active.c-red{border-color:var(--red);background:var(--red-dim);}
+.sc-stat.filter-active.c-blue{border-color:var(--accent);background:var(--accent-dim);}
+.sc-stat.filter-active.c-yellow{border-color:var(--yellow);background:var(--yellow-dim);}
+
+/* 统一导航（吸顶固定：一级视图 + 业务流水二级筛选，均不参与局部刷新） */
+.flow-nav{
+    position:sticky;top:0;z-index:7;
+    margin:0 -22px 14px;padding:6px 22px 0;
+    background:var(--surface);border-bottom:1px solid var(--border);
+}
+.flow-tabs1{display:flex;gap:20px;align-items:center;border-bottom:1px solid var(--border);}
+.flow-tab1{
+    padding:7px 1px 10px;margin-bottom:-1px;
+    font-size:14px;font-weight:500;color:var(--text2);text-decoration:none;
+    border-bottom:2px solid transparent;transition:color .15s ease,border-color .15s ease;
+}
+.flow-tab1:hover{color:var(--accent);}
+.flow-tab1.active{color:var(--accent);font-weight:600;border-bottom-color:var(--accent);}
+.flow-tabs2{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 0 11px;}
+.flow-tabs2.is-hidden{display:none;}
+.flow-tab2{
+    font-size:12px;color:var(--text2);text-decoration:none;white-space:nowrap;
+    padding:4px 13px;border-radius:20px;border:1px solid transparent;background:var(--surface2);
+    transition:color .15s ease,border-color .15s ease,background .15s ease;
+}
+.flow-tab2:hover{color:var(--accent);border-color:var(--accent);}
+.flow-tab2.active{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+.flow-view-desc{
+    margin:0;padding:0 0 9px;
+    font-size:12px;line-height:1.6;color:var(--text2);
+}
+.flow-tabs2:not(.is-hidden) + .flow-view-desc{margin-top:-4px;}
+html:has(#flowNav) body{overflow-x:clip;}
+
+/* 内容区（局部刷新的唯一变化区域） */
+.flow-region{position:relative;min-height:120px;}
+.flow-region.is-loading{opacity:.55;pointer-events:none;transition:opacity .12s ease;}
+.flow-region.is-loading::after{
+    content:'';position:absolute;left:0;right:0;top:0;height:2px;
+    background:var(--accent);opacity:.75;border-radius:2px;
+}
+
+/* 筛选工具条 */
+.flow-toolbar{
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;
+    margin-bottom:14px;padding:10px 12px;
+    border:1px solid var(--border);border-radius:10px;background:var(--surface2);
+}
+.flow-toolbar input,
+.flow-toolbar select{
+    height:32px;padding:0 10px;font-size:13px;
+    background:var(--surface);color:var(--text);
+    border:1px solid var(--border);border-radius:6px;
+}
+.flow-toolbar input:focus,
+.flow-toolbar select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+.flow-toolbar input[type=number]{width:104px;}
+.flow-toolbar .flow-grow{flex:0 1 190px;min-width:140px;}
+.flow-toolbar .flow-spacer{flex:1;}
+.flow-toolbar .flow-hint{font-size:12px;color:var(--text3);}
+
+/* 数据表格 */
+.flow-table{width:100%;border-collapse:collapse;font-size:13px;}
+.flow-table th{
+    padding:9px 10px;text-align:left;white-space:nowrap;
+    font-size:12px;font-weight:600;color:var(--text2);
+    background:var(--surface2);border-bottom:1px solid var(--border);
+}
+.flow-table td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.flow-table tbody tr:hover{background:var(--surface2);}
+.flow-table th.num,.flow-table td.num{text-align:right;}
+.flow-time{font-family:var(--font-mono);font-size:11px;color:var(--text2);white-space:nowrap;}
+.flow-part{font-family:var(--font-mono);font-size:12px;color:var(--accent);text-decoration:none;}
+.flow-part:hover{text-decoration:underline;}
+.flow-mono{font-family:var(--font-mono);font-size:12px;}
+.flow-chg-in{font-family:var(--font-mono);font-weight:600;color:var(--green);}
+.flow-chg-out{font-family:var(--font-mono);font-weight:600;color:var(--red);}
+.flow-remark{font-size:12px;color:var(--text2);word-break:break-word;max-width:320px;}
+.flow-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;white-space:nowrap;background:var(--surface3);border:1px solid var(--border);}
+
+/* 撤销流水「复核」列： */
+.flow-review-col{width:92px;white-space:nowrap;}
+.flow-reviewed{font-size:12px;color:var(--text3);}
+
+/* 视图层行内 style 外置 */
+
+/* 类型标签的语义色。后端 `TYPE_LABELS` 给的是十六进制字面值 */
+.flow-tag-lg{padding:2px 8px;border-radius:4px;font-size:11px;}
+.flow-tag-lg.is-blue{background:color-mix(in srgb, var(--accent) 13%, transparent);color:var(--accent);}
+.flow-tag-lg.is-green{background:color-mix(in srgb, var(--green) 13%, transparent);color:var(--green);}
+.flow-tag-lg.is-red{background:color-mix(in srgb, var(--red) 13%, transparent);color:var(--red);}
+.flow-tag-lg.is-amber{background:color-mix(in srgb, var(--yellow) 13%, transparent);color:var(--yellow);}
+.flow-tag-lg.is-purple{background:color-mix(in srgb, var(--purple) 13%, transparent);color:var(--purple);}
+.flow-tag.is-blue{color:var(--accent);}
+.flow-tag.is-green{color:var(--green);}
+.flow-tag.is-red{color:var(--red);}
+.flow-tag.is-amber{color:var(--yellow);}
+.flow-tag.is-purple{color:var(--purple);}
+.flow-tag.is-muted{color:#7a86a8;}
+.flow-tag.is-dim{color:var(--text2);}
+
+.flow-star{color:var(--yellow);font-size:10px;margin-left:3px;}
+.flow-row-smp{opacity:.72;}
+.flow-sum{color:var(--green);}
+
+.search-box.flow-search{flex:0 1 240px;min-width:170px;}
+/* 搜索框内的 `<form>`：相对定位是 `.clear-btn` 的定位基准 */
+.flow-search-form{display:flex;position:relative;flex:1;}
+.flow-toolbar input.flow-search-input{border-radius:7px;padding-left:30px;padding-right:28px;font-size:12px;}
+.clear-btn.flow-clear{right:6px;width:16px;height:16px;}
+
+/* 勾选列（表头与表体共用一个 30px 窄列） */
+.flow-th-check{width:30px;}
+.flow-td-check{text-align:center;}
+
+/* 普通文本列（型号 / 操作人 / 采购平台等，12px） */
+.flow-td-text{font-size:12px;}
+.flow-td-remark{color:var(--text2);font-size:12px;word-break:break-word;white-space:normal;max-width:300px;}
+.flow-td-chg{text-align:right;font-family:var(--font-mono);}
+.flow-td-chg.is-in{color:var(--green);}
+.flow-td-chg.is-out{color:var(--red);}
+.flow-td-time{font-family:var(--font-mono);font-size:11px;color:var(--text2);}
+.flow-table th.flow-th-r{text-align:right;}
+.flow-toolbar .flow-export{margin-left:auto;}
+
+/* 页头标题组（`<h2>` + `.page-desc` 包在一个可伸缩容器里）。 */
+.flow-head{flex:1;min-width:0;}
+
+/* 订单信息视图：可点订单号 / 列设置 / 详情弹窗 */
+.flow-empty{color:var(--text3);}
+.order-no-link{cursor:pointer;}
+.order-no-link:focus{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px;}
+
+.order-cols-hint{margin:0 0 12px;font-size:12px;color:var(--text2);line-height:1.6;}
+.order-cols-list{
+    display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:6px;max-height:46vh;overflow-y:auto;padding:2px;
+}
+.order-cols-item{
+    display:flex;align-items:center;gap:6px;padding:6px 8px;
+    border:1px solid var(--border);border-radius:6px;
+    font-size:13px;cursor:pointer;user-select:none;
+}
+.order-cols-item:hover{background:var(--surface2);}
+.order-cols-item input[type=checkbox]{cursor:pointer;flex:0 0 auto;}
+.order-cols-item input[type=checkbox]:disabled{cursor:not-allowed;}
+.order-cols-item span{flex:1 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.order-cols-lock{font-size:11px;color:var(--text3);flex:0 0 auto;}
+.order-cols-actions{display:flex;gap:8px;margin-top:12px;}
+
+.order-detail-body{max-height:64vh;overflow-y:auto;}
+.order-detail-loading{padding:24px;text-align:center;color:var(--text2);font-size:13px;}
+.order-detail-group{margin-bottom:16px;}
+.order-detail-group:last-child{margin-bottom:0;}
+.order-detail-group-title{
+    font-size:12px;font-weight:600;color:var(--text2);
+    padding-bottom:6px;margin-bottom:8px;border-bottom:1px solid var(--border);
+}
+.order-detail-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px 16px;}
+.order-detail-item{display:flex;gap:8px;align-items:baseline;font-size:13px;min-width:0;}
+.order-detail-label{color:var(--text2);flex:0 0 88px;font-size:12px;}
+.order-detail-value{
+    flex:1 1 auto;min-width:0;word-break:break-word;
+    font-family:var(--font-mono);font-size:12px;
+}
+.order-detail-foot{
+    margin-top:14px;padding-top:10px;border-top:1px solid var(--border);
+    font-size:11px;color:var(--text3);text-align:right;
+}
+
+/* 窄屏：导航条横向滚动，不换行挤压 */
+@media(max-width:768px){
+    .sc-stats{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .sc-stat{padding:12px 14px;}
+    .sc-stat .stat-value{font-size:20px;}
+    .flow-tabs1,.flow-tabs2{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+    .flow-tabs2{padding-bottom:9px;}
+    .flow-nav{margin:0 -14px 12px;padding:6px 14px 0;}
+    .flow-toolbar input,.flow-toolbar select{height:30px;}
+    .flow-remark{max-width:200px;}
+}

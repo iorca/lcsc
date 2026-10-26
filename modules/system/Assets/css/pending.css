@@ -1,0 +1,26 @@
+/* pending.css — 待处理工作台（异常物料统一管理） */
+
+.stat-grid.pd-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+    gap:12px;margin-bottom:20px;
+}
+.stat-card.pd-card{cursor:pointer;padding:14px;border-radius:8px;}
+/* 卡面大数字。原行内用的是未定义 token +硬编码兜底 `#1a1a1a` */
+.pd-card-num{font-size:24px;font-weight:700;color:var(--text);}
+.pd-card-label{font-size:13px;color:var(--text2);margin-top:4px;}
+
+/* 操作栏（扫描 / 批量修正 / 批量忽略 / 类型筛选 / 结果提示） */
+.pd-actions{display:flex;gap:8px;margin-bottom:16px;align-items:center;flex-wrap:wrap;}
+.pd-select{padding:6px 10px;border:1px solid var(--border);border-radius:6px;}
+.pd-scan-result{color:var(--text2);font-size:13px;}
+
+.table-wrapper{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--card-radius);overflow-x:auto;
+    -webkit-overflow-scrolling:touch;position:relative;box-shadow:var(--shadow-sm);
+}
+/* 勾选列（表头窄列） */
+.pd-th-check{width:36px;}
+.data-table td.pd-td-empty{text-align:center;padding:40px;color:var(--text3);}
+/* 分页容器 */
+#pending-pagination.pd-pager{margin-top:12px;}

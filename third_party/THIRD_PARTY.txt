@@ -1,0 +1,37 @@
+third_party/ — 前端第三方库的本地副本
+
+用途：随发布包分发，使离线 / 内网部署不再依赖 CDN（图表 / 扫码 / 标签二维码）。
+说明：库名·版本·用途·许可·开源地址的**唯一清单在根 README.md §「第三方组件」**，此处不抄（R-DOC-006）。
+      本文件只记「本地文件 ← 上游 URL」与取件校验值；取件一律取**上游原件**（非 jsDelivr 的 .min 派生件）。
+
+本地文件                  字节数    上游 URL
+js/chart.umd.js           204948    https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js
+js/html5-qrcode.min.js    375364    https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js
+js/qrcode.js               56694    https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.js
+LICENSES.txt               11361    https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/LICENSE
+
+SHA-256 校验值
+321e3a3fa98da4aaa957d10be57cbb514de0989eed8f9d726b5d05902cd01904  js/chart.umd.js
+660b12437b1d747e3e68b8be0685c08cb728140110ad213f167b14b66f8b1d8e  js/html5-qrcode.min.js
+79ec86f82856005b1c887905cfccfcfbec3821ca61c7fd5a952faa5f778f791c  js/qrcode.js
+306bc450da41244fefb92fec6fba30f27afb9d9b0eaa72b96372c23e2338c612  LICENSES.txt
+
+许可
+- js/chart.umd.js       Chart.js 4.4.0 — MIT，版权声明已含于文件头部（/*! … Released under the MIT License */）
+- js/qrcode.js          qrcode-generator 2.0.4 — MIT，版权声明已含于文件头部（Copyright (c) 2009 Kazuhiko Arase）
+- js/html5-qrcode.min.js html5-qrcode 2.3.8 — Apache-2.0，文件本体无许可头，故随附 LICENSES.txt（Apache-2.0 全文）
+- 三者均**禁止改名 / 压缩 / 裁剪注释**（保留原作者署名与协议声明）。
+
+取件说明
+- 日期：2026-10-16
+- 方式：curl.exe -sL --http1.1 -o <本地> <上游URL>
+        （PowerShell 5 的 `curl` 是 Invoke-WebRequest 的别名，字节语义不同；写文件必须用 curl.exe）
+- 为何取上游原件：jsDelivr 的 dist/chart.umd.min.js 只是 dist/chart.umd.js 的别名（丢许可头）；
+        dist/qrcode.min.js 是 jsDelivr 用 Terser 的派生件，尾部带 `//# sourceMappingURL=/sm/<hash>.map`
+        绝对路径引用（本地化后必 404）。取上游原件既可保留许可头，又消除该 404。
+- chart.umd.js 尾部仍有 `//# sourceMappingURL=chart.umd.js.map` → 本地浏览器 F12 会看到该 .map 404，
+        属**预期**，禁止塞空 / 假的 .map 文件充数（理由见 docs/pitfalls.md）。
+
+升级口径
+- 换版本 = 重新取件 + 更新上表（URL / 字节数 / SHA-256） + 更新根 README §第三方组件 + 记 CHANGELOG。
+- 各处引用带 `?v=APP_VERSION.filemtime(...)`（R-FE-006），文件改动后 mtime 变化即自动失效缓存。

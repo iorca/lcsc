@@ -1,0 +1,33 @@
+# 开发期 / 文档 / 站点子项目 / 版本快照
+.git
+.trae
+dev
+docs
+LSCS
+Version
+node_modules
+vendor
+
+# 本地凭据与安装状态
+config.db.php
+.installed
+.secret_key
+.install_migrate_from
+.env
+
+# 运行时数据（镜像内只保留保护文件）
+backups/*
+!backups/.gitkeep
+uploads/*
+!uploads/.htaccess
+updates/*
+!updates/.htaccess
+
+# 打包产物、开发工具与调试残留
+*.zip
+*.md
+healthcheck.php
+cookies_verify.txt
+
+# Dockerfile 需要显式 COPY docker/ 下的配置与入口脚本，故不排除该目录
+.dockerignore

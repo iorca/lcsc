@@ -1,0 +1,292 @@
+/* 导入中心 — 模块级样式（仅导入页加载） */
+
+/* 通用：模块内徽标补齐（badge-gray 全站缺失，仅本模块使用） */
+.badge-gray{background:var(--surface3);color:var(--text2);border:1px solid var(--border2);}
+
+/* 1. 步骤条（已完成可点击回退 / 当前高亮 / 未来禁用） */
+.import-steps{display:flex;gap:8px;margin:0 0 18px;flex-wrap:wrap;}
+.import-step{
+    flex:1 1 0;min-width:0;display:flex;align-items:center;gap:9px;
+    padding:10px 14px;border:1px solid var(--border);border-radius:10px;
+    background:var(--surface2);color:var(--text3);font-size:13px;
+    cursor:not-allowed;user-select:none;transition:border-color .15s,background .15s,color .15s;
+}
+.import-step .step-no{
+    flex:none;width:22px;height:22px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:var(--surface3);color:var(--text3);font-size:12px;font-weight:600;
+}
+.import-step .step-label{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* 已完成：可点击回退 */
+.import-step.done{cursor:pointer;color:var(--text2);background:var(--surface);border-color:var(--border2);}
+.import-step.done .step-no{background:var(--green-dim);color:var(--green);}
+.import-step.done:hover{border-color:var(--accent);color:var(--accent);}
+/* 当前：高亮 */
+.import-step.active{cursor:default;border-color:var(--accent);background:var(--accent-dim);color:var(--accent);font-weight:600;}
+.import-step.active .step-no{background:var(--accent);color:#fff;}
+/* 处理中：禁止回退点击 */
+.import-steps.locked .import-step.done{cursor:not-allowed;}
+
+/* 2. 卡片（导入类型 / 平台） */
+.plat-cards{display:flex;flex-wrap:wrap;gap:10px;}
+.plat-card{
+    position:relative;display:flex;flex-direction:column;gap:7px;min-width:158px;
+    padding:12px 14px;border:1px solid var(--border);border-radius:10px;
+    background:var(--surface);cursor:pointer;margin:0;
+    transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.plat-card:hover{border-color:var(--accent);}
+.plat-card input[type=radio]{position:absolute;opacity:0;width:0;height:0;pointer-events:none;}
+.plat-card-name{font-size:14px;font-weight:600;color:var(--text);}
+.plat-card-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.plat-card.selected{border-color:var(--accent);background:var(--accent-dim);box-shadow:inset 0 0 0 1px var(--accent);}
+.plat-card.selected .plat-card-name{color:var(--accent);}
+.plat-card-add{align-items:center;justify-content:center;border-style:dashed;text-decoration:none;color:var(--text2);}
+.plat-card-add:hover{color:var(--accent);}
+
+/* 3. 拖拽上传区 */
+.drop-zone{
+    border:2px dashed var(--border2);border-radius:12px;padding:30px 20px;
+    text-align:center;background:var(--surface2);cursor:pointer;
+    transition:border-color .15s,background .15s;
+}
+.drop-zone:hover,.drop-zone.dragging{border-color:var(--accent);background:var(--accent-dim);}
+.drop-zone-icon{font-size:30px;line-height:1;margin-bottom:9px;opacity:.85;}
+.drop-zone-text{font-size:14px;color:var(--text);margin-bottom:5px;}
+.drop-zone-hint{font-size:12px;color:var(--text3);}
+
+/* 4. 提示条（必填 / 未识别警示） */
+.imp-bar{
+    display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+    padding:9px 12px;border-radius:8px;font-size:12.5px;line-height:1.6;margin-bottom:10px;
+}
+.imp-bar-req{background:var(--surface2);border:1px solid var(--border);color:var(--text2);}
+.imp-bar-warn{background:var(--yellow-dim);border:1px solid var(--yellow);color:var(--yellow);}
+.imp-bar-warn strong{color:var(--yellow);}
+.imp-bar .imp-bar-actions{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;}
+
+/* 5. 映射确认 */
+.imp-map-toolbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.imp-map-table{min-width:660px;table-layout:fixed;}
+.imp-map-table th{white-space:nowrap;}
+.imp-map-table td{vertical-align:middle;}
+.imp-col-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500;}
+.imp-col-name.is-empty{color:var(--text3);font-weight:400;}
+.imp-sample{
+    font-family:var(--font-mono);font-size:11.5px;color:var(--text2);
+    max-width:230px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.imp-rule{font-size:11px;color:var(--text3);}
+.imp-rule .imp-conf{display:inline-block;margin-left:6px;font-family:var(--font-mono);color:var(--text2);}
+.imp-col-sel{
+    width:100%;padding:5px 8px;font-size:12px;
+    background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;
+}
+.imp-col-sel:focus{outline:none;border-color:var(--accent);}
+.imp-map-table tr.row-unknown td:first-child{box-shadow:inset 3px 0 0 0 var(--yellow);}
+.imp-map-table tr.row-unknown .imp-col-name{color:var(--yellow);}
+.imp-map-table tr.row-ignored td{opacity:.62;}
+
+/* 必填提示条尾部的补充说明 */
+.imp-tip{color:var(--text3);}
+/* 列映射汇总行里的「待处理 N 列」黄字警示 */
+.imp-sum-warn{color:var(--yellow);}
+/* 数据预览小标题 */
+.imp-prev-title{font-size:11px;color:var(--text3);margin-bottom:4px;}
+/* 横向滚动容器（预览区，限高 180px） */
+.imp-scroll-box{overflow-x:auto;max-height:180px;border:1px solid var(--border);border-radius:8px;}
+/* 紧凑表：预览 11px，明细与自定义字段 12px。 */
+.data-table.imp-tb-xs{font-size:11px;}
+.data-table.imp-tb-sm{font-size:12px;}
+.imp-th-60{width:60px;}
+.imp-th-70{width:70px;}
+.imp-th-150{width:150px;}
+.imp-th-pct34{width:34%;}
+
+/* 6. 处理进度 */
+.imp-progress-wrap{padding:16px 16px 14px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);}
+.imp-progress-bar{height:10px;border-radius:999px;background:var(--surface3);overflow:hidden;}
+.imp-progress-inner{height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .25s ease;}
+.imp-progress-wrap.is-done{border-color:var(--green);}
+.imp-progress-wrap.is-done .imp-progress-inner{background:var(--green);}
+.imp-progress-text{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:9px;font-size:12.5px;color:var(--text2);}
+.imp-progress-wrap.is-done .imp-progress-text #progText{color:var(--green);font-weight:600;}
+.imp-counts{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;}
+.imp-count{font-size:12px;color:var(--text2);}
+.imp-count b{font-family:var(--font-mono);font-size:14px;margin-left:6px;color:var(--text);}
+.imp-count.c-ins b{color:var(--green);}
+.imp-count.c-upd b{color:var(--accent);}
+.imp-count.c-err b{color:var(--red);}
+
+/* 7. 处理详情弹窗 */
+.imp-detail-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;}
+.imp-detail-cell{
+    display:block;width:100%;padding:12px 10px;border:1px solid var(--border);border-radius:10px;
+    background:var(--surface2);text-align:center;font-family:inherit;cursor:pointer;
+    transition:border-color .15s,background .15s,box-shadow .15s;
+}
+.imp-detail-cell:hover{border-color:var(--accent);}
+.imp-detail-cell:focus-visible{outline:2px solid var(--accent);outline-offset:1px;}
+.imp-detail-cell.active{border-color:var(--accent);background:var(--accent-dim);box-shadow:inset 0 0 0 1px var(--accent);}
+.imp-detail-cell .k{font-size:12px;color:var(--text2);margin-bottom:6px;}
+.imp-detail-cell .v{font-family:var(--font-mono);font-size:20px;font-weight:600;line-height:1.2;}
+.imp-err-raw{max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* 四张卡片的计数配色：v-ins / v-upd / v-skip / v-err */
+.imp-detail-cell .v-ins{color:var(--green);}
+.imp-detail-cell .v-upd{color:var(--accent);}
+.imp-detail-cell .v-skip{color:var(--text2);}
+.imp-detail-cell .v-err{color:var(--red);}
+/* 详情头部：文件名 + 平台/类型/行数元信息 */
+.imp-detail-name{font-size:13px;font-weight:600;margin-bottom:4px;}
+.imp-detail-meta{font-size:12px;color:var(--text2);}
+/* 明细区小节标题（卡片下方 / 明细表上方共用） */
+.imp-rows-title{font-size:13px;font-weight:600;margin-bottom:6px;}
+/* 明细表滚动容器（纵向 + 横向，限高 260px） */
+.imp-scroll-box-tall{overflow:auto;max-height:260px;border:1px solid var(--border);border-radius:8px;}
+/* 占位与错误文案 */
+.imp-hint{font-size:12px;color:var(--text3);}
+.imp-hint-pad{padding:10px 0;}
+.imp-hint-spaced{padding:8px 0;}
+.imp-hint-error{font-size:12px;color:var(--red);}
+/* 「库存前 → 后」后面的增量数字 */
+.imp-qty-delta{color:var(--accent);}
+.imp-reason{color:var(--text2);}
+.imp-reason.is-err{color:var(--red);}
+.imp-pager{display:flex;align-items:center;justify-content:flex-end;gap:8px;margin-top:8px;font-size:12px;color:var(--text2);}
+.imp-pager .pg-info{font-family:var(--font-mono);}
+
+/* 7b. 自定义字段管理弹窗 */
+.imp-cf-add{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px;}
+.imp-cf-add input[type=text]{
+    flex:1 1 180px;min-width:0;padding:6px 9px;font-size:12px;font-family:inherit;
+    background:var(--surface2);color:var(--text);border:1px solid var(--border2);border-radius:6px;
+}
+.imp-cf-add input[type=text]:focus{outline:none;border-color:var(--accent);}
+.imp-cf-tip{font-size:11.5px;color:var(--text3);line-height:1.7;margin-bottom:10px;}
+.imp-cf-list{max-height:320px;overflow:auto;}
+
+/* 8. 最近导入空状态 */
+.empty-block .empty-action{
+    padding:7px 16px;border-radius:8px;border:1px solid var(--accent);
+    background:var(--accent-dim);color:var(--accent);font-size:13px;
+    text-decoration:none;cursor:pointer;font-family:inherit;
+}
+.empty-block .empty-action:hover{background:var(--accent);color:#fff;}
+
+/* Views/index.php 视图层行内 style */
+
+/* 页头 */
+.imp-page-head{display:block;}
+.page-header h2.imp-page-title{margin:0 0 6px;}
+.page-header .imp-page-desc{font-size:13px;}
+
+/* 区块标题的顶部间距（4 档：4 / 16 / 18 / 24 px） */
+.imp-sec-4{margin-top:4px;}
+.imp-sec-16{margin-top:16px;}
+.imp-sec-18{margin-top:18px;}
+.imp-sec-24{margin-top:24px;}
+/* 标题里的括号说明（小字 + 次要色 + 取消大写 transform）。 */
+.imp-sec-note{font-size:11px;color:var(--text3);font-weight:normal;text-transform:none;}
+
+/* 步骤容器（默认隐藏，由 JS 切换） */
+.imp-step{display:none;}
+/* 步骤区里的横向操作行（底部按钮条，3 处共用）。 */
+.imp-act-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px;}
+.imp-act-row.is-tight{gap:10px;}
+/* 操作行里的弹性占位（把右侧按钮推到行尾） */
+.imp-flex-spacer{flex:1;}
+/* 操作行里的复选标签 */
+.imp-check-label{display:flex;align-items:center;gap:6px;font-size:var(--fs-sm);color:var(--text2);cursor:pointer;}
+/* 工具栏里的普通标签（非复选行，无 cursor/手型） */
+.imp-plain-label{font-size:var(--fs-sm);color:var(--text2);}
+/* 行内主色调的复选框（尺寸自适应 + 主色） */
+.imp-cb-accent{accent-color:var(--accent);width:auto;}
+/* 平台卡列表的底部间距 */
+.imp-mode-cards{margin-bottom:18px;}
+/* 平台卡里「平台URL」那行小字（11px，非 `--fs-xs` 的 10px） */
+.imp-card-meta-sm{color:var(--text3);font-size:11px;}
+.imp-th-pct18{width:18%;}
+.imp-th-pct24{width:24%;}
+.imp-th-pct28{width:28%;}
+.imp-th-pct30{width:30%;}
+.data-table.imp-map-full{width:100%;}
+
+/* 上传区 */
+/* 隐藏的文件输入（点击拖拽区触发） */
+.imp-file-input{display:none;}
+/* 已选文件信息条（13px，非 `--fs-md` 的 14px） */
+.imp-file-info{display:none;margin-top:10px;padding:10px 12px;background:var(--surface2);border-radius:8px;font-size:13px;}
+/* 文件名旁的「移除」按钮 */
+.imp-file-clear{margin-left:8px;}
+
+/* 映射确认区 */
+/* 映射摘要行 */
+.imp-map-summary{font-size:var(--fs-sm);color:var(--text2);margin-bottom:10px;}
+.imp-scroll-tall{overflow-x:auto;max-height:360px;border:1px solid var(--border);border-radius:8px;}
+/* 默认分类输入框（固定 200px 宽） */
+.imp-cat-input{width:200px;font-size:var(--fs-sm);}
+/* 预览容器 */
+.imp-preview{margin-top:12px;}
+
+/* 进度区 */
+.imp-progress-init{width:0%;}
+.imp-percent{font-size:var(--fs-sm);color:var(--text2);}
+.imp-progress-actions{margin-top:12px;}
+/* 「查看处理详情」按钮（默认隐藏，出结果后显示）。 */
+.imp-btn-detail{display:none;}
+.imp-btn-detail.is-on{display:inline-flex;}
+/* 操作行里的说明小字 */
+.imp-hint-inline{font-size:var(--fs-sm);color:var(--text3);}
+
+/* 最近导入表格 */
+/* 文件名单元格（限宽 280px + 单行截断） */
+.imp-file-cell{max-width:280px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+/* 平台 / 状态列的固定宽度 */
+.imp-th-90{width:90px;}
+.imp-th-110{width:110px;}
+.imp-th-170{width:170px;}
+/* 数值列的语义色 */
+.imp-v-ins{color:var(--green);}
+.imp-v-upd{color:var(--accent);}
+.imp-v-skip{color:var(--text2);}
+.imp-v-err{color:var(--red);}
+.imp-v-idle{color:var(--text3);}
+/* 时间单元格（11px，非 `--fs-xs` 的 10px） */
+.imp-time-cell{font-size:11px;color:var(--text3);}
+
+/* 格式说明区 */
+/* 说明正文（12px + 行高 2，用 `<br>` 分行） */
+.imp-format-note{font-size:var(--fs-sm);color:var(--text2);line-height:2;}
+
+/* 处理详情弹窗 */
+.imp-detail-head{margin-bottom:12px;}
+.imp-detail-rows{margin-top:14px;}
+/* 弹窗底部两个按钮（默认隐藏，按批次状态显示）。 */
+.imp-detail-btn{display:none;}
+
+/* 错误详情页（Views/errors.php） */
+.imp-err-head{flex-direction:column;align-items:flex-start;margin-bottom:20px;}
+/* 行号（`.mono` 已含等宽字体，此处只给语义色） */
+.imp-err-row{color:var(--yellow);}
+.imp-err-reason{color:var(--red);font-size:var(--fs-sm);}
+.imp-errpage-raw{font-size:11px;color:var(--text2);font-family:var(--font-mono);max-width:300px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+
+/* 显隐状态（配合 JS 的 classList.toggle） */
+.imp-step.is-on{display:block;}
+.imp-file-info.is-on{display:block;}
+.imp-detail-btn.is-on{display:inline-flex;}
+.imp-bar-warn{display:none;}
+.imp-bar-warn.is-on{display:flex;}
+
+/* 9. 窄屏（≤900px）适配：步骤条折叠为进度点 */
+@media(max-width:900px){
+    .import-steps{gap:6px;}
+    .import-step{flex:0 0 auto;padding:7px 9px;justify-content:center;}
+    .import-step .step-label{display:none;}
+    .import-step.active{flex:0 0 auto;min-width:46px;}
+    .plat-card{flex:1 1 calc(50% - 5px);min-width:calc(50% - 5px);}
+    .imp-detail-stats{grid-template-columns:repeat(2,minmax(0,1fr));}
+    .imp-progress-wrap{padding:13px 12px;}
+    .imp-sample{max-width:150px;}
+    .imp-map-table{min-width:560px;}
+}

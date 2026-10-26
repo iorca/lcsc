@@ -1,0 +1,190 @@
+/* print.css — 标签打印页面样式（V1.2 专业化优化） */
+
+/* 打印基础重置 */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+    font-family:'Noto Sans SC','Microsoft YaHei',system-ui,-apple-system,sans-serif;
+    background:#f5f6f8;color:#1a1d29;font-size:12px;
+    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    line-height:1.4;
+}
+
+/* 顶部操作栏（仅屏幕显示） */
+.no-print{
+    position:sticky;top:0;z-index:10;
+    display:flex;align-items:center;flex-wrap:wrap;gap:8px;
+    text-align:left;padding:14px 20px;
+    background:#fff;border-bottom:1px solid #e5e7eb;
+    box-shadow:0 1px 3px rgba(0,0,0,.06);margin-bottom:16px;
+}
+.no-print button{
+    padding:8px 20px;font-size:13px;cursor:pointer;
+    border-radius:6px;border:1px solid #d1d5db;background:#fff;
+    font-weight:500;transition:all .15s ease;
+    font-family:inherit;
+}
+.no-print button.primary{
+    background:#2563eb;color:#fff;border-color:#2563eb;
+    box-shadow:0 1px 2px rgba(37,99,235,.2);
+}
+.no-print button.primary:hover{background:#1d4ed8;box-shadow:0 2px 6px rgba(37,99,235,.3);}
+.no-print button:hover{background:#f9fafb;border-color:#9ca3af;}
+.no-print .hint{
+    margin-left:auto;color:#6b7280;font-size:12px;
+    display:flex;align-items:center;gap:6px;
+}
+
+/* 标签容器 */
+.labels{
+    display:flex;flex-wrap:wrap;gap:10px;
+    padding:4px 16px 20px;justify-content:flex-start;
+}
+
+/* 标签卡片 */
+.label-card{
+    display:flex;flex-direction:column;
+    border:1.5px solid #1a1d29;border-radius:6px;
+    padding:10px 12px;width:300px;page-break-inside:avoid;
+    background:#fff;
+    box-shadow:0 1px 2px rgba(0,0,0,.04);
+    transition:box-shadow .15s ease;
+}
+.label-card:hover{box-shadow:0 2px 8px rgba(0,0,0,.08);}
+
+/* 标签头部 */
+.label-header{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    margin-bottom:8px;gap:8px;padding-bottom:6px;
+    border-bottom:1px solid #e5e7eb;
+}
+.label-model{
+    font-family:'JetBrains Mono','Consolas',monospace;
+    font-size:14px;font-weight:700;color:#1a1d29;
+    word-break:break-all;flex:1;line-height:1.3;
+}
+.label-usertype{
+    padding:2px 8px !important;border-radius:4px !important;
+    font-size:9px !important;font-weight:600 !important;
+    letter-spacing:.3px;text-transform:uppercase;
+    white-space:nowrap;
+}
+
+/* 标签中部（QR + 信息） */
+.label-mid{
+    display:flex;gap:10px;align-items:flex-start;
+    margin-bottom:6px;
+}
+.label-qr{
+    flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    padding:2px;background:#fff;border:1px solid #e5e7eb;border-radius:4px;
+}
+.label-qr img,.label-qr canvas,.label-qr svg{
+    width:110px;height:110px;display:block;
+}
+.label-qr-wrap{flex-shrink:0;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.label-qr-cap{font-size:8px;color:#9ca3af;letter-spacing:.5px;line-height:1;}
+.label-mid-info{
+    flex:1;display:flex;flex-direction:column;gap:3px;
+    font-size:10px;color:#374151;min-width:0;
+}
+/* 二维码下方的整宽补充区（封装/品牌/分类/名称）：两列排布利用 QR 下方空白。 */
+.label-under{
+    display:grid;grid-template-columns:1fr 1fr;gap:3px 10px;
+    margin-top:6px;padding-top:5px;border-top:1px dashed #e5e7eb;
+}
+.label-mid-info .row{
+    display:flex;gap:6px;align-items:baseline;
+    line-height:1.4;
+}
+.label-mid-info .row .k{
+    color:#9ca3af;flex-shrink:0;min-width:28px;
+    font-size:9px;text-transform:uppercase;letter-spacing:.3px;
+}
+.label-mid-info .row .v{
+    font-family:'JetBrains Mono','Consolas',monospace;
+    word-break:break-all;font-size:10px;color:#1a1d29;
+}
+.label-mid-info .part-no{
+    font-family:'JetBrains Mono','Consolas',monospace;
+    font-size:11px;font-weight:600;color:#1a1d29;
+    padding-bottom:3px;margin-bottom:2px;
+    border-bottom:1px dashed #e5e7eb;
+}
+
+/* 标签备注 */
+.label-remark{
+    font-size:10px;color:#4b5563;
+    border-top:1px dashed #e5e7eb;padding-top:4px;margin-top:4px;
+    word-break:break-all;
+}
+
+/* 标签底部 */
+.label-footer{
+    display:flex;justify-content:space-between;align-items:center;
+    margin-top:8px;font-size:10px;color:#6b7280;
+    border-top:1px solid #e5e7eb;padding-top:6px;
+}
+.label-location{
+    font-weight:600;color:#374151;
+    display:inline-flex;align-items:center;gap:2px;
+}
+.label-tag{
+    display:inline-block;padding:1px 6px;border-radius:3px;
+    background:#eef2ff;color:#3730a3;font-size:9px;
+    margin-left:4px;font-weight:500;letter-spacing:.2px;
+}
+
+/* 标签模板：网站设置 label_template 控制尺寸排版 */
+/* 迷你（小标签） */
+body.tpl-mini .label-card{width:210px;padding:7px 9px;}
+body.tpl-mini .label-model{font-size:11px;}
+body.tpl-mini .label-qr img,body.tpl-mini .label-qr canvas,body.tpl-mini .label-qr svg{width:76px;height:76px;}
+body.tpl-mini .label-mid-info{font-size:9px;gap:2px;}
+body.tpl-mini .label-mid-info .row .k{font-size:8px;min-width:24px;}
+body.tpl-mini .label-mid-info .row .v{font-size:9px;}
+body.tpl-mini .label-mid-info .part-no{font-size:10px;}
+body.tpl-mini .label-footer{font-size:8px;margin-top:5px;padding-top:4px;}
+body.tpl-mini .label-usertype{font-size:8px !important;}
+/* 大标签 */
+body.tpl-large .label-card{width:400px;padding:14px 16px;}
+body.tpl-large .label-model{font-size:17px;}
+body.tpl-large .label-qr img,body.tpl-large .label-qr canvas,body.tpl-large .label-qr svg{width:140px;height:140px;}
+body.tpl-large .label-mid-info{font-size:12px;gap:5px;}
+body.tpl-large .label-mid-info .row .k{font-size:10px;min-width:32px;}
+body.tpl-large .label-mid-info .row .v{font-size:12px;}
+body.tpl-large .label-mid-info .part-no{font-size:13px;}
+body.tpl-large .label-footer{font-size:11px;}
+@media print{
+    body.tpl-mini .label-card{width:26%;}
+    body.tpl-large .label-card{width:46%;}
+}
+
+/* 二维码生成失败的占位文案（print.js 的 catch 分支）。 */
+.label-qr-fail{
+    font-size:9px;color:#999;text-align:center;padding:20px 4px;
+}
+
+/* 打印时优化 */
+@media print{
+    .no-print{display:none !important;}
+    body{background:none;font-size:11px;}
+    .labels{padding:0;gap:0;}
+    .label-card{
+        border:1.2px solid #000;border-radius:3px;
+        margin:3px;box-shadow:none;
+    }
+    .label-card:hover{box-shadow:none;}
+    .label-qr{border:1px solid #ccc;}
+    @page{margin:8mm;size:auto;}
+}
+
+/* 多列打印布局 */
+@media print and (min-width:1200px){
+    .label-card{width:32%;}
+}
+@media print and (min-width:1500px){
+    .label-card{width:23%;}
+}
+@media print and (min-width:1900px){
+    .label-card{width:18%;}
+}

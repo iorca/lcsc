@@ -1,0 +1,11 @@
+# 禁止 uploads 目录中的 PHP 执行（Apache 2.4 通用写法）
+# 说明：不使用 php_flag / php_admin_flag（仅 mod_php 有效，PHP-FPM 环境下会导致 500），
+#      改用核心 Require 指令在 PHP-FPM 与 mod_php 下都生效。
+<FilesMatch "\.(php|php3|php4|php5|php7|phtml|pht|phar|inc)$">
+    Require all denied
+</FilesMatch>
+
+# 兜底：若允许 AllowOverride FileInfo，则把 PHP 当纯文本返回；否则由上面的 deny 保证安全
+<IfModule mod_mime.c>
+    AddType text/plain .php .php3 .php4 .php5 .php7 .phtml .pht
+</IfModule>

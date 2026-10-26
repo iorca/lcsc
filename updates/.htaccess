@@ -1,0 +1,12 @@
+# updates/ —— 在线升级工作区（P2）：下载的安装包 / staging / 旧版本源文件回滚副本 / 维护锁
+#
+# **整目录拒绝 web 访问**：回滚副本里是**旧版本的全部源文件**，被下载走等于源码泄露。
+# 说明：不使用 <Directory>（在 .htaccess 中非法）与 php_flag（仅 mod_php 有效、PHP-FPM 下 500）。
+#      与 uploads/.htaccess 同一写法，用核心 Require 指令，两种 SAPI 都生效。
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+</IfModule>

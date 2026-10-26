@@ -1,0 +1,8 @@
+# Docker 构建 / 容器内执行的文本文件必须使用 LF，
+# 避免 Windows 检出为 CRLF 后出现 `/bin/sh^M`、Dockerfile 续行异常。
+docker/* text eol=lf
+docker-compose.yml text eol=lf
+.env.example text eol=lf
+.dockerignore text eol=lf
+deploy/nginx.conf text eol=lf
+.htaccess text eol=lf

@@ -1,0 +1,391 @@
+/* 扫码页CSS — 三层架构：基础共享 + PC断点 + 移动端断点 */
+
+/* 1, 基础层：两端共享属性（颜色、边框、圆角、布局） */
+.device-status-bar{display:flex;gap:8px;flex-wrap:wrap;font-size:12px;min-width:0;}
+.device-status{display:flex;align-items:center;gap:6px;border-radius:20px;background:var(--surface2);border:1px solid var(--border);cursor:pointer;transition:all .15s;}
+.device-status:hover{border-color:var(--accent);}
+.device-status .dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.device-status .dot.ok{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.5);}
+.device-status .dot.warn{background:var(--yellow);box-shadow:0 0 6px rgba(245,158,11,.5);}
+.device-status .dot.off{background:var(--text3);}
+.device-status .dot.pulse{animation:dotPulse 1.5s infinite;}
+@keyframes dotPulse{0%,100%{opacity:1;}50%{opacity:.3;}}
+.device-status .ds-btn{background:none;border:none;color:var(--accent);cursor:pointer;font-size:11px;padding:0 4px;font-family:inherit;}
+.device-status .ds-btn:hover{text-decoration:underline;}
+
+.sd-device-row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px;}
+
+/* 今日统计卡（本页专用 4 列紧凑栅格） */
+.sd-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+.sd-stats .stat-card{padding:10px 14px;}
+.sd-stats .stat-label{font-size:var(--fs-xs);margin-bottom:3px;}
+.sd-stats .stat-value{font-size:20px;}
+.scan-cam-toggle{display:inline-flex;align-items:center;gap:8px;padding:9px 16px;border-radius:9px;border:1px solid var(--accent);background:var(--accent);color:var(--on-accent);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all .15s;white-space:nowrap;box-shadow:var(--shadow-sm);}
+.scan-cam-toggle:hover{filter:brightness(1.06);}
+.scan-cam-toggle.active{background:var(--green);color:#fff;border-color:var(--green);}
+.scan-cam-toggle.active:hover{background:var(--green);color:#fff;filter:none;}
+.scan-cam-toggle .cam-icon{font-size:16px;line-height:1;}
+.scan-cam-toggle .cam-text{line-height:1;}
+
+/* 快捷键 */
+.scan-shortcuts{display:flex;align-items:center;gap:6px;margin-left:auto;color:var(--text3);}
+.shortcut-label{color:var(--text3);}
+.scan-options .shortcut-hint{font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:4px;background:var(--surface2);border:1px solid var(--border);color:var(--text3);}
+
+/* 连续扫码选项 */
+.scan-options{display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap;font-size:12px;color:var(--text2);}
+.scan-options label{display:flex;align-items:center;gap:4px;cursor:pointer;user-select:none;}
+.scan-options input[type=checkbox]{accent-color:var(--accent);width:14px;height:14px;cursor:pointer;}
+/* 「入库不计成本」仅在连续扫码开启时可用 —— 禁用态灰显 */
+.scan-options label.is-off{opacity:.45;cursor:not-allowed;}
+.scan-opt-group{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:5px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);}
+.scan-opt-group-title{flex:none;font-size:11px;color:var(--text3);letter-spacing:.5px;padding-right:9px;border-right:1px solid var(--border);}
+
+.scan-session-bar{display:none;align-items:center;gap:10px;flex-wrap:wrap;margin-top:10px;padding:9px 12px;border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;background:var(--surface2);}
+.scan-session-bar.is-on{display:flex;}
+.ssb-info{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0;font-size:var(--fs-sm);color:var(--text2);}
+.ssb-title{flex:none;padding:1px 8px;border-radius:10px;background:var(--accent);color:var(--on-accent);font-size:var(--fs-xs);}
+.ssb-stat b{font-family:var(--font-mono);font-size:var(--fs-md);color:var(--text);}
+.ssb-stat b.is-in{color:var(--green);}
+.ssb-stat b.is-out{color:var(--red);}
+.ssb-acts{display:flex;gap:6px;margin-left:auto;}
+
+.camera-section{margin-bottom:0;}
+.camera-view-outer{max-width:400px;margin:0 auto;}
+.camera-view-wrap{width:100%;aspect-ratio:1/1;position:relative;background:#1a1a2e;border-radius:8px;overflow:hidden;}
+#cameraView{width:100% !important;height:100% !important;border-radius:8px;overflow:hidden;background:#1a1a2e;position:relative;}
+#cameraView video{width:100% !important;height:100% !important;display:block;object-fit:cover !important;}
+#cameraView .html5-qrcode__scan_region img,
+#cameraView .html5-qrcode__overlay,
+#cameraView .html5-qrcode__dashboard_section,
+#cameraView .html5-qrcode__scan_region > div:first-child{display:none !important;}
+#cameraView .html5-qrcode__scan_region{border:none !important;background:transparent !important;box-shadow:none !important;}
+.camera-placeholder{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#1a1a2e;border-radius:8px;z-index:5;text-align:center;}
+.camera-placeholder .ph-icon{font-size:36px;margin-bottom:8px;}
+.camera-placeholder .ph-text{font-size:12px;color:var(--text3);}
+.scan-overlay{position:absolute;inset:0;pointer-events:none;z-index:10;display:none;}
+.scan-overlay.show{display:block;}
+.scan-box-outer{position:absolute;top:7.5%;left:7.5%;width:85%;height:85%;border:2px solid rgba(255,255,255,0.35);border-radius:6px;box-sizing:border-box;}
+.scan-box-inner{position:absolute;top:15%;left:15%;width:70%;height:70%;border:2px solid rgba(255,255,255,0.85);border-radius:4px;box-sizing:border-box;}
+.scan-box-inner::before,.scan-box-inner::after,.scan-box-outer::before,.scan-box-outer::after{content:'';position:absolute;width:18px;height:18px;border:3px solid #fff;}
+.scan-box-inner::before{top:-3px;left:-3px;border-right:none;border-bottom:none;border-radius:4px 0 0 0;}
+.scan-box-inner::after{top:-3px;right:-3px;border-left:none;border-bottom:none;border-radius:0 4px 0 0;}
+.scan-box-outer::before{bottom:-3px;left:-3px;border-right:none;border-top:none;border-radius:0 0 0 4px;}
+.scan-box-outer::after{bottom:-3px;right:-3px;border-left:none;border-top:none;border-radius:0 0 4px 0;}
+.scan-hint-text{position:absolute;bottom:8%;left:50%;transform:translateX(-50%);color:rgba(255,255,255,0.7);white-space:nowrap;text-shadow:0 1px 3px rgba(0,0,0,0.8);}
+.camera-controls{display:flex;gap:8px;margin-top:8px;align-items:center;flex-wrap:wrap;max-width:400px;margin-left:auto;margin-right:auto;}
+.camera-status{color:var(--text2);margin-left:auto;}
+
+/* 摄像头扫描弹窗（点「开启摄像头扫码」弹出） */
+.modal.sd-cam-modal{max-width:440px;}
+.sd-cam-body{padding-top:2px;}
+.sd-cam-tip{font-size:12px;color:var(--text2);}
+
+/* Toast弹窗 */
+.scan-toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);z-index:500;border-radius:10px;font-weight:600;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.5);animation:toastIn .3s ease;pointer-events:none;}
+.scan-toast.success{background:var(--green);color:#fff;}
+.scan-toast.error{background:var(--red);color:#fff;}
+.scan-toast.warning{background:var(--yellow);color:#000;}
+.scan-toast.fadeout{animation:toastOut .5s ease forwards;}
+
+/* 扫码结果弹窗 */
+.modal-overlay{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease;padding:16px;}
+.modal-overlay .modal{animation:slideUp .25s ease;}
+.info-table td{vertical-align:middle;}
+.info-table td:first-child{color:var(--text2);}
+
+/* 统一输入条（扫码枪 / 手动共用） */
+.scan-input-bar{display:flex;gap:8px;margin-bottom:14px;align-items:stretch;}
+.scan-input{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:14px;}
+.scan-input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+.scan-input::placeholder{color:var(--text3);font-family:inherit;}
+
+/* 确认卡片（预检命中已有物料） */
+.confirm-card{max-width:420px;width:100%;}
+.confirm-head{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.confirm-head-icon{font-size:20px;line-height:1;}
+.confirm-head-title{font-size:15px;font-weight:600;margin:0;line-height:1.3;}
+.confirm-head-sub{font-size:12px;color:var(--text3);margin:2px 0 0;line-height:1.3;}
+.confirm-part{padding:12px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);margin-bottom:14px;}
+.confirm-part-model{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:15px;color:var(--accent);word-break:break-all;line-height:1.4;}
+.confirm-part-meta{display:flex;gap:14px;margin-top:8px;font-size:12px;color:var(--text2);flex-wrap:wrap;}
+.confirm-part-meta b{font-family:'JetBrains Mono',monospace;color:var(--text);font-weight:600;}
+.confirm-fields{display:flex;flex-direction:column;gap:12px;}
+.confirm-field{display:flex;flex-direction:column;gap:5px;}
+.confirm-field-label{font-size:12px;color:var(--text2);}
+.confirm-field input{width:100%;padding:9px 11px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;}
+.confirm-field input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+.confirm-field input[readonly]{opacity:.7;cursor:default;}
+/* 方向分段控件 */
+.confirm-dir{display:flex;gap:6px;}
+.confirm-dir-btn{flex:1;padding:9px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text2);cursor:pointer;font-family:inherit;font-size:13px;font-weight:600;transition:all .15s;}
+.confirm-dir-btn:hover{border-color:var(--accent);}
+.confirm-dir-btn.active-in{background:var(--green);border-color:var(--green);color:#fff;}
+.confirm-dir-btn.active-out{background:var(--red);border-color:var(--red);color:#fff;}
+.confirm-hint{font-size:11px;color:var(--text3);margin-top:10px;text-align:center;line-height:1.5;}
+
+/* 新建物料表单（预检未命中） */
+.create-card{max-width:460px;width:100%;}
+.create-reason{font-size:12px;color:var(--text2);padding:10px 12px;border-radius:8px;background:var(--surface2);border-left:3px solid var(--yellow);margin-bottom:14px;line-height:1.5;}
+.create-reason code{font-family:'JetBrains Mono',monospace;color:var(--accent);word-break:break-all;}
+.create-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.create-field{display:flex;flex-direction:column;gap:5px;}
+.create-field.full{grid-column:1/-1;}
+.create-field label{font-size:12px;color:var(--text2);}
+.create-field label .req{color:var(--red);margin-left:2px;}
+.create-field input{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:inherit;}
+.create-field input:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+.create-field input.mono{font-family:'JetBrains Mono',monospace;}
+.create-field select{width:100%;padding:8px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-size:13px;font-family:inherit;cursor:pointer;}
+.create-field select:focus{outline:none;border-color:var(--accent);background:var(--surface);}
+
+/* 候选列表（型号匹配到多条） */
+.cand-list{display:flex;flex-direction:column;gap:6px;max-height:50vh;overflow-y:auto;}
+.cand-item{display:flex;flex-direction:column;align-items:flex-start;gap:3px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);cursor:pointer;text-align:left;font-family:inherit;transition:all .15s;}
+.cand-item:hover{border-color:var(--accent);background:var(--accent-dim);}
+.cand-model{font-family:'JetBrains Mono',monospace;font-weight:600;font-size:14px;color:var(--text);word-break:break-all;line-height:1.3;}
+.cand-meta{font-size:11px;color:var(--text2);line-height:1.3;}
+
+/* 设备选择弹窗 */
+.device-modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease;}
+.device-modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;width:90%;display:flex;flex-direction:column;box-shadow:0 8px 40px rgba(0,0,0,.5);animation:slideUp .25s ease;}
+.device-modal-header{display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);font-weight:600;}
+.device-modal-close{background:none;border:none;font-size:22px;color:var(--text2);cursor:pointer;padding:0 4px;line-height:1;}
+.device-modal-close:hover{color:var(--text);}
+.device-modal-body{overflow-y:auto;flex:1;}
+.device-modal-desc{font-size:13px;color:var(--text2);margin:0 0 12px 0;line-height:1.5;}
+.device-modal-footer{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);gap:12px;}
+.device-remember{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;cursor:pointer;white-space:nowrap;}
+.device-remember input[type=checkbox]{accent-color:var(--accent);}
+.device-list{display:flex;flex-direction:column;gap:6px;}
+.device-item{display:flex;align-items:center;gap:12px;border-radius:9px;border:1px solid var(--border);cursor:pointer;transition:all .15s;background:var(--surface2);}
+.device-item:hover{border-color:var(--accent);background:var(--accent-dim);}
+.device-item.selected{border-color:var(--accent);background:var(--accent-dim);box-shadow:0 0 0 1px var(--accent);}
+.device-item-icon{flex-shrink:0;}
+.device-item-info{flex:1;min-width:0;}
+.device-item-name{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.device-item-id{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.device-item-check{font-size:18px;color:var(--accent);flex-shrink:0;display:none;}
+.device-item.selected .device-item-check{display:block;}
+
+/* 扫码枪连接验证区 */
+.scanner-verify-area{padding:20px;background:var(--surface2);border-radius:9px;border:1px solid var(--border);text-align:center;}
+.scanner-verify-icon{font-size:40px;margin-bottom:12px;}
+.scanner-verify-timer{font-family:'JetBrains Mono',monospace;font-size:28px;font-weight:700;color:var(--accent);margin:10px 0;}
+.scanner-verify-bar{width:100%;height:4px;background:var(--surface);border-radius:2px;overflow:hidden;margin-top:12px;}
+.scanner-verify-bar-fill{height:100%;background:var(--accent);transition:width 1s linear;}
+
+.https-notice{display:none;align-items:flex-start;gap:10px;padding:8px 8px 8px 14px;border-radius:8px;background:var(--yellow-dim);border:1px solid rgba(245,158,11,.3);color:var(--yellow);font-size:12px;margin-bottom:12px;line-height:1.5;}
+.https-notice.show{display:flex;}
+.https-notice-text{flex:1;min-width:0;}
+.https-notice code{background:rgba(0,0,0,.2);padding:2px 6px;border-radius:4px;font-size:11px;}
+.https-notice-close{flex:none;background:none;border:none;color:inherit;cursor:pointer;font-size:13px;line-height:1;padding:3px 5px;opacity:.65;font-family:inherit;border-radius:4px;}
+.https-notice-close:hover{opacity:1;}
+
+/* 动画 */
+@keyframes scanRowHighlight{0%{background:var(--accent-dim);}100%{background:transparent;}}
+@keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(-20px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+@keyframes toastOut{from{opacity:1;}to{opacity:0;}}
+@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+@keyframes cameraFlash{0%,100%{box-shadow:0 0 0 0 rgba(34,197,94,.6);}50%{box-shadow:0 0 0 6px rgba(34,197,94,0);}}
+.scan-row-highlight{animation:scanRowHighlight 1.5s ease;}
+.camera-flash{animation:cameraFlash .3s ease;}
+
+/* 2. PC端断点（≥769px）：仅尺寸和布局差异 */
+@media(min-width:769px){
+  /* 扫码核心输入框：加高 + 放大字号，突出主操作（宽度本就占满整行） */
+  .scan-input{padding:14px 16px;font-size:17px;}
+  .scan-cam-toggle{padding:10px 20px;font-size:14px;}
+  .device-status{padding:6px 12px;font-size:12px;}
+  .scan-hint-text{font-size:11px;}
+  .camera-status{font-size:12px;}
+  .scan-toast{padding:14px 28px;font-size:14px;min-width:280px;}
+  .info-table td:first-child{width:90px;}
+  .device-modal{max-width:460px;max-height:80vh;}
+  .device-modal-header{padding:16px 20px;font-size:15px;}
+  .device-modal-body{padding:16px 20px;}
+  .device-modal-footer{padding:12px 20px;}
+  .device-item{padding:10px 14px;}
+  .device-item-icon{font-size:22px;}
+  .device-item-name{font-size:13px;}
+  #recentScanTable th,#recentScanTable td{padding:8px 10px;}
+}
+
+/* 3. 移动端断点（≤768px）：仅尺寸和布局差异 */
+@media(max-width:768px){
+    .sd-device-row{flex-direction:column;align-items:stretch;}
+  /* 统计卡窄屏 2 列 */
+  .sd-stats{grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px;}
+  .sd-stats .stat-card{padding:8px 10px;}
+  .sd-stats .stat-value{font-size:16px;}
+  .scan-cam-toggle{width:100%;justify-content:center;}
+  .scan-shortcuts{display:none;}
+  .scan-options{font-size:10px;gap:6px;}
+  .scan-options label{gap:3px;}
+  /* 移动端隐藏语音播报（浏览器权限限制无法稳定工作，后续版本升级） */
+  .voice-only-desktop{display:none !important;}
+  .camera-view-outer{max-width:100%;}
+  .scan-hint-text{font-size:10px;}
+  .camera-controls{gap:6px;}
+  .camera-controls .btn{font-size:11px;padding:6px 10px;}
+  .device-status-bar{gap:6px;}
+  .device-status{font-size:10px;padding:4px 8px;}
+  .device-modal{max-width:95vw;max-height:90vh;}
+  .device-modal-header{font-size:13px;padding:12px 14px;}
+  .device-modal-body{padding:12px 14px;}
+  .device-modal-footer{padding:10px 14px;flex-direction:column;gap:8px;align-items:stretch;}
+  .device-modal-footer .btn{width:100%;}
+  .device-item{padding:8px 10px;}
+  .device-item-icon{font-size:18px;}
+  .device-item-name{font-size:12px;}
+  .form-row{flex-direction:column;gap:10px;}
+  .form-row .form-group{min-width:0;flex:1;}
+  .form-group{margin-bottom:8px;}
+  .card-pad{padding:12px;}
+  .scan-toast{min-width:auto;max-width:90vw;font-size:12px;padding:10px 16px;}
+  .info-table td:first-child{width:70px;font-size:12px;}
+  .info-table td{font-size:13px;}
+  #recentScanTable th,#recentScanTable td{padding:6px 8px;white-space:nowrap;}
+  #recentScanTable th:nth-child(6),#recentScanTable td:nth-child(6){display:none;}
+  .modal-overlay{padding:12px;}
+  .modal-overlay .modal{max-width:100%;width:100%;}
+  /* 确认卡片 / 新建表单：移动端单列、加大点击区 */
+  .scan-input{padding:11px 12px;font-size:15px;}
+  .confirm-card,.create-card{max-width:100%;}
+  .confirm-head{margin-bottom:12px;}
+  .confirm-head-title{font-size:14px;}
+  .confirm-part{padding:10px;margin-bottom:12px;}
+  .confirm-part-model{font-size:14px;}
+  .confirm-field input{padding:11px 12px;font-size:16px;}
+  .confirm-dir-btn{padding:11px;font-size:14px;}
+  .create-grid{grid-template-columns:1fr;gap:10px;}
+  .create-field input{padding:11px 12px;font-size:16px;}
+}
+
+/* 10. 弹窗骨架与动态表格（替掉scan-*.js 里的行内 style） */
+.modal h3.sd-modal-title{margin:0;font-size:16px;}
+.sd-modal-body{padding:16px 20px;}
+.sd-modal-footer{display:flex;gap:8px;}
+.confirm-hint.sd-hint-left{text-align:left;}
+/* 候选弹窗底部「都不对，另建为新物料」通栏按钮 */
+.sd-cand-new{width:100%;margin-top:10px;}
+.sd-field-gap{margin-bottom:12px;}
+.sd-optional{display:none;}
+.sd-optional.is-on{display:block;}
+
+/* 10b. 扫码结果弹窗的信息表 */
+.sd-res-table{font-size:14px;width:100%;}
+.info-table td.sd-res-td{padding:6px 0;}
+.sd-res-ppn{font-family:var(--font-mono);color:var(--accent);font-weight:600;}
+.sd-res-mono{font-family:var(--font-mono);}
+.sd-res-qty{font-weight:700;}
+.sd-res-qty.is-in{color:var(--green);}
+.sd-res-qty.is-out{color:var(--red);}
+.sd-res-after{font-weight:600;}
+.sd-res-err{font-size:14px;color:var(--text2);padding:12px 0;text-align:center;}
+
+/* 10c. 最近扫描记录（scan-core.js 动态追加行 / 首次建表） */
+.sd-recent-wrap{border-radius:8px;}
+#recentScanTable{font-size:12px;}
+.data-table thead th.sd-th-r{text-align:right;}
+.sd-th-ops{width:50px;}
+.sd-td-time{font-family:var(--font-mono);font-size:11px;color:var(--text2);}
+.sd-td-ppn{font-family:var(--font-mono);font-size:11px;color:var(--accent);}
+.sd-td-model{font-family:var(--font-mono);font-size:11px;}
+.sd-td-qty{text-align:right;font-family:var(--font-mono);font-weight:600;}
+.sd-td-qty.is-in{color:var(--green);}
+.sd-td-qty.is-out{color:var(--red);}
+.sd-td-remark{font-size:11px;color:var(--text2);}
+.sd-td-c{text-align:center;}
+/* 行内撤销按钮 */
+.sd-undo{color:var(--red);padding:2px 6px;font-size:12px;}
+/* 无 scan_log（建档入库）时的占位破折号 */
+.sd-dash{font-size:11px;color:var(--text3);}
+/* 撤销最后一条后的空态 */
+.sd-empty{padding:24px 0;}
+
+/* 10d. 扫码枪连接验证弹窗（scan-camera.js） */
+.sc-verify-lead{font-size:14px;color:var(--text);margin-bottom:8px;}
+.sc-verify-sub{font-size:12px;color:var(--text2);}
+.sc-verify-full{width:100%;}
+.sc-verify-btn{margin-top:14px;}
+.sc-verify-state.is-ok{color:var(--green);}
+.sc-verify-state.is-bad{color:var(--red);}
+
+
+/* 通用间距（本页 4 处卡片 + 1 处提示条都用 16px 下间距） */
+.sd-mb16{margin-bottom:16px;}
+.sd-pagination{margin-top:10px;}
+
+/* 扫码结果卡片（首屏直出那张） */
+.sd-result-card{border-left:4px solid var(--green);}
+.sd-result-card.is-out{border-left-color:var(--red);}
+/* 卡片标题行（标题 + 右侧徽标） */
+.sd-result-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.sd-result-title{font-size:15px;margin:0;}
+/* 结果明细表。`.info-table` 无字号声明，这里给 13px */
+.sd-result-table{font-size:13px;}
+/* 明细里的等宽值列 */
+.sd-res-mono{font-family:var(--font-mono);}
+.sd-res-ppn-cell{font-family:var(--font-mono);color:var(--accent);}
+/* 数量变化列：等宽 + 加粗 + 语义色 */
+.sd-res-qty-cell{font-family:var(--font-mono);font-weight:700;}
+.sd-res-qty-cell.is-in{color:var(--green);}
+.sd-res-qty-cell.is-out{color:var(--red);}
+
+/* 扫码状态显示区（解析结果回显） */
+.sd-status-box{display:none;margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--surface2);border:1px solid var(--border);font-size:13px;}
+.sd-status-box.is-on{display:block;}
+.sd-status-rows{display:flex;gap:18px;flex-wrap:wrap;align-items:center;}
+.sd-status-row{display:flex;align-items:center;gap:6px;}
+.sd-status-row.is-wide{min-width:0;}
+/* 字段名（操作类型 / 型号 / 数量） */
+.sd-status-key{color:var(--text2);}
+/* 字段值。类型=加粗、型号=等宽正文色可折行、数量=等宽加粗。 */
+.sd-status-val-type{font-weight:600;color:var(--accent);}
+.sd-status-val-type.is-in{color:var(--green);}
+.sd-status-val-type.is-out{color:var(--red);}
+.sd-status-val-model{font-family:var(--font-mono);color:var(--text);word-break:break-all;}
+.sd-status-val-qty{font-family:var(--font-mono);font-weight:600;color:var(--green);}
+.sd-status-val-qty.is-in{color:var(--green);}
+.sd-status-val-qty.is-out{color:var(--red);}
+
+/* 扫码结果弹窗（2 秒自动关闭的那个） */
+.sd-result-overlay{display:none;z-index:9999;}
+.sd-result-overlay.is-on{display:flex;}
+.modal.sd-result-modal{max-width:360px;}
+
+/* 最近扫描记录 */
+/* 区块标题（15px），两种下间距 */
+.sd-sec-title{font-size:15px;}
+.sd-sec-title.is-spaced{margin-bottom:12px;}
+.sd-empty-dense{padding:16px 0;color:var(--text3);font-size:12px;}
+
+/* 使用提示 */
+.sd-tips-list{font-size:13px;color:var(--text2);padding-left:18px;line-height:2;}
+/* 提示里内嵌的二维码格式示例（等宽 + 浅底 + 小圆角） */
+.sd-tips-code{font-family:var(--font-mono);background:var(--surface2);padding:1px 6px;border-radius:3px;}
+.sd-tips-foot{margin-top:12px;text-align:center;}
+
+/* 帮助说明（默认收起） */
+.sd-help{overflow:hidden;}
+.sd-help-toggle{display:flex;align-items:center;gap:10px;width:100%;padding:12px 16px;background:none;border:none;cursor:pointer;font-family:inherit;text-align:left;color:var(--text);}
+.sd-help-toggle:hover{background:var(--row-hover);}
+.sd-help-title{flex:none;font-size:15px;font-weight:600;}
+.sd-help-sub{flex:1;min-width:0;font-size:12px;color:var(--text3);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.sd-help-arrow{flex:none;color:var(--text3);font-size:12px;transition:transform .15s;}
+.sd-help.is-open .sd-help-arrow{transform:rotate(180deg);}
+.sd-help-body{display:none;padding:0 16px 16px;}
+.sd-help-body.is-on{display:block;}
+
+/* 语音权限按钮（默认隐藏，由 JS 按浏览器能力显示） */
+.sd-voice-btn{display:none;color:var(--yellow);border-color:var(--yellow);font-size:10px;}
+.sd-voice-btn.is-on{display:inline-flex;}
+
+/* 闪光灯按钮（默认隐藏，摄像头支持时才显示） */
+.sd-torch-btn{display:none;}
+.sd-torch-btn.is-on{display:inline-flex;}
+
+/* 设备选择弹窗的遮罩与底部条（默认隐藏） */
+.device-modal-overlay.is-off,.device-modal-footer.is-off{display:none;}

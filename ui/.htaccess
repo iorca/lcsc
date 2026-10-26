@@ -1,0 +1,6 @@
+# 禁止直接访问 /ui/ 目录下的布局 / 组件 PHP（仅允许通过 PHP require/include 加载）
+# 主题 CSS / JS 必须可被浏览器直接加载，否则全站无样式
+Options -Indexes
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>

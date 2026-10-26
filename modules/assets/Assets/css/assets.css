@@ -1,0 +1,166 @@
+/* assets.css — 资产总览页面样式（V1.2 专业化优化） */
+
+/* 响应式图表网格 */
+@media(min-width:769px) and (max-width:1200px){
+    .asset-charts-grid{grid-template-columns:1fr 1fr !important;}
+}
+
+/* 区块标题 */
+.sec-title{
+    font-size:13px;font-weight:600;margin-bottom:10px;color:var(--text);
+    display:flex;align-items:center;gap:6px;
+}
+
+/* 数据表格 */
+.data-table{
+    border-collapse:collapse;width:100%;
+}
+.data-table th{
+    background:var(--surface2);
+    border-bottom:1px solid var(--border);
+    font-weight:500;color:var(--text2);
+    text-transform:uppercase;letter-spacing:.4px;
+    font-size:11px;padding:10px 12px;
+    text-align:left;
+}
+.data-table td{
+    border-bottom:1px solid var(--border);
+    padding:10px 12px;vertical-align:middle;
+}
+.data-table tbody tr{
+    transition:background .12s ease;
+}
+.data-table tbody tr:hover{
+    background:var(--surface2);
+}
+.data-table tbody tr:last-child td{
+    border-bottom:none;
+}
+
+/* 统计卡片增强 */
+.stats-grid .stat-card{
+    transition:transform .2s ease,box-shadow .2s ease;
+    position:relative;overflow:hidden;
+}
+.stats-grid .stat-card:hover{
+    transform:translateY(-2px);
+    box-shadow:0 6px 20px rgba(0,0,0,.1);
+}
+.stats-grid .stat-card::before{
+    content:'';position:absolute;top:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,transparent,currentColor,transparent);
+    opacity:.3;
+}
+
+/* 筛选表单 */
+.asset-filter-form .form-group label{
+    font-size:11px;color:var(--text2);font-weight:500;
+    text-transform:uppercase;letter-spacing:.3px;
+}
+.asset-filter-form .form-group input,
+.asset-filter-form .form-group select{
+    background:var(--surface2);border:1px solid var(--border);
+    border-radius:7px;padding:8px 11px;font-size:13px;
+    color:var(--text);transition:border-color .15s,box-shadow .15s;
+    width:100%;
+}
+.asset-filter-form .form-group input:focus,
+.asset-filter-form .form-group select:focus{
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px var(--accent-dim);
+    outline:none;
+}
+
+/* 分页样式 */
+.pagination{
+    display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+    margin-top:14px;padding-top:14px;
+    border-top:1px solid var(--border);
+}
+
+/* 分类资产饼图的空状态占位（无成本数据 / 库存为 0） */
+.as-pie-empty{
+    height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;color:var(--text3);font-size:12px;
+}
+.as-pie-empty-ico{font-size:26px;}
+.as-pie-empty-sub{font-size:11px;}
+
+/* 出入库流水表（AJAX 重绘；首屏 PHP 输出一致） */
+/* 区块标题里的条数注记 */
+.as-count-note{font-size:11px;color:var(--text3);font-weight:400;}
+/* 区块标题左右分栏（标题 + 右侧动作按钮） */
+.as-sec-row{justify-content:space-between;}
+/* 横向滚动容器 */
+.as-scroll-x{overflow-x:auto;}
+.data-table.as-tb-sm{font-size:12px;}
+.data-table th.as-th-pad,.data-table td.as-td-pad{padding:8px;}
+.data-table th.as-th-c{text-align:center;}
+.data-table th.as-th-r{text-align:right;}
+.data-table th.as-th-l{text-align:left;}
+.as-th-check{width:36px;}
+.as-td-c{text-align:center;}
+.as-td-r{text-align:right;}
+.as-td-nowrap{white-space:nowrap;}
+/* 分类列比表体更小一号 */
+.as-td-xs{font-size:11px;}
+/* 等宽数字列 */
+.as-mono{font-family:var(--font-mono);}
+/* 物料列：商品编号（主）+ 型号/品名（次） */
+.as-ppn{font-family:var(--font-mono);color:var(--accent);}
+.as-ppn-sub{font-size:11px;color:var(--text2);}
+/* 操作类型标签。原为后端给的十六进制 + `22` 透明后缀拼色， */
+.as-tag{
+    display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;
+    background:var(--surface3);color:var(--text2);
+}
+.as-tag.is-blue{background:var(--accent-dim);color:var(--accent);}
+.as-tag.is-green{background:var(--green-dim);color:var(--green);}
+.as-tag.is-red{background:var(--red-dim);color:var(--red);}
+.as-tag.is-amber{background:var(--yellow-dim);color:var(--yellow);}
+.as-tag.is-purple{background:var(--purple-dim);color:var(--purple);}
+/* 样品标记 ★（样品不计资产） */
+.as-tag-star{color:var(--yellow);font-size:10px;margin-left:3px;}
+/* 变动数量：正 / 负 */
+.as-qty.is-up{color:var(--green);}
+.as-qty.is-down{color:var(--red);}
+/* 含税小计恒为绿色 */
+.as-subtotal{color:var(--green);}
+.as-row-sample{background:color-mix(in srgb, var(--yellow) 6%, transparent);opacity:.7;}
+.data-table td.as-td-empty{text-align:center;padding:30px;color:var(--text3);}
+
+/* 视图层行内 style 外置 */
+
+.as-page-head{flex-direction:column;align-items:flex-start;margin-bottom:18px;}
+.as-stats-3{grid-template-columns:repeat(3,1fr);}
+.as-stat-note{font-size:10px;color:var(--text3);margin-top:4px;}
+.as-reconcile-note{
+    margin:-6px 0 14px;padding:8px 12px;
+    font-size:var(--fs-sm);color:var(--text2);line-height:1.7;
+    background:var(--surface2);border:1px solid var(--border);
+    border-left:3px solid var(--yellow);border-radius:var(--btn-radius);
+}
+.as-reconcile-note b{color:var(--text);font-family:var(--font-mono);}
+/* 区块下间距 18px（`.card-pad` 本身无 margin） */
+.as-mb18{margin-bottom:18px;}
+.as-chart-box{height:260px;position:relative;}
+.asset-charts-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:18px;}
+/* TOP10 表的行号列（次要色） */
+.as-idx{color:var(--text3);}
+.as-sum{color:var(--accent);font-weight:600;}
+/* 响应式 */
+@media(max-width:768px){
+    .asset-charts-grid{grid-template-columns:1fr !important;}
+    .stats-grid{grid-template-columns:repeat(2,1fr) !important;gap:8px !important;margin-bottom:14px !important;}
+    .stats-grid .stat-card{padding:10px 12px !important;grid-column:span 1 !important;}
+    .stats-grid .stat-card:nth-child(n){grid-column:span 1 !important;}
+    .stats-grid .stat-label{font-size:10px !important;margin-bottom:2px !important;}
+    .stats-grid .stat-value{font-size:17px !important;}
+    .asset-filter-form{display:grid !important;grid-template-columns:1fr 1fr;gap:8px !important;align-items:flex-end !important;}
+    .asset-filter-form .fg-keyword{grid-column:1/3;}
+    .asset-filter-form .fg-cat{grid-column:1/2;}
+    .asset-filter-form .fg-plat{grid-column:2/3;}
+    .asset-filter-form .fg-date-from{grid-column:1/2;}
+    .asset-filter-form .fg-date-to{grid-column:2/3;}
+    .asset-filter-form .fg-actions{grid-column:1/3;display:flex;gap:6px;justify-content:flex-end;}
+}

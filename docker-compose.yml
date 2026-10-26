@@ -1,0 +1,88 @@
+name: lcsc
+
+x-lcsc-app: &lcsc-app
+  build:
+    context: .
+    dockerfile: docker/Dockerfile
+    args:
+      PHP_IMAGE: "${PHP_IMAGE:-php:8.3-fpm-alpine}"
+      COMPOSER_IMAGE: "${COMPOSER_IMAGE:-composer:2}"
+      APK_MIRROR: "${APK_MIRROR:-}"
+      COMPOSER_MIRROR: "${COMPOSER_MIRROR:-}"
+  image: lcsc-app:local
+
+services:
+  app:
+    <<: *lcsc-app
+    working_dir: /var/www/html
+    environment:
+      LCSC_AUTOINSTALL: "${LCSC_AUTOINSTALL:-1}"
+      LCSC_DB_HOST: db
+      LCSC_DB_PORT: "3306"
+      LCSC_DB_NAME: "${LCSC_DB_NAME:-lcsc}"
+      LCSC_DB_USER: root
+      LCSC_DB_PASS: "${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}"
+      LCSC_EDITION: "${LCSC_EDITION:-studio}"
+      LCSC_ADMIN_USER: "${LCSC_ADMIN_USER:-admin}"
+      LCSC_ADMIN_PASS: "${LCSC_ADMIN_PASS:?set LCSC_ADMIN_PASS in .env}"
+      LCSC_TZ: "${LCSC_TZ:-Asia/Shanghai}"
+      TZ: "${LCSC_TZ:-Asia/Shanghai}"
+    volumes:
+      - lcsc_app:/var/www/html
+      - lcsc_sessions:/var/lib/php/sessions
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "php -r 'exit(@fsockopen(\"127.0.0.1\", 9000) ? 0 : 1);'"]
+      interval: 10s
+      timeout: 5s
+      retries: 24
+      start_period: 120s
+    restart: unless-stopped
+
+  web:
+    image: "${NGINX_IMAGE:-nginx:1.27-alpine}"
+    entrypoint: ["/bin/sh", "/etc/nginx/lcsc/nginx-entrypoint.sh"]
+    volumes:
+      - lcsc_app:/var/www/html:ro
+      # 复用 deploy/nginx.conf（Nginx 安全规则唯一来源），入口脚本只改写三处部署参数
+      - ./deploy/nginx.conf:/etc/nginx/lcsc/nginx.conf:ro
+      - ./docker/nginx-entrypoint.sh:/etc/nginx/lcsc/nginx-entrypoint.sh:ro
+    ports:
+      - "${LCSC_BIND_IP:-0.0.0.0}:${LCSC_PORT:-8080}:80"
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/login.php || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+      start_period: 60s
+    restart: unless-stopped
+
+  db:
+    image: "${MYSQL_IMAGE:-mysql:8.0}"
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+    environment:
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD:?set MYSQL_ROOT_PASSWORD in .env}"
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_DATABASE: "${LCSC_DB_NAME:-lcsc}"
+      TZ: "${LCSC_TZ:-Asia/Shanghai}"
+    volumes:
+      - lcsc_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -u root -p\"$$MYSQL_ROOT_PASSWORD\" --silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  lcsc_app:
+  lcsc_db:
+  lcsc_sessions:

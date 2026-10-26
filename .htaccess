@@ -4,7 +4,10 @@
 Options -Indexes
 
 # 保护敏感文件
-<FilesMatch "\.(sql|md|log|ini|sh|bak)$">
+# ⚠️ `.conf` 是为 deploy/nginx.conf 加的 —— 它含 root 路径 / fastcgi_pass / 域名，
+# 属内部部署信息。`.htaccess` 只能保护本目录树内的文件，而 deploy/ 下另有
+# 自己的 .htaccess 做双重拦截。
+<FilesMatch "\.(sql|md|log|ini|sh|bak|conf)$">
     Require all denied
 </FilesMatch>
 
@@ -13,17 +16,39 @@ Options -Indexes
     Require all denied
 </Files>
 
+# 数据库凭据文件（安装向导生成，含明文 DB 账号密码）
+# ⚠️ 它**必须**显式列出：上面的敏感后缀列表是 sql|md|log|ini|sh|bak，不含 php，
+# 而点文件规则（^\.）也不匹配 —— 故本文件原先是根目录唯一未被拦截的 .php。
+# 被访问时不会泄露内容（只含 define()、无输出），但属于可执行暴露面，不应留着。
+<Files "config.db.php">
+    Require all denied
+</Files>
+
 # 保护点文件（.git, .htaccess 等）
 <FilesMatch "^\.">
     Require all denied
 </FilesMatch>
 
-# uploads 目录禁止 PHP 执行
-<Directory "uploads">
-    php_flag engine off
-    AddType text/plain .php .php3 .php4 .php5 .phtml .pht
-    Options -ExecCGI
-</Directory>
+# 开发期工具目录（巡检器 / 规则登记表 / 基线），**不进发布包**
+# 即便误发，访问也被拒（防源码泄露）
+<FilesMatch "\.(json|lock)$">
+    Require all denied
+</FilesMatch>
+RedirectMatch 404 ^/dev/
+
+# 在线升级工作区（P2，updates/）：下载的安装包 / staging / 旧版本源文件回滚副本
+# 另有 updates/.htaccess 整目录禁止；此处再加一道前缀规则（Nginx 等价见 deploy/nginx.conf）
+RedirectMatch 404 ^/updates/
+
+# 备份目录（backups/）：数据库备份与导出文件，整目录禁止
+RedirectMatch 404 ^/backups/
+
+# uploads 目录的 PHP 执行禁止规则见 uploads/.htaccess
+# （<Directory> 在 .htaccess 中非法，会导致 Apache 500；php_flag 仅 mod_php 有效，PHP-FPM 下亦 500）
+#
+# ⚠️ **Nginx 用户注意**：Nginx 完全不读 .htaccess，本文件所有规则均不会生效。
+#    等价配置见 **deploy/nginx.conf**（随发布包交付，逐条对应，含 location
+#    优先级陷阱说明与部署后自检清单）。
 
 # 安全头
 <IfModule mod_headers.c>

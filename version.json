@@ -1,9 +1,11 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "version_type": "stable",
-  "release_date": "2026-07-18",
+  "release_date": "2026-10-26",
   "min_php": "8.0",
   "min_mysql": "5.7",
   "min_composer": "2.0",
-  "codename": "V1 Refresh"
+  "codename": "Feature First + Edition Gate",
+  "database_version": "1.2.0",
+  "previous_stable": "1.1.0"
 }

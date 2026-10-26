@@ -1,0 +1,8 @@
+# 禁止直接访问 /app/ 目录下的所有文件（仅允许通过 PHP require/include 加载）
+# 例外：/app/api/router.php 是公开 API 入口，需要允许访问
+RewriteEngine On
+RewriteRule ^api/router\.php$ - [L]
+RewriteRule ^.*$ - [F,L]
+
+# 兜底：禁止目录列表
+Options -Indexes

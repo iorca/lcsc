@@ -1,16 +1,25 @@
 <?php
 declare(strict_types=1);
-require_once 'config.php';
+/** print.php — 标签打印页面（独立入口，与v1.1.0保持一致） */
+declare(strict_types=1);
+require_once __DIR__ . '/config.php';
 initDB();
 $user = requireLogin();
-if (!hasPermission('can_print')) { header('Location: index.php'); exit; }
+
+if (\App\Core\Migration\MigrationGate::pending(getDB())) {
+    header('Location: ' . siteUrl('index.php?v=migration'));
+    exit;
+}
+
+if (!hasFeature('print_label')) { header('Location: ' . siteUrl('index.php')); exit; }
+if (!hasPermission('can_print')) { header('Location: ' . siteUrl('index.php')); exit; }
 $db   = getDB();
 $uid  = $user['id'];
 $dataUid = getDataUserId();
 
 $ids = array_map('intval', $_GET['ids'] ?? []);
 if (empty($ids)) {
-    header('Location: index.php');
+    header('Location: ' . siteUrl('index.php'));
     exit;
 }
 
@@ -21,7 +30,7 @@ $parts->execute([...$ids, $dataUid]);
 $parts = $parts->fetchAll(PDO::FETCH_ASSOC);
 
 if (empty($parts)) {
-    header('Location: index.php');
+    header('Location: ' . siteUrl('index.php'));
     exit;
 }
 
@@ -33,67 +42,42 @@ $remark    = trim($_GET['remark'] ?? '');
 $labelTypeLabel = $labelType === 'out' ? '出库标签' : '入库标签';
 $labelTypeColor = $labelType === 'out' ? '#ef4444' : '#22c55e';
 
+// ── 标签模板：支持弹窗传参 tpl（mini/default），缺省回退网站设置 ──
+$tplParam = (string)($_GET['tpl'] ?? '');
+if (!in_array($tplParam, ['mini', 'default', ''], true)) $tplParam = '';
+$labelTemplate = $tplParam !== '' ? $tplParam : getSetting('label_template', 'default');
+if (!in_array($labelTemplate, ['mini', 'default', 'large'], true)) $labelTemplate = 'default';
+
+// ── 打印字段：支持弹窗传参 fields（逗号分隔），缺省全部显示 ──
+$allowedFields = ['model', 'part_no', 'stock', 'location', 'qrcode', 'category', 'brand'];
+$showFields = [];
+$fieldsParam = trim((string)($_GET['fields'] ?? ''));
+if ($fieldsParam === '') {
+    foreach ($allowedFields as $f) $showFields[$f] = true;
+} else {
+    foreach (explode(',', $fieldsParam) as $f) {
+        $f = trim($f);
+        if (in_array($f, $allowedFields, true)) $showFields[$f] = true;
+    }
+    if (empty($showFields)) $showFields['model'] = true; // 至少保留一个字段
+}
+$showQrcode = !empty($showFields['qrcode']);
+
+$labelQrContent = getSetting('label_qr_content', 'internal_id');
+if (!in_array($labelQrContent, ['internal_id', 'model', 'platform_part_no'], true)) $labelQrContent = 'internal_id';
+
 $pageTitle = '打印标签';
 ?><!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <title>打印标签</title>
-<!-- 第三方脚本：qrcode-generator v2.0.4 (MIT) by Kazuhiko Arase - https://github.com/kazuhikoarase/qrcode-generator -->
-<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@2.0.4/dist/qrcode.min.js"></script>
-<style>
-/* ── 打印基础样式 ── */
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-body{
-    font-family:'Noto Sans SC','Microsoft YaHei',system-ui,sans-serif;
-    background:#fff;color:#111;font-size:12px;
-    -webkit-print-color-adjust:exact;print-color-adjust:exact;
-}
-.no-print{text-align:center;padding:18px;background:#f0f0f0;border-bottom:1px solid #ddd;margin-bottom:16px;}
-.no-print button{padding:8px 22px;margin:0 6px;font-size:14px;cursor:pointer;border-radius:6px;border:1px solid #ccc;background:#fff;}
-.no-print button.primary{background:#2563eb;color:#fff;border-color:#2563eb;}
-.no-print button:hover{opacity:.85;}
-.no-print .hint{margin-left:16px;color:#666;font-size:13px;}
+<?php $__qrjs = __DIR__ . '/third_party/js/qrcode.js'; ?>
 
-/* ── 标签容器 ── */
-.labels{display:flex;flex-wrap:wrap;gap:12px;padding:12px;justify-content:flex-start;}
-.label-card{
-    display:flex;flex-direction:column;
-    border:2px solid #000;border-radius:6px;
-    padding:10px 12px;width:300px;page-break-inside:avoid;
-    background:#fff;
-}
-.label-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px;gap:8px;}
-.label-model{font-family:'JetBrains Mono','Consolas',monospace;font-size:14px;font-weight:700;color:#000;word-break:break-all;flex:1;}
-.label-brand{font-size:10px;color:#555;white-space:nowrap;}
-.label-mid{display:flex;gap:10px;align-items:flex-start;margin-bottom:4px;}
-.label-qr{flex-shrink:0;display:flex;align-items:center;justify-content:center;}
-.label-qr img,.label-qr canvas,.label-qr svg{width:120px;height:120px;display:block;}
-.label-mid-info{flex:1;display:flex;flex-direction:column;gap:3px;font-size:10px;color:#333;min-width:0;}
-.label-mid-info .row{display:flex;gap:6px;}
-.label-mid-info .row .k{color:#777;flex-shrink:0;}
-.label-mid-info .row .v{font-family:'JetBrains Mono','Consolas',monospace;word-break:break-all;}
-.label-mid-info .part-no{font-family:'JetBrains Mono','Consolas',monospace;font-size:11px;font-weight:600;color:#000;}
-.label-footer{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:10px;color:#555;border-top:1px dashed #ccc;padding-top:4px;}
-.label-location{font-weight:600;}
-.label-tag{display:inline-block;padding:1px 6px;border-radius:3px;background:#eef;color:#336;font-size:9px;margin-left:4px;}
-
-/* ── 打印时隐藏非打印元素 ── */
-@media print{
-    .no-print{display:none !important;}
-    body{background:none;}
-    .labels{padding:0;gap:0;}
-    .label-card{border:1.5px solid #000;border-radius:4px;margin:4px;}
-    @page{margin:8mm;size:auto;}
-}
-
-/* ── 5列打印布局 ── */
-@media print and (min-width:1500px){
-    .label-card{width:18%;}
-}
-</style>
+<script src="third_party/js/qrcode.js?v=<?=defined('APP_VERSION') ? APP_VERSION.'.'.(is_file($__qrjs) ? filemtime($__qrjs) : '0') : '1.2.0'?>"></script>
+<link rel="stylesheet" href="modules/system/Assets/css/print.css?v=<?=defined('APP_VERSION') ? APP_VERSION : '1.2.0'?>">
 </head>
-<body>
+<body class="tpl-<?=h($labelTemplate)?>">
 
 <div class="no-print">
     <button class="primary" onclick="window.print()">🖨 立即打印</button>
@@ -108,42 +92,78 @@ body{
 <div class="labels" id="labelsBox">
 <?php foreach ($parts as $p):
     $partNo = $p['platform_part_no'] ?: $p['customer_part_no'] ?: '';
-    // 标签数量：'all' 按各自库存，否则用统一数字
+
     $labelQty = ($qtyParam === 'all') ? max(1, (int)$p['stock']) : max(1, (int)$qtyParam);
     // 系统QR码内容：
-    // {id:<内部物料ID>,pid:<平台代码>,model:<型号>,qty:<操作数量>,type:<in|out>}
-    // id=internal_id 全平台唯一, pid=平台code(如lcsc/huaqiu) 平台标识, qty=标签数量, type=入库in/出库out
-    // 去除逗号/大括号/冒号防止解析器混淆
+
     $safeModel  = str_replace([',', '{', '}', ':'], ' ', (string)$p['model']);
     $safePcode  = str_replace([',', '{', '}', ':'], ' ', (string)$p['pcode']);
     $internalId = (int)($p['internal_id'] ?? 0);
     $qrValue = '{id:' . $internalId . ',pid:' . trim($safePcode) . ',model:' . trim($safeModel) . ',qty:' . $labelQty . ',type:' . $labelType . '}';
+
+    $displayNo = match ($labelQrContent) {
+        'model'            => (string)$p['model'],
+        'platform_part_no' => $partNo,
+        default            => \partCode($internalId),
+    };
+    $showModel    = !empty($showFields['model']);
+    $showPartNo   = !empty($showFields['part_no']);
+    $showStock    = !empty($showFields['stock']);
+    $showLocation = !empty($showFields['location']);
+    $showCategory = !empty($showFields['category']);
+    $showBrand    = !empty($showFields['brand']);
 ?>
 <div class="label-card">
+    <?php if ($showModel): ?>
     <div class="label-header">
         <div class="label-model"><?=h($p['model'])?></div>
         <span class="label-usertype" style="background:<?=$labelTypeColor?>22;color:<?=$labelTypeColor?>;border:1px solid <?=$labelTypeColor?>;padding:1px 6px;border-radius:3px;font-size:9px;font-weight:600"><?=$labelTypeLabel?></span>
     </div>
+    <?php endif; ?>
     <div class="label-mid">
-        <div class="label-qr" id="qr<?=$p['id']?>" data-value="<?=h($qrValue)?>"></div>
+        <?php if ($showQrcode): ?>
+        <div class="label-qr-wrap">
+            <div class="label-qr" id="qr<?=$p['id']?>" data-value="<?=h($qrValue)?>"></div>
+            <div class="label-qr-cap">系统码</div>
+        </div>
+        <?php endif; ?>
         <div class="label-mid-info">
-            <div class="part-no"><?=h($partNo)?></div>
-            <?php if ($p['package']): ?>
-            <div class="row"><span class="k">封装</span><span class="v"><?=h($p['package'])?></span></div>
+            <?php if ($showQrcode && $displayNo !== ''): ?>
+            <div class="part-no"><?=h($displayNo)?></div>
             <?php endif; ?>
+            <?php if ($showPartNo && $partNo !== ''): ?>
+            <div class="row"><span class="k">编号</span><span class="v"><?=h($partNo)?></span></div>
+            <?php endif; ?>
+            <?php if ($showStock): ?>
             <div class="row"><span class="k">库存</span><span class="v"><?=$p['stock']?><?php if((int)$p['damaged']>0):?> (不良:<?=$p['damaged']?>)<?php endif; ?></span></div>
-            <div class="row"><span class="k">数量</span><span class="v" style="font-weight:600;color:<?=$labelTypeColor?>"><?=$labelQty?> (<?=$labelType==='out'?'出':'入'?>库)</span></div>
-            <?php if ($p['product_name']): ?>
-            <div class="row"><span class="k">名称</span><span class="v"><?=h($p['product_name'])?></span></div>
             <?php endif; ?>
+            <div class="row"><span class="k">数量</span><span class="v" style="font-weight:600;color:<?=$labelTypeColor?>"><?=$labelQty?> (<?=$labelType==='out'?'出':'入'?>库)</span></div>
         </div>
     </div>
+    <?php
+          ?>
+    <?php
+    $underRows = [];
+    if ($showModel && $p['package'] !== '')    $underRows['封装'] = $p['package'];
+    if ($showBrand && $p['brand'] !== '')      $underRows['品牌'] = $p['brand'];
+    if ($showCategory && $p['product_type'] !== '') $underRows['分类'] = $p['product_type'];
+    if ($showModel && $p['product_name'] !== '')    $underRows['名称'] = $p['product_name'];
+    ?>
+    <?php if ($underRows): ?>
+    <div class="label-mid-info label-under">
+        <?php foreach ($underRows as $uk => $uv): ?>
+        <div class="row"><span class="k"><?=h($uk)?></span><span class="v"><?=h($uv)?></span></div>
+        <?php endforeach; ?>
+    </div>
+    <?php endif; ?>
     <?php if ($remark): ?>
     <div class="label-remark" style="font-size:10px;color:#444;border-top:1px dashed #ccc;padding-top:4px;margin-top:4px">备注：<?=h($remark)?></div>
     <?php endif; ?>
     <div class="label-footer">
-        <span><?=h($p['pname'])?><span class="label-tag">系统码</span></span>
-        <?php if ($p['location']): ?>
+        <?php
+              ?>
+        <span><?=h($p['pname'])?></span>
+        <?php if ($showLocation && $p['location']): ?>
         <span class="label-location">📍<?=h($p['location'])?></span>
         <?php endif; ?>
     </div>
@@ -151,22 +171,7 @@ body{
 <?php endforeach; ?>
 </div>
 
-<script>
-// ── 生成二维码（系统标识）──
-document.querySelectorAll('.label-qr').forEach(function(container) {
-    var value = container.getAttribute('data-value');
-    try {
-        // typeNumber=0 自动选择版本; errorCorrectionLevel='M' 中等纠错
-        var qr = qrcode(0, 'M');
-        qr.addData(value);
-        qr.make();
-        // createImgTag(cellSize, margin, alt)
-        container.innerHTML = qr.createImgTag(3, 0, 'QR');
-    } catch (e) {
-        container.innerHTML = '<div style="font-size:9px;color:#999;text-align:center;padding:20px 4px;">QR生成失败</div>';
-    }
-});
-</script>
+<script src="modules/system/Assets/js/print.js?v=<?=defined('APP_VERSION') ? APP_VERSION : '1.2.0'?>"></script>
 
 </body>
 </html>

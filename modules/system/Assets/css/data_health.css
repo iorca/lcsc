@@ -1,0 +1,203 @@
+/* data_health.css — 数据健康中心页面样式 */
+
+/* 健康分总览卡 */
+.dh-score-card{
+    margin-bottom:16px;
+    background:linear-gradient(135deg,var(--accent-dim) 0%,var(--surface) 100%);
+    border:1px solid var(--border);
+}
+.dh-score-row{
+    display:flex;align-items:stretch;justify-content:space-between;
+    flex-wrap:wrap;gap:20px;
+}
+.dh-score-left{min-width:200px;}
+.dh-score-label{
+    font-size:var(--fs-sm);color:var(--text3);
+    letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px;
+}
+.dh-score-hint{font-size:var(--fs-xs);color:var(--text3);margin-bottom:6px;line-height:1.6;}
+.dh-score-value{
+    font-family:var(--font-mono);font-size:40px;font-weight:700;
+    color:var(--accent);line-height:1.1;
+}
+.dh-score-total{font-size:18px;color:var(--text3);font-weight:400;}
+.dh-level-badge{
+    display:inline-flex;align-items:center;gap:4px;
+    margin-top:8px;padding:3px 10px;border-radius:12px;
+    font-size:var(--fs-sm);
+}
+.dh-level-ok  {background:rgba(34,197,94,.12);color:var(--green);border:1px solid rgba(34,197,94,.3);}
+.dh-level-warn{background:rgba(245,158,11,.12);color:var(--yellow);border:1px solid rgba(245,158,11,.35);}
+.dh-level-bad {background:rgba(239,68,68,.12);color:var(--red);border:1px solid rgba(239,68,68,.35);}
+
+/* 分数怎么来的：三级分解（需要马上处理 / 建议处理 / 仅供参考） */
+.dh-score-breakdown{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;}
+.dh-bd{
+    display:inline-flex;align-items:center;gap:5px;
+    padding:3px 9px;border-radius:var(--pill-radius);
+    font-size:var(--fs-xs);border:1px solid var(--border);
+    background:var(--surface);color:var(--text2);
+}
+.dh-bd::before{content:'';width:6px;height:6px;border-radius:50%;background:currentColor;flex-shrink:0;}
+.dh-bd-must{color:var(--red);border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.08);}
+.dh-bd-warn{color:var(--yellow);border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08);}
+.dh-bd-ref {color:var(--text3);}
+
+.dh-score-right{flex:1;min-width:280px;}
+.dh-stat-row{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:10px;
+}
+.dh-stat{
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--card-radius);padding:10px;text-align:center;
+}
+.dh-stat-num{
+    font-family:var(--font-mono);font-size:22px;font-weight:700;
+    color:var(--text);line-height:1.2;
+}
+.dh-stat-label{
+    font-size:var(--fs-xs);color:var(--text3);margin-top:2px;
+}
+.dh-cache-meta{
+    display:flex;align-items:center;gap:8px;
+    font-size:var(--fs-sm);color:var(--text3);
+}
+.dh-notice{
+    margin-top:12px;padding:9px 12px;
+    background:var(--yellow-dim);border:1px solid rgba(245,158,11,.3);
+    border-radius:var(--card-radius);
+    font-size:var(--fs-base);color:var(--text2);
+}
+
+/* 分组折叠 */
+.dh-group{margin-bottom:10px;padding:0;overflow:hidden;}
+.dh-group-head{
+    display:flex;align-items:center;gap:10px;width:100%;
+    padding:13px 16px;background:transparent;border:0;
+    cursor:pointer;text-align:left;font-family:inherit;
+    transition:background var(--transition-base);
+}
+.dh-group-head:hover{background:var(--surface2);}
+.dh-group-caret{
+    color:var(--text3);font-size:12px;flex-shrink:0;
+    transition:transform var(--transition-base);
+    display:inline-block;
+}
+.dh-group.is-open .dh-group-caret{transform:rotate(90deg);}
+.dh-group-icon{font-size:16px;flex-shrink:0;}
+.dh-group-name{
+    font-size:var(--fs-md);font-weight:600;color:var(--text);flex-shrink:0;
+}
+.dh-group-desc{
+    font-size:var(--fs-sm);color:var(--text3);flex:1;min-width:0;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.dh-group-badges{display:flex;gap:6px;flex-shrink:0;flex-wrap:wrap;}
+
+.dh-group-body{
+    display:none;padding:0 16px 14px;
+    border-top:1px solid var(--border);
+    padding-top:14px;
+}
+.dh-group.is-open .dh-group-body{display:block;}
+.dh-group-empty{padding:20px 0;}
+
+/* 检测卡网格 */
+.dh-check-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(250px,1fr));
+    gap:10px;
+}
+.dh-check{
+    position:relative;
+    background:var(--surface2);
+    border:1px solid var(--border);
+    border-radius:var(--card-radius);
+    padding:12px 13px;
+    border-left-width:3px;
+    transition:border-color var(--transition-base),box-shadow var(--transition-base);
+}
+.dh-check:hover{box-shadow:var(--shadow-sm);border-color:var(--border2);}
+.dh-sev-critical{border-left-color:var(--red);}
+.dh-sev-warn   {border-left-color:var(--yellow);}
+.dh-sev-info   {border-left-color:var(--accent);}
+.dh-check.is-clean{opacity:.62;}
+
+.dh-check-top{
+    display:flex;align-items:center;gap:6px;margin-bottom:6px;
+}
+.dh-check-icon{font-size:15px;flex-shrink:0;}
+.dh-check-label{
+    font-size:var(--fs-base);color:var(--text2);font-weight:500;
+    flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.dh-sev-badge{font-size:var(--fs-xs);padding:1px 6px;flex-shrink:0;white-space:nowrap;}
+.dh-check-num{
+    display:flex;align-items:baseline;gap:8px;
+    font-family:var(--font-mono);font-size:24px;font-weight:700;
+    color:var(--text);line-height:1.2;margin-bottom:5px;
+}
+.dh-sev-critical .dh-check-num{color:var(--red);}
+.dh-sev-warn    .dh-check-num{color:var(--yellow);}
+.dh-check-pct{font-size:var(--fs-sm);color:var(--text3);font-weight:400;}
+.dh-check-hint{
+    font-size:var(--fs-sm);color:var(--text3);line-height:1.5;
+    margin-bottom:8px;min-height:34px;
+}
+.dh-check-actions{display:flex;gap:6px;flex-wrap:wrap;}
+
+/* 明细下钻面板 */
+.dh-detail{margin-top:16px;border-color:var(--accent);}
+.dh-detail-head{
+    display:flex;align-items:flex-start;justify-content:space-between;
+    gap:12px;margin-bottom:12px;flex-wrap:wrap;
+}
+.dh-detail-title{
+    font-size:var(--fs-lg);margin:0 0 2px;font-weight:600;color:var(--text);
+}
+.dh-detail-hint{
+    font-size:var(--fs-base);color:var(--text3);line-height:1.5;
+}
+.dh-detail-table{max-height:420px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--card-radius);}
+.dh-detail-table .data-table{margin:0;}
+.dh-link{color:var(--accent);text-decoration:none;font-family:var(--font-mono);}
+.dh-link:hover{text-decoration:underline;}
+
+/* 页头 */
+.dh-head{flex:1;min-width:0;}
+.dh-toolbar{margin-bottom:0;}
+
+/* 忽略功能：仅供参考项可忽略，隐藏后可恢复 */
+/* 工具条开关：与「重新检测」同排，靠右 */
+.dh-ignored-toggle{
+    display:inline-flex;align-items:center;gap:5px;
+    font-size:12px;color:var(--text2);cursor:pointer;user-select:none;white-space:nowrap;
+}
+.dh-ignored-toggle input{cursor:pointer;accent-color:var(--accent);}
+/* 被忽略的卡：默认隐藏（JS 按开关显隐），勾选后可见时降饱和提示「已忽略」 */
+.dh-check.is-ignored{opacity:.55;}
+.dh-check.is-ignored .dh-sev-badge{display:none;}
+.dh-check.is-ignored .dh-check-hint{display:none;}
+.dh-check.is-ignored::after{
+    content:'已忽略';position:absolute;top:8px;right:10px;
+    font-size:10px;color:var(--text3);letter-spacing:.3px;
+}
+.dh-check{position:relative;}
+
+/* 响应式 */
+@media(max-width:768px){
+    .dh-score-row{flex-direction:column;gap:14px;}
+    .dh-score-right{width:100%;min-width:0;}
+    .dh-stat-row{grid-template-columns:repeat(2,1fr);}
+    .dh-stat-num{font-size:18px;}
+    .dh-check-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+    .dh-check{padding:10px 11px;}
+    .dh-check-num{font-size:20px;}
+    .dh-check-hint{min-height:0;font-size:var(--fs-xs);}
+    .dh-group-desc{display:none;}
+    .dh-group-head{padding:11px 12px;gap:8px;}
+    .dh-group-name{font-size:var(--fs-base);}
+}
+@media(max-width:480px){
+    .dh-check-grid{grid-template-columns:1fr;}
+}

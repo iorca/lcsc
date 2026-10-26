@@ -1,0 +1,64 @@
+/* modules/admin/Assets/css/trace.css — 后台「溯源日志」Tab 专属样式 */
+/* 溯源日志：面板 / 筛选区 / 表格 */
+.trace-panel{position:relative;transition:opacity .15s ease;}
+/* 无感刷新进行中：内容保持可见仅轻微变淡，不出现白屏 */
+.trace-panel.is-loading{opacity:.6;}
+.trace-panel.is-loading::after{
+    content:'刷新中…';position:absolute;top:12px;right:16px;z-index:6;
+    font-size:11px;color:var(--accent);background:var(--accent-dim);
+    padding:3px 10px;border-radius:99px;border:1px solid var(--accent);
+}
+.trace-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.trace-title{font-size:var(--fs-lg);font-weight:600;color:var(--text);letter-spacing:.2px;}
+.trace-retention{font-size:var(--fs-sm);color:var(--text3);white-space:nowrap;}
+/* 筛选区：浅底分组容器，快捷时段与条件行分区 */
+.trace-filter-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:14px;}
+.trace-presets{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+.trace-presets-label{font-size:var(--fs-sm);color:var(--text3);margin-right:2px;}
+.trace-chip{
+    border:1px solid var(--border);background:var(--surface);color:var(--text2);
+    padding:4px 14px;border-radius:99px;font-size:var(--fs-sm);
+    font-family:inherit;cursor:pointer;transition:all .15s ease;
+}
+.trace-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim);}
+.trace-chip:active{transform:scale(.97);}
+.trace-filters{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;}
+.trace-field{display:flex;flex-direction:column;gap:4px;min-width:0;}
+.trace-field > span{font-size:var(--fs-sm);color:var(--text2);}
+.trace-field input,.trace-field select{
+    background:var(--surface);border:1px solid var(--border);color:var(--text);
+    padding:6px 10px;border-radius:7px;font-size:var(--fs-md);font-family:inherit;
+    transition:border-color .15s ease,box-shadow .15s ease;
+}
+.trace-field input:focus,.trace-field select:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim);}
+.trace-field input[type=text]{width:120px;}
+.trace-filter-actions{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap;}
+/* 结果表格：表头吸顶 + 单元格排版统一 */
+.trace-table-wrap{max-height:560px;overflow-y:auto;}
+.trace-table-wrap thead th{position:sticky;top:0;z-index:2;background:var(--surface2);}
+.trace-table-wrap tbody td{vertical-align:middle;}
+.trace-cell-time{font-size:var(--fs-sm);color:var(--text2);font-family:var(--font-mono);white-space:nowrap;}
+.trace-cell-user{font-size:var(--fs-sm);color:var(--accent);font-weight:500;}
+.trace-cell-plain{font-size:var(--fs-sm);color:var(--text2);}
+.trace-cell-dim{font-size:var(--fs-sm);color:var(--text3);font-family:var(--font-mono);}
+.trace-cell-detail{font-size:var(--fs-sm);color:var(--text2);line-height:1.6;word-break:break-word;}
+/* 超长操作详情（批量操作明细可能数千字）：默认摘要 + 就地展开，展开后限高滚动， */
+.trace-detail-full{display:none;white-space:pre-wrap;word-break:break-word;}
+.trace-cell-detail.is-open .trace-detail-short{display:none;}
+.trace-cell-detail.is-open .trace-detail-full{display:block;max-height:160px;overflow-y:auto;padding-right:4px;}
+.trace-detail-toggle{
+    display:inline-block;margin-left:6px;padding:0 4px;border:none;background:none;
+    color:var(--accent);font-family:inherit;font-size:var(--fs-sm);cursor:pointer;
+}
+.trace-detail-toggle:hover{text-decoration:underline;}
+.trace-cell-ip{font-size:11px;color:var(--text3);font-family:var(--font-mono);text-align:right;white-space:nowrap;}
+.trace-actions{text-align:center;white-space:nowrap;}
+.trace-snapshot-btn{padding:3px 8px;font-size:11px;margin-right:4px;}
+.trace-rollback-btn{padding:3px 8px;font-size:11px;color:var(--red);}
+.trace-rollback-btn:hover{border-color:var(--red);color:var(--red);background:var(--red-dim);}
+.trace-empty-hint{display:block;font-size:var(--fs-sm);color:var(--text3);margin-top:6px;}
+@media(max-width:900px){
+    .trace-filter-actions{margin-left:0;width:100%;}
+    .trace-field{flex:1 1 45%;}
+    .trace-field input,.trace-field select,.trace-field input[type=text]{width:100%;}
+}

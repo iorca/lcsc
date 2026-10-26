@@ -1,0 +1,411 @@
+/* modules/inventory/Assets/css/parts.css — 物料列表页（?v=parts）专属样式 */
+/* 弹窗/表单统一视觉补充（配合 common.css design system） */
+.form-sec{margin:18px 0 12px;padding-top:14px;border-top:1px dashed var(--border2);font-size:14px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:8px}
+.form-sec:first-of-type{margin-top:0;padding-top:0;border-top:none}
+.form-sec .sec-ic{color:var(--accent);font-size:14px}
+.form-sec .sec-note{font-size:11px;color:var(--text3);font-weight:normal;margin-left:6px}
+.form-grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px 20px}
+/* 两列表单：单控件组标签右对齐定宽，复杂组（库位/关联/勾选）标签上置 */
+.form-grid2>.form-group{display:grid;grid-template-columns:110px 1fr;gap:6px 12px;align-items:start;min-width:0}
+.form-grid2>.form-group>label{text-align:right;padding-top:8px;margin:0}
+.form-grid2>.form-group>label+input,.form-grid2>.form-group>label+select,.form-grid2>.form-group>label+textarea{grid-column:2;justify-self:stretch}
+.form-grid2>.form-group>label+input.fld-err{grid-column:2}
+.form-grid2>.form-group.fg-stack{display:block}
+.form-grid2>.form-group.fg-stack>label{text-align:left;padding-top:0;margin-bottom:5px}
+#modalAdd .modal-footer{justify-content:flex-end}
+@media(max-width:640px){.form-grid2{grid-template-columns:1fr}.form-grid2>.form-group{grid-template-columns:1fr;display:block}.form-grid2>.form-group>label{text-align:left;padding-top:0;margin-bottom:5px}}
+.fld-err{display:none;color:var(--red);font-size:11px;margin-top:4px;line-height:1.5}
+.fld-err.show{display:block}
+.input-invalid{border-color:var(--red)!important;box-shadow:0 0 0 2px var(--red-dim)}
+
+/* 添加 / 编辑元件弹窗布局 */
+#modalAdd .form-grid2>.form-group,#modalEdit .form-grid2>.form-group{display:block}
+#modalAdd .form-grid2>.form-group>label,#modalEdit .form-grid2>.form-group>label{text-align:left;padding-top:0;margin-bottom:6px}
+#modalAdd .modal,#modalEdit .modal{padding-bottom:0;}
+#modalAdd .modal-footer,#modalEdit .modal-footer{justify-content:flex-end;gap:10px;}
+#modalAdd .modal-footer .btn:last-child,#modalEdit .modal-footer .btn:last-child{margin-left:0;}
+/* 库位录入控件组：左树右文，等高并排；文本框占主要宽度 */
+.loc-pair{display:flex;gap:8px;align-items:stretch;}
+.loc-pair .loc-picker{flex:0 0 38%;width:38%;height:36px;margin-bottom:0;}
+.loc-pair .loc-pair-text{flex:1;min-width:0;width:auto;}
+.tip-box{display:flex;align-items:center;gap:6px;padding:8px 11px;border-radius:8px;background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent);font-size:12px;margin-bottom:12px}
+.sem-green{border-color:var(--green)!important}
+.sem-red{border-color:var(--red)!important}
+.sem-amber{border-color:var(--yellow)!important}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.chip{padding:3px 12px;border-radius:14px;border:1px solid var(--border2);background:var(--surface);color:var(--text2);font-size:11px;cursor:pointer;transition:all var(--transition-fast)}
+.chip:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.qty-wrap{display:flex;align-items:stretch;gap:8px}
+.qty-stepper{display:flex;align-items:stretch;border:1px solid var(--border2);border-radius:7px;overflow:hidden;background:var(--surface2);flex:1;max-width:170px}
+.qty-stepper button{width:34px;border:none;background:var(--surface2);color:var(--text2);cursor:pointer;font-size:16px;line-height:1}
+.qty-stepper button:hover{background:var(--accent-dim);color:var(--accent)}
+.qty-stepper input{flex:1;min-width:60px;border:none;background:transparent;text-align:center;outline:none;color:var(--text);height:100%}
+.qty-stepper input:disabled{opacity:.5}
+.loc-chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:12px;background:var(--accent-dim);border:1px solid transparent;color:var(--accent);font-size:11px;cursor:pointer;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:all var(--transition-fast)}
+.loc-chip:hover{border-color:var(--accent)}
+.loc-chip-empty{color:var(--text3);font-size:12px}
+.btn.btn-stock{color:var(--accent);}
+.alt-pick-head,.alt-pick-row{display:grid;gap:8px;align-items:center;padding:6px 10px;font-size:12px;min-width:0}
+.alt-pick-head.alt-cols,.alt-pick-row.alt-cols{grid-template-columns:28px 1.2fr .9fr .9fr .65fr 1fr}
+.alt-pick-head.linked-cols,.alt-pick-row.linked-cols{grid-template-columns:1.2fr .9fr .9fr .65fr 1fr}
+.alt-pick-head>div,.alt-pick-row>div{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.alt-pick-head{background:var(--surface3);color:var(--text3);font-weight:600;border-bottom:1px solid var(--border2);position:sticky;top:0;z-index:2;font-size:11px;border-radius:7px 7px 0 0}
+.alt-pick-row{border-bottom:1px solid var(--border);cursor:pointer;border-radius:6px;margin:2px 6px}
+.alt-pick-row:hover{background:var(--accent-dim)}
+.alt-pick-row.is-off{opacity:.5;background:var(--surface2);cursor:not-allowed}
+.alt-pick-row.is-checked{background:var(--accent-dim);outline:1px solid var(--accent)}
+.alt-pick-row input[type=checkbox]{width:auto;accent-color:var(--accent);cursor:pointer}
+.alt-stk-ok{color:var(--green);font-weight:600}
+.alt-stk-zero{color:var(--red)}
+.alt-pick-row .apt-stk{text-align:center;font-family:var(--font-mono);font-weight:600}
+.print-fields{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+@media(max-width:520px){.print-fields{grid-template-columns:repeat(2,1fr)}}
+.print-fields label{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text2);cursor:pointer;background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:6px 8px;transition:all var(--transition-fast)}
+.print-fields label:hover{border-color:var(--accent)}
+.print-fields label:has(input:checked){border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+.print-fields input[type=checkbox]{width:auto;accent-color:var(--accent);cursor:pointer}
+.cost-readonly{background:var(--surface2)!important;color:var(--green)!important;font-family:var(--font-mono);font-weight:600}
+.alt-table{width:100%;border-collapse:collapse;font-size:12px}
+.alt-table th{color:var(--text3);font-weight:600;text-align:left;padding:5px 8px;border-bottom:1px solid var(--border2);font-size:11px}
+.alt-table td{padding:6px 8px;border-bottom:1px solid var(--border)}
+.alt-table tr:last-child td{border-bottom:none}
+.alt-table .alt-del{color:var(--red);cursor:pointer;border:none;background:none;font-size:14px;line-height:1;padding:0 3px}
+.alt-table .alt-del:hover{opacity:.7}
+
+/* parts-batch.js 的 HTML 拼接所需类 */
+
+/* 强调数字 / 强调文本：提示语里的关键数值 */
+.emb-accent{color:var(--accent);}
+.emb-danger{color:var(--red);}
+.emb-ok{color:var(--green);}
+/* 强调 + 半粗（用于「出库 / 入库标签」这类带状态语义的强调） */
+.emb-strong{font-weight:600;}
+
+/* 空态 / 占位提示块（查询中、无结果、无数据） */
+.pbx-note{padding:24px 0;text-align:center;color:var(--text2);}
+.pbx-note.is-lg{padding:32px 0;}
+.pbx-note .pbx-sub{font-size:11px;}
+/* 虚线框空态（替代料列表未绑定时的引导） */
+.pbx-dash{
+    padding:12px 14px;color:var(--text3);font-size:12px;
+    background:var(--surface2);border:1px dashed var(--border2);border-radius:8px;
+}
+/* 紧凑空态（替代料表查询后为空） */
+.pbx-note.is-tight{padding:10px 12px;}
+
+
+/* 合并向导（步骤 1：候选组 / 步骤 2：确认预览） */
+.mg-group{
+    border:1px solid var(--border);border-radius:8px;
+    padding:10px 12px;margin-bottom:10px;
+}
+.mg-group-title{font-weight:600;font-size:13px;margin-bottom:8px;}
+/* 组标题尾部的「品牌 · 封装 · N 项」（弱化，不抢主物料的视觉重量） */
+.mg-group-sub{font-weight:400;color:var(--text2);font-size:11px;}
+/* 主物料候选行（radio + 编号 + 库存 + 库位）。 */
+.mg-pick{
+    display:flex;align-items:center;gap:8px;
+    padding:5px 8px;border-radius:6px;cursor:pointer;font-size:12px;
+}
+.mg-pick:hover{background:var(--surface2);}
+.mg-pick-main{flex:1;min-width:0;}
+/* 行内次要信息（商品编号 / 库存 / 库位） */
+.mg-pick-sub{color:var(--text2);}
+.mg-pick-sub.has-width{min-width:90px;}
+.mg-group-ops{text-align:right;margin-top:6px;}
+
+/* 步骤 2 确认预览容器 */
+.mg-preview{border:1px solid var(--border);border-radius:8px;padding:12px;font-size:13px;}
+.mg-preview-hint{font-size:11px;color:var(--text2);margin-top:2px;}
+.mg-preview-sec{margin-bottom:4px;}
+.mg-preview-list{margin:4px 0 8px 18px;padding:0;font-size:12px;color:var(--text2);}
+.mg-preview-total{font-size:12px;}
+
+/* 替代料选择器（弹窗内网格表头 / 行内徽标） */
+/* 居中格（表头 ✔ / 库存列在选择器里是居中） */
+.alt-c{text-align:center;}
+/* 右对齐格（替代料表「库存」列的表头与单元格）。 */
+.alt-table .alt-r{text-align:right;}
+/* 「当前已关联 / 已添加」状态徽标 */
+.alt-flag{
+    color:var(--accent);font-size:10px;
+    background:var(--accent-dim);border-radius:3px;padding:0 4px;
+}
+/* 已关联物料的内部编号胶囊 */
+.alt-pill{
+    display:inline-block;background:var(--accent-dim);color:var(--accent);
+    border-radius:3px;padding:0 4px;
+    font-size:10px;font-family:var(--font-mono);font-weight:600;
+}
+.alt-no{color:var(--accent);font-family:var(--font-mono);}
+.alt-name{color:var(--text3);margin-left:6px;font-size:11px;}
+.alt-table .is-gone{color:var(--red);}
+/* 列宽（替代料表：编号 64 / 库存 64 / 删除 32） */
+.alt-w-id{width:64px;}
+.alt-w-stock{width:64px;}
+.alt-w-del{width:32px;}
+.preview-frame{width:100%;height:520px;border:1px solid var(--border2);border-radius:10px;background:#fff}
+/* 顶部概览条：统计 + 筛选态 + 显示密度 合并为一行（紧凑，不占用纵向空间） */
+.inv-statsbar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:8px 12px;margin-bottom:12px;
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:var(--card-radius);box-shadow:var(--shadow-sm);
+}
+/* 统计项：横向「标签 + 数值」，可点击筛选；选中态=主色底 */
+.inv-stat{
+    display:inline-flex;align-items:baseline;gap:6px;
+    padding:5px 11px;border-radius:var(--btn-radius);
+    border:1px solid transparent;background:var(--surface2);
+    cursor:pointer;font-family:inherit;text-align:left;
+    transition:background var(--transition-base),border-color var(--transition-base),color var(--transition-base);
+}
+.inv-stat:hover{background:var(--row-hover);border-color:var(--border2)}
+.inv-stat .stat-label{font-size:var(--fs-sm);color:var(--text2);white-space:nowrap}
+.inv-stat .stat-value{
+    font-family:var(--font-mono);font-size:var(--fs-lg);
+    font-weight:700;line-height:1;color:var(--text);
+}
+.inv-stat.c-blue .stat-value{color:var(--accent)}
+.inv-stat.c-yellow .stat-value{color:var(--yellow)}
+.inv-stat.c-red .stat-value{color:var(--red)}
+.inv-stat.c-purple .stat-value{color:var(--purple)}
+.inv-stat.active{background:var(--accent-dim);border-color:var(--accent)}
+.inv-stat.active .stat-label{color:var(--text);font-weight:500}
+/* 左侧语义色点：区分指标含义，比整块彩色底更安静 */
+.inv-stat::before{
+    content:'';width:6px;height:6px;border-radius:50%;flex:none;
+    background:var(--accent);align-self:center;
+}
+.inv-stat.c-yellow::before{background:var(--yellow)}
+.inv-stat.c-red::before,.inv-stat.c-gray::before{background:var(--red)}
+.inv-stat.c-purple::before{background:var(--purple)}
+/* 右侧：筛选态 + 密度 */
+.inv-statsbar-right{margin-left:auto;display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap}
+.inv-statsbar-right .filter-state-row{margin:0;min-height:0}
+@media(max-width:768px){
+    .inv-statsbar{padding:8px;gap:6px}
+    .inv-stat{padding:4px 8px}
+    .inv-stat .stat-value{font-size:var(--fs-md)}
+    .inv-statsbar-right{width:100%;margin-left:0}
+}
+/* 表格细节：型号加粗 / 库存旁状态标签 / 排序箭头 */
+.inv-table .model-txt{font-weight:600;font-size:var(--fs-md);color:var(--text)}
+.stk-tag{display:inline-flex;align-items:center;margin-left:5px;padding:0 5px;height:16px;border-radius:4px;font-size:10px;font-weight:600;vertical-align:1px}
+.stk-tag.red{background:var(--red-dim);color:var(--red)}
+.stk-tag.gray{background:var(--surface3);color:var(--text2)}
+/* 密度切换：舒适（型号列两行：型号 + 商品描述）/ 紧凑（单行高密度） */
+.inv-dens-row{display:inline-flex;align-items:center;gap:6px}
+.dens-seg-label{font-size:12px;color:var(--text3)}
+.dens-seg{display:inline-flex;border:1px solid var(--border);border-radius:var(--btn-radius);overflow:hidden}
+.dens-seg button{border:none;background:var(--surface);padding:4px 12px;font-size:12px;cursor:pointer;color:var(--text2);font-family:inherit;transition:background var(--transition-fast)}
+.dens-seg button:hover{background:var(--surface2);color:var(--accent)}
+.dens-seg button.active{background:var(--accent);color:#fff}
+/* 表头排序 */
+th.sortable{cursor:pointer;user-select:none}
+th.sortable .sort-arrow{display:inline-block;margin-left:4px;font-size:10px;opacity:.4}
+th.sortable .sort-arrow::after{content:'↕'}
+th.sortable.sorted-asc .sort-arrow::after{content:'↑';opacity:1;color:var(--accent)}
+th.sortable.sorted-desc .sort-arrow::after{content:'↓';opacity:1;color:var(--accent)}
+/* 筛选状态标签（点击统计卡后自动生成，样式与分类标签统一） */
+.filter-state-row{display:flex;align-items:center;gap:8px;margin:0 0 12px;flex-wrap:wrap;min-height:26px}
+.filter-state-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 10px;border-radius:var(--btn-radius);background:var(--accent);color:#fff;font-size:12px;font-weight:500}
+.filter-state-tag .fs-close{width:16px;height:16px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer;background:rgba(255,255,255,.25);transition:background var(--transition-fast)}
+.filter-state-tag .fs-close:hover{background:rgba(255,255,255,.45)}
+.filter-row .filter-select{height:36px;padding:0 10px;border-radius:var(--btn-radius);font-size:var(--fs-md);box-sizing:border-box}
+.filter-row .filter-add-btn{height:36px}
+.cat-filter-box .cat-act-btn{font-size:12px}
+
+/* 列表缩略图列 */
+.col-thumb{width:56px}
+th.col-thumb{font-size:11px;color:var(--text3);font-weight:400;text-align:center}
+td.col-thumb{padding:4px 6px;vertical-align:middle}
+.row-thumb{display:block;width:40px;height:40px;object-fit:cover;border-radius:var(--btn-radius);border:1px solid var(--border);background:var(--surface2);cursor:zoom-in}
+.row-thumb:hover{border-color:var(--accent)}
+.row-thumb-empty{display:block;width:40px;height:40px;border-radius:var(--btn-radius);border:1px dashed var(--border2);background:var(--surface2)}
+/* 物料详情抽屉 · 图片与手册 */
+.att-gallery{display:flex;flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:12px}
+.att-main{display:inline-block;max-width:100%;padding:4px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--card-radius);cursor:zoom-in;line-height:0;overflow:hidden}
+.att-main:hover{border-color:var(--accent)}
+.att-main img{display:block;width:auto;max-width:100%;height:auto;max-height:220px;object-fit:contain;image-rendering:auto}
+.att-thumbs{display:flex;gap:8px;flex-wrap:wrap}
+.att-thumb{padding:0;border:1px solid var(--border);border-radius:var(--card-radius);background:var(--surface2);cursor:pointer;overflow:hidden;transition:all var(--transition-fast);line-height:0}
+.att-thumb img{display:block;width:52px;height:52px;object-fit:cover}
+.att-thumb:hover{border-color:var(--accent)}
+.att-thumb.on{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent)}
+
+.att-list{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.att-row{display:flex;align-items:center;gap:8px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--btn-radius);background:var(--surface2);font-size:12px;min-width:0}
+.att-ic{flex:none;width:16px;text-align:center}
+.att-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+.att-size{flex:none;color:var(--text3);font-size:11px;font-family:var(--font-mono)}
+.att-acts{flex:none;display:flex;gap:6px;align-items:center}
+/* 标题右侧操作区（与 .dc-more 同一形态，但承载按钮组而非单个链接） */
+.dc-title-acts{margin-left:auto;display:flex;gap:6px;align-items:center}
+
+/* 图片灯箱（attPreview） */
+.att-lightbox{position:fixed;inset:0;z-index:1200;display:none;align-items:center;justify-content:center;padding:32px;background:rgba(0,0,0,.72);opacity:0;visibility:hidden;transition:opacity .18s ease,visibility .18s ease}
+.att-lightbox.is-open{display:flex;opacity:1;visibility:visible}
+.att-lb-img{max-width:100%;max-height:100%;object-fit:contain;border-radius:var(--btn-radius);transform:scale(.96);transition:transform .18s ease}
+.att-lightbox.is-open .att-lb-img{transform:scale(1)}
+.att-lb-close{position:absolute;top:16px;right:20px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.45);color:#fff;font-size:20px;line-height:1;cursor:pointer;transition:background .15s ease,border-color .15s ease}
+.att-lb-close:hover{background:rgba(0,0,0,.7);border-color:rgba(255,255,255,.5)}
+body.att-lb-locked{overflow:hidden}
+
+
+/* parts-drawer.js 的分类层级缩进 + 无子分类提示 */
+
+/* 缩进阶梯的一节（宽 12px 的空撑块，撑出层级深度）。 */
+.cat-indent-step-blank{display:block;width:12px;}
+/* 缩进末端的「↳」标记 */
+.cat-indent-mark{color:var(--text3);margin-right:2px;}
+/* 「该大类下无子分类」提示。**两处形态不同**： */
+.cat-sub-empty{color:var(--text3);font-size:12px;}
+.cat-sub-empty.is-block{display:block;padding:10px;}
+
+/* parts-modal.js 抽屉内「相似物料推荐」区 */
+
+/* 加载中占位 */
+.alt-s-loading{padding:14px;text-align:center;color:var(--text3);font-size:12px;}
+/* 标题尾部的说明（弱化，不与标题抢视觉重量） */
+.alt-s-hint{font-weight:normal;color:var(--text3);font-size:11px;}
+.info-table th.alt-s-th{text-align:left;padding:4px 8px;font-size:11px;color:var(--text2);}
+/* 末列的空表头。**刻意不给 `.alt-s-th`** —— */
+.info-table th.alt-s-th-end{padding:4px 8px;}
+/* 数据单元格 */
+.info-table td.alt-s-td{padding:5px 8px;font-size:12px;}
+.info-table td.alt-s-td.is-act{padding:5px 8px;text-align:right;}
+/* 型号列的可点链接（等宽 + 主色，点开该物料的抽屉） */
+.alt-s-link{color:var(--accent);font-family:var(--font-mono);font-size:12px;}
+.info-table td.alt-s-td.is-in{color:var(--green);}
+.info-table td.alt-s-td.is-out{color:var(--red);}
+
+/* Views/index.php 视图层行内 style */
+
+/* 通用工具类（本页多处复用） */
+.inv-modal-wide{max-width:720px;width:92%;}
+/* 更宽的弹窗（替代料选择 860px） */
+.inv-modal-xwide{max-width:860px;}
+/* 需要与上方内容拉开间距的玻璃盒 */
+.inv-glass-spaced{margin-top:14px;}
+/* 搜索框：表单容器 + 输入框合并圆角（左圆右方），搜索图标占位 34px */
+.inv-search-form{display:flex;gap:0;position:relative;flex:1;}
+.inv-search-input{border-radius:7px 0 0 7px;border-right:none;padding-left:34px;padding-right:32px;}
+/* 弹窗内的裸输入框（不在 .form-group 内时用）。 */
+.inv-input{flex:1;min-width:0;}
+/* `.form-group` 内的紧凑控件变体。 */
+.inv-fg-dense{padding:7px 11px;}
+.inv-scroll-box{overflow-y:auto;}
+/* 「已选 N 项」提示条：4 个批量弹窗共用同一形态 */
+.inv-batch-hint{font-size:var(--fs-sm);color:var(--text2);padding:6px 10px;background:var(--surface2);border-radius:6px;}
+/* 提示条里的数字（主色加粗） */
+.inv-batch-count{color:var(--accent);font-weight:var(--fw-semibold);}
+/* 弹窗内的次级说明小字 */
+.inv-hint-sm{font-size:var(--fs-sm);color:var(--text3);}
+/* 必填星号 */
+.inv-req-star{color:var(--red);font-size:var(--fs-xs);}
+/* 行内文字里的强调数值（等宽 + 主色） */
+.inv-em-accent{font-family:var(--font-mono);color:var(--accent);font-weight:var(--fw-semibold);}
+/* 行内文字里的强调数值（等宽 + 紫色，不良品计数用） */
+.inv-em-purple{font-family:var(--font-mono);color:var(--purple);margin-left:8px;}
+/* 行内说明小字（包裹在 label 内的括号说明） */
+.inv-label-note{font-size:var(--fs-xs);color:var(--text3);font-weight:normal;}
+
+/* 批量操作条 */
+/* 「出入库 / 删除」批量条内的复选框：宽高固定 + 主色调 + 手型 */
+.inv-cb-accent{accent-color:var(--accent);width:16px;height:16px;cursor:pointer;}
+/* 「宽度自适应」的复选框（覆盖浏览器默认尺寸，用于弹窗内联行） */
+.inv-cb-auto{width:auto;}
+
+/* 移动卡片样式已随单套 DOM 方案删除 */
+
+/* 合并 / 批量 BOM 弹窗 */
+/* 搜索框行：输入框撑满剩余宽度（`.inv-input` 自带 flex:1） */
+.inv-merge-search{display:flex;gap:8px;align-items:center;}
+/* 重复组列表滚动区 */
+.inv-merge-list{max-height:380px;}
+/* 第二步（预览）容器，默认隐藏由 JS 切换 */
+.inv-merge-step2{display:none;}
+/* 预览滚动区 */
+.inv-merge-preview{max-height:340px;}
+/* 加载中占位 */
+.inv-loading-pad{padding:24px 0;text-align:center;color:var(--text2);}
+/* 合并预览里的告警框（红色底 + 描边） */
+.inv-warn-box{background:var(--red-dim,#fee2e2);border:1px solid var(--red,#ef4444);border-radius:8px;padding:10px 12px;margin:12px 0;font-size:var(--fs-sm);color:var(--text);}
+.inv-check-row{display:flex;align-items:center;gap:8px;font-size:var(--fs-md);margin-bottom:12px;cursor:pointer;}
+/* 打印数量的 flex 行 */
+.inv-print-qty-row{display:flex;gap:8px;align-items:center;}
+
+/* 替代料选择弹窗 */
+/* 结果区滚动框（带边框与底色） */
+.pp-result-box{max-height:400px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:var(--surface);}
+/* 空态（默认隐藏，由 JS 切换） */
+.pp-empty{display:none;padding:28px 16px;text-align:center;color:var(--text3);font-size:var(--fs-sm);line-height:1.9;}
+/* 空态里的大号放大镜图标 */
+.pp-empty-ico{font-size:30px;margin-bottom:6px;opacity:.55;}
+/* 加载中条 */
+.pp-loading{display:none;text-align:center;padding:14px;color:var(--text3);font-size:var(--fs-sm);}
+/* 已选提示行 */
+.pp-sel-hint{margin-top:8px;font-size:var(--fs-sm);color:var(--text3);min-height:18px;}
+
+/* 出入库弹窗 */
+/* 顶部物料摘要条 */
+.inv-stk-bar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;margin-bottom:14px;}
+/* 摘要条里的物料名 */
+.inv-stk-name{font-weight:var(--fw-semibold);font-size:var(--fs-md);color:var(--text);}
+/* 摘要条里的商品编号（等宽 + 限宽截断） */
+.inv-stk-ppn{font-size:var(--fs-xs);color:var(--text3);font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:150px;}
+/* 当前库存数值（等宽 + 主色 + 加粗） */
+.inv-stk-cur{font-family:var(--font-mono);color:var(--accent);font-weight:var(--fw-semibold);}
+/* 成本区（样品不计资产等，默认隐藏） */
+.inv-cost-group{display:none;}
+/* 弹窗内的小号复选行标签 */
+.inv-check-row-sm{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:var(--fs-sm);color:var(--text2);}
+
+/* 删除 / 打印 / 版本更新 */
+/* 删除确认的说明文字 */
+.inv-del-msg{color:var(--text2);font-size:var(--fs-md);margin-bottom:18px;}
+/* 打印范围提示条（主色底 + 描边） */
+.inv-print-info{color:var(--text);font-size:var(--fs-sm);margin-bottom:14px;padding:9px 12px;background:var(--accent-dim);border:1px solid var(--accent);border-radius:8px;}
+.inv-print-fields-2{grid-template-columns:1fr 1fr;}
+/* 打印字段选项里的括号说明 */
+.inv-print-tpl-note{font-size:10px;color:var(--text3);}
+/* 模板单选组的横向排列行 */
+.inv-tpl-row{display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;}
+/* 模板单选项标签 */
+.inv-tpl-label{display:flex;align-items:center;gap:5px;cursor:pointer;font-weight:normal;font-size:var(--fs-md);}
+/* 「每个物料打印数量 = 当前库存」行（默认隐藏，由 JS 切换）。 */
+.form-group label.inv-print-each-row{display:none;margin-top:6px;font-size:var(--fs-sm);color:var(--text2);gap:6px;align-items:center;cursor:pointer;}
+/* 数量错误提示（默认隐藏，由 JS 切换） */
+.inv-qty-error{color:var(--red);font-size:var(--fs-xs);margin-top:4px;display:none;}
+/* 替代料预览的元信息行 */
+.inv-pp-preview-meta{font-size:var(--fs-sm);color:var(--text2);margin-bottom:10px;}
+/* 抽屉标题（字号 15px + 半粗） */
+.inv-drawer-title{font-weight:var(--fw-semibold);font-size:15px;}
+/* 库存备注段落 */
+.inv-stock-note{font-size:var(--fs-sm);color:var(--text2);margin:2px 0 10px;}
+/* 「添加替代料」按钮的顶部间距 */
+.inv-alt-add{margin-top:8px;}
+/* 表单栅格跨整行（库位字段占满一行） */
+.inv-fg-full{grid-column:1/-1;}
+
+/* 显隐状态类（配合 JS 的 classList.toggle） */
+.pp-head{display:none;}
+.pp-head.is-on{display:block;}
+/* 替代料弹窗：空态 */
+.pp-empty.is-on{display:block;}
+/* 替代料弹窗：加载中 */
+.pp-loading.is-on{display:block;}
+/* 出入库弹窗：不良品计数 */
+.inv-em-purple.is-on{display:inline;}
+/* 出入库弹窗：成本区（样品 / 单价） */
+.inv-cost-group.is-on{display:block;}
+/* 打印弹窗：数量错误提示 */
+.inv-qty-error.is-on{display:block;}
+/* 打印弹窗：「每个物料打印数量 = 当前库存」行打开。 */
+.form-group label.inv-print-each-row.is-on{display:flex;}
+/* PC 端的 `.m-cat-footer` 基础样式。 */
+.m-cat-footer.is-on{display:flex;align-items:center;justify-content:space-between;padding:8px 16px;border-top:1px solid var(--border);background:var(--surface);flex-shrink:0;}
+
+/* `.loc-picker` 的下边距（3 处弹窗共用）。 */
+.loc-picker{margin-bottom:6px;}

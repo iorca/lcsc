@@ -1,0 +1,208 @@
+/* backup.css — 数据备份 Tab 样式 */
+
+/* 栅格与卡片 */
+.bk-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:14px;margin-bottom:14px;}
+/* 紧凑网格：小卡片布局，视觉密度更高 */
+.bk-grid.compact{grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px;}
+.bk-card{
+    border:1px solid var(--border);border-radius:var(--card-radius);padding:14px 16px;
+    background:var(--surface);margin-bottom:14px;
+    transition:border-color var(--transition-base),box-shadow var(--transition-base);
+}
+.bk-grid .bk-card{margin-bottom:0;}
+.bk-card:hover{border-color:var(--border2);box-shadow:var(--shadow-sm);}
+.bk-card h4{font-size:var(--fs-md);font-weight:var(--fw-semibold);margin:0 0 5px;color:var(--text);}
+.bk-desc{font-size:var(--fs-sm);color:var(--text3);margin-bottom:10px;line-height:1.6;}
+.bk-card .form-hint{margin-bottom:10px;}
+
+/* 提示条 */
+.bk-danger-tip,.bk-warning-tip{
+    display:flex;gap:8px;align-items:flex-start;
+    border-radius:var(--btn-radius);padding:8px 10px;
+    font-size:var(--fs-sm);line-height:1.6;margin-bottom:10px;
+}
+.bk-danger-tip{background:var(--red-dim);border:1px solid var(--red);color:var(--red);}
+.bk-warning-tip{background:var(--yellow-dim);border:1px solid var(--yellow);color:var(--yellow);}
+
+/* 表单行与操作区 */
+.bk-field-row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;margin-bottom:10px;}
+.bk-field-row .form-group{margin:0;}
+.bk-field-row .bk-grow{flex:1 1 200px;min-width:180px;}
+.bk-ops{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+
+/* 定时备份状态行：常驻信息（不参与自动消失） */
+.bk-schedule-status{
+    font-size:var(--fs-sm);color:var(--text3);margin-top:8px;
+    padding-top:8px;border-top:1px dashed var(--border);line-height:1.6;
+}
+.bk-schedule-status b{color:var(--text2);font-weight:var(--fw-semibold);font-family:var(--font-mono);}
+
+/* 忙碌动画 */
+.bk-spin{
+    display:inline-block;width:12px;height:12px;
+    border:2px solid currentColor;border-top-color:transparent;border-radius:50%;
+    animation:bkSpin .7s linear infinite;vertical-align:-2px;margin-right:5px;
+}
+@keyframes bkSpin{to{transform:rotate(360deg);}}
+@media (prefers-reduced-motion: reduce){ .bk-spin{animation:none;} }
+
+/* 空状态 */
+.bk-empty{padding:20px 12px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.bk-empty-icon{
+    width:46px;height:46px;border-radius:50%;
+    background:var(--surface2);border:1px dashed var(--border);
+    display:flex;align-items:center;justify-content:center;
+    font-size:20px;margin-bottom:6px;color:var(--text3);
+}
+.bk-empty-title{font-size:var(--fs-md);font-weight:var(--fw-semibold);color:var(--text2);}
+.bk-empty-text{font-size:var(--fs-sm);color:var(--text3);}
+
+/* 表格 */
+.bk-table-wrap{margin-top:12px;}
+
+/* 文件选择 */
+.bk-file-input{
+    background:var(--surface);border:1px solid var(--border);color:var(--text);
+    padding:8px 10px;border-radius:var(--btn-radius);font-size:var(--fs-md);width:100%;
+    margin-bottom:10px;transition:border-color var(--transition-base);
+}
+.bk-file-input:hover{border-color:var(--accent);}
+.bk-file-input:focus{outline:none;border-color:var(--accent);}
+
+/* 权限范围选择按钮（替代原生多选 select） */
+.bk-scope-btn{
+    width:100%;text-align:left;padding:8px 12px;border-radius:var(--btn-radius);
+    border:1px solid var(--border);background:var(--surface);color:var(--text);
+    font-size:var(--fs-sm);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:8px;
+    transition:border-color var(--transition-base);font-family:inherit;
+}
+.bk-scope-btn:hover{border-color:var(--accent);}
+.bk-scope-btn .arrow{color:var(--text3);font-size:10px;flex-shrink:0;}
+.bk-scope-btn.placeholder{color:var(--text3);}
+
+/* 权限范围选择弹窗 */
+.bks-overlay{
+    position:fixed;inset:0;z-index:var(--z-overlay);display:flex;align-items:center;justify-content:center;
+    background:var(--overlay-bg);backdrop-filter:var(--overlay-blur);animation:acmFade var(--transition-base);
+}
+.bks-dialog{
+    width:min(420px,calc(100vw - 40px));background:var(--surface);
+    border:1px solid var(--border);border-radius:10px;
+    box-shadow:var(--shadow-lg);padding:20px;
+    animation:acmPop .18s cubic-bezier(.34,1.4,.64,1);
+}
+.bks-title{font-size:var(--fs-xl);font-weight:var(--fw-bold);color:var(--text);margin-bottom:6px;}
+.bks-hint{font-size:var(--fs-sm);color:var(--text2);margin-bottom:12px;}
+.bks-list{
+    max-height:320px;overflow-y:auto;border:1px solid var(--border);
+    border-radius:8px;margin-bottom:14px;
+}
+.bks-item{
+    display:flex;align-items:center;gap:10px;padding:11px 14px;
+    border-bottom:1px solid var(--border);cursor:pointer;transition:background var(--transition-fast);
+}
+.bks-item:last-child{border-bottom:none;}
+.bks-item:hover{background:var(--surface2);}
+.bks-item input[type=checkbox]{width:16px;height:16px;cursor:pointer;flex-shrink:0;accent-color:var(--accent);}
+.bks-item .bks-name{font-size:var(--fs-md);color:var(--text);font-weight:var(--fw-medium);}
+.bks-item .bks-val{font-size:var(--fs-xs);color:var(--text3);font-family:var(--font-mono);}
+.bks-item .bks-desc{font-size:var(--fs-xs);color:var(--text3);margin-left:auto;text-align:right;}
+.bks-btns{display:flex;justify-content:flex-end;gap:10px;}
+.bks-overlay.is-hidden{display:none;}
+
+/* WebDAV 连通性测试弹窗（保存配置后显示远端目录内容） */
+.wd-dialog{width:min(560px,calc(100vw - 40px));}
+.wd-list{max-height:320px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;margin-bottom:14px;}
+.wd-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);}
+.wd-row:last-child{border-bottom:none;}
+.wd-ico{flex:none;width:18px;text-align:center;}
+.wd-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:var(--fs-md);color:var(--text);}
+.wd-meta{font-size:var(--fs-xs);color:var(--text3);font-family:var(--font-mono);white-space:nowrap;}
+.wd-empty{padding:18px 14px;text-align:center;color:var(--text3);font-size:var(--fs-sm);}
+
+/* 版本与维护：紧凑横条 */
+.bk-maint-bar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    border:1px solid var(--border);border-radius:8px;padding:10px 14px;
+    background:var(--surface);margin-bottom:14px;
+}
+.bk-maint-ver{font-size:var(--fs-sm);color:var(--text2);}
+.bk-maint-ver strong{color:var(--text);font-family:var(--font-mono);}
+/* 卡片标题行：左标题 + 右操作（「清理过期备份」按钮移到这里，右对齐） */
+.bk-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+.bk-card-head h4{margin-bottom:0;}
+
+/* 响应式 */
+@media(max-width:768px){
+    .bk-grid,.bk-grid.compact{grid-template-columns:1fr;}
+}
+/* 备份操作记录表 */
+.bk-desc-flash{margin:0;}
+.bk-table-wrap-tight{margin-top:8px;}
+.bk-input-mono{font-family:var(--font-mono);font-size:var(--fs-sm);}
+.bk-field-fixed{margin:0 !important;flex:none;}
+.bk-grow-name{flex:1.2 1 200px;}
+.bk-grow-scope{flex:1.6 1 240px;}
+
+.bk-w-file-size{width:90px;}
+.bk-w-file-time{width:140px;}
+.bk-w-file-ops{width:130px;}
+.bk-file-name{font-size:var(--fs-sm);font-family:var(--font-mono);}
+.bk-file-meta{font-size:var(--fs-sm);color:var(--text2);}
+/* 备份行操作：恢复 + 删除并排，右对齐 */
+.bk-file-ops{display:flex;gap:4px;justify-content:flex-end;}
+
+/* API Key 列表（admin-apikey.js AJAX 重绘） */
+.bk-w-key-ops{width:60px;}
+.bk-key-name{font-size:var(--fs-sm);}
+.bk-key-token{font-size:var(--fs-sm);font-family:var(--font-mono);color:var(--text2);}
+.bk-key-scope{font-size:var(--fs-sm);color:var(--text2);}
+.bk-key-time{font-size:var(--fs-sm);color:var(--text2);}
+
+/* API Key 生成结果弹窗（showApiKeyResult） */
+.ak-dialog{width:min(560px,calc(100vw - 40px));padding:20px 22px 18px;}
+.ak-head{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px;}
+.ak-ic{
+    flex:none;width:44px;height:44px;border-radius:12px;
+    display:flex;align-items:center;justify-content:center;font-size:22px;
+    background:var(--accent-dim);border:1px solid var(--accent);
+}
+.ak-head-txt{flex:1;min-width:0;}
+.ak-head .bks-hint{margin-bottom:0;}
+.ak-close{
+    flex:none;width:30px;height:30px;border-radius:8px;border:1px solid var(--border);
+    background:var(--surface2);color:var(--text2);font-size:15px;line-height:1;cursor:pointer;
+    transition:background var(--transition-fast),color var(--transition-fast),border-color var(--transition-fast);
+}
+.ak-close:hover{background:var(--surface3);color:var(--text);border-color:var(--border2);}
+/* 密钥主体：左串右钮，密钥可整体选中（点一下即全选），超长自动折行 */
+.ak-key-row{display:flex;gap:8px;align-items:stretch;margin-bottom:12px;}
+.ak-key{
+    flex:1;min-width:0;display:block;
+    padding:11px 12px;border:1px dashed var(--accent);border-radius:8px;
+    background:var(--surface2);color:var(--text);
+    font-family:var(--font-mono);font-size:var(--fs-md);line-height:1.6;
+    word-break:break-all;user-select:all;-webkit-user-select:all;
+}
+.ak-copy{flex:none;align-self:stretch;padding-left:16px;padding-right:16px;}
+/* 元信息两栏：权限与有效期一屏读完 */
+.ak-meta{
+    display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 16px;
+    margin:0 0 12px;padding:11px 14px;
+    background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+}
+.ak-meta dt{font-size:var(--fs-xs);color:var(--text3);margin-bottom:3px;}
+.ak-meta dd{margin:0;font-size:var(--fs-md);color:var(--text);font-weight:var(--fw-medium);}
+.ak-tip{font-size:var(--fs-sm);color:var(--text3);line-height:1.6;margin-bottom:16px;}
+.ak-tip code{
+    font-family:var(--font-mono);font-size:var(--fs-xs);
+    background:var(--surface3);border:1px solid var(--border);
+    border-radius:4px;padding:1px 5px;color:var(--text2);
+}
+.ak-btns{justify-content:flex-end;}
+.ak-ta-fallback{position:fixed;top:-1000px;left:-1000px;width:1px;height:1px;opacity:0;}
+@media(max-width:560px){
+    .ak-key-row{flex-direction:column;}
+    .ak-copy{align-self:stretch;}
+    .ak-meta{grid-template-columns:1fr;}
+}
