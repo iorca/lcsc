@@ -8,6 +8,7 @@
 
 Name "${APPNAME} ${VERSION}"
 OutFile "LCSC-Setup-${VERSION}.exe"
+IconFile "launcher\LCSC.ico"
 InstallDir "$LOCALAPPDATA\${APPNAME}"
 RequestExecutionLevel user
 
@@ -22,8 +23,8 @@ Section "Install"
   File /r "payload\*"
 
   CreateDirectory "$SMPROGRAMS\${APPNAME}"
-  CreateShortcut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\launcher.exe"
-  CreateShortcut "$SMPROGRAMS\${APPNAME}\卸载.lnk" "$INSTDIR\Uninstall.exe"
+  CreateShortcut "$SMPROGRAMS\${APPNAME}\${APPNAME}.lnk" "$INSTDIR\launcher.exe" "" "$INSTDIR\LCSC.ico" 0
+  CreateShortcut "$SMPROGRAMS\${APPNAME}\卸载.lnk" "$INSTDIR\Uninstall.exe" "" "$INSTDIR\LCSC.ico" 0
   WriteUninstaller "$INSTDIR\Uninstall.exe"
 SectionEnd
 

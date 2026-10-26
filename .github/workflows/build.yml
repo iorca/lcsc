@@ -159,6 +159,10 @@ jobs:
       - name: Build launcher (windows)
         run: |
           cd desktop/launcher
+          # 注入 exe 图标 + Windows manifest（go-winres 生成 .syso 资源文件，
+          # 文件名必须以 _windows_amd64.syso 结尾 Go 才会自动嵌入）
+          go install github.com/tc-hib/winres-bin/cmd/go-winres@latest
+          go-winres make --in winres.json --out rsrc_windows_amd64.syso
           go build -o ../launcher.exe .
 
       - name: Download runtimes

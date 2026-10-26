@@ -28,6 +28,14 @@ Copy-Item (Join-Path $root "www")     $payload -Recurse
 Copy-Item (Join-Path $root "conf")    $payload -Recurse
 Copy-Item (Join-Path $root "launcher.exe") $payload
 
+# 图标：桌面快捷方式 / NSIS 安装包都用它
+$ico = Join-Path $root "launcher\LCSC.ico"
+if (Test-Path $ico) {
+  Copy-Item $ico $payload
+} else {
+  Write-Host "未找到 launcher\LCSC.ico，跳过图标（安装包将用默认图标）"
+}
+
 # 便携 zip（写 portable.flag）
 New-Item -ItemType File -Path (Join-Path $payload "portable.flag") | Out-Null
 $zip = Join-Path $root "LCSC-portable.zip"
