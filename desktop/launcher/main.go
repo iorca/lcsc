@@ -109,10 +109,12 @@ func main() {
 	}
 	log.Println("MariaDB 就绪")
 
-	// 4. 起 php-cgi
+	// 4. 起 php-cgi（先由模板生成 extension_dir 为绝对路径的 php.ini）
+	phpIniGen := filepath.Join(logsDir, "php.ini")
+	genPhpIni(phpIni, phpIniGen, filepath.Join(runtimeDir, "php"))
 	phpCmd := startProcess(ctx, "php-cgi", phpCgi, []string{
 		"-b", fastcgiAddr,
-		"-c", phpIni,
+		"-c", phpIniGen,
 	}, runtimeDir, logsDir)
 	if err := waitForPort(fastcgiAddr, 15*time.Second); err != nil {
 		log.Fatalf("php-cgi 启动超时: %v", err)
@@ -166,6 +168,26 @@ func genNginxConf(tmpl, out, www string) {
 	s := strings.ReplaceAll(string(b), "{{ROOT}}", filepath.ToSlash(www))
 	if err := os.WriteFile(out, []byte(s), 0644); err != nil {
 		log.Fatalf("写 nginx.conf 失败: %v", err)
+	}
+}
+
+// genPhpIni 由模板生成一份 extension_dir 为绝对路径的 php.ini。
+// 因为 php-cgi 通过 -c 指向 conf/php.ini（不在 php 目录下），相对 extension_dir
+// 会被解析到 conf/ext（不存在）；改为绝对路径确保扩展正确加载。
+func genPhpIni(tmpl, out, phpDir string) {
+	b, err := os.ReadFile(tmpl)
+	if err != nil {
+		log.Fatalf("读取 php.ini 模板失败: %v", err)
+	}
+	extDir := "extension_dir = \"" + filepath.ToSlash(filepath.Join(phpDir, "ext")) + "\""
+	lines := strings.Split(string(b), "\n")
+	for i, ln := range lines {
+		if strings.HasPrefix(strings.TrimSpace(ln), "extension_dir") {
+			lines[i] = extDir
+		}
+	}
+	if err := os.WriteFile(out, []byte(strings.Join(lines, "\n")), 0644); err != nil {
+		log.Fatalf("写 php.ini 失败: %v", err)
 	}
 }
 
