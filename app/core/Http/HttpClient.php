@@ -35,6 +35,139 @@ final class HttpClient
         return $data;
     }
 
+    /**
+     * POST JSON 并解析响应（AI 等需要请求体的接口用；失败返回 null，不抛异常）
+     *
+     * 与 getJson() 同风格：所有失败都收敛成 null，错误写日志。
+     */
+    public static function postJson(string $url, array $payload, array $headers = [], int $timeout = self::TOTAL_TIMEOUT): ?array
+    {
+        try {
+            $body = self::postBody($url, $payload, $headers, $timeout);
+            if ($body === null) return null;
+
+            $data = json_decode($body, true);
+            if (!is_array($data)) {
+                self::logFailure(HttpException::decode($url));
+                return null;
+            }
+            return $data;
+        } catch (HttpException $e) {
+            self::logFailure($e);
+            return null;
+        } catch (Throwable $e) {
+            error_log(sprintf(
+                '[HttpClient] 未预期异常 %s @ %s:%d | %s',
+                get_class($e), $e->getFile(), $e->getLine(), $e->getMessage()
+            ));
+            return null;
+        }
+    }
+
+    /** POST 请求返回原始响应体（失败返回 null，不抛异常） */
+    public static function postBody(string $url, array $payload, array $headers = [], int $timeout = self::TOTAL_TIMEOUT): ?string
+    {
+        try {
+            return self::requestPost($url, $payload, $headers, $timeout);
+        } catch (HttpException $e) {
+            self::logFailure($e);
+            return null;
+        } catch (Throwable $e) {
+            error_log(sprintf(
+                '[HttpClient] 未预期异常 %s @ %s:%d | %s',
+                get_class($e), $e->getFile(), $e->getLine(), $e->getMessage()
+            ));
+            return null;
+        }
+    }
+
+    /** 实际发起 POST（JSON 体），失败抛 HttpException */
+    private static function requestPost(string $url, array $payload, array $headers, int $timeout): string
+    {
+        if (self::isBlockedUrl($url)) {
+            throw HttpException::blocked($url, '协议非 https 或主机命中内网地址段');
+        }
+        $body = json_encode($payload, JSON_UNESCAPED_UNICODE);
+        if ($body === false) {
+            throw HttpException::transport($url, '请求体 JSON 序列化失败');
+        }
+        $ua = 'LCSC-Inventory/' . (defined('APP_VERSION') ? APP_VERSION : '1.0');
+        $headers = $headers + ['Content-Type' => 'application/json'];
+        if (function_exists('curl_init')) {
+            return self::postViaCurl($url, $body, $headers, $timeout, $ua);
+        }
+        return self::postViaStream($url, $body, $headers, $timeout, $ua);
+    }
+
+    /** POST · curl 实现 */
+    private static function postViaCurl(string $url, string $body, array $headers, int $timeout, string $ua): string
+    {
+        $ch = curl_init($url);
+        $opt = [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_CONNECTTIMEOUT  => self::CONNECT_TIMEOUT,
+            CURLOPT_TIMEOUT        => $timeout,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_USERAGENT      => $ua,
+            CURLOPT_FOLLOWLOCATION => false,
+            CURLOPT_POST           => true,
+            CURLOPT_POSTFIELDS     => $body,
+        ];
+        $hdr = self::formatHeaders($headers);
+        if ($hdr !== []) $opt[CURLOPT_HTTPHEADER] = $hdr;
+        curl_setopt_array($ch, $opt);
+
+        $resp   = curl_exec($ch);
+        $errno  = curl_errno($ch);
+        $err    = curl_error($ch);
+        $status = (int)curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($errno === CURLE_OPERATION_TIMEDOUT) throw HttpException::timeout($url);
+        if ($errno !== 0 || $resp === false)  throw HttpException::transport($url, $err !== '' ? $err : "errno {$errno}");
+        if ($status < 200 || $status >= 300)   throw HttpException::httpStatus($url, $status);
+
+        return (string)$resp;
+    }
+
+    /** POST · stream context 兜底（无 curl 扩展时） */
+    private static function postViaStream(string $url, string $body, array $headers, int $timeout, string $ua): string
+    {
+        $ctx = stream_context_create([
+            'http' => [
+                'method'         => 'POST',
+                'timeout'        => $timeout,
+                'header'         => implode("\r\n", self::formatHeaders($headers + ['User-Agent' => $ua])),
+                'content'        => $body,
+                'ignore_errors'  => true,
+                'follow_location'=> 0,
+            ],
+            'ssl' => [
+                'verify_peer'      => true,
+                'verify_peer_name' => true,
+                'cafile'           => (string)ini_get('curl.cainfo') ?: (string)ini_get('openssl.cafile'),
+            ],
+        ]);
+
+        $resp = @file_get_contents($url, false, $ctx);
+        if ($resp === false) {
+            $err = error_get_last()['message'] ?? '';
+            if (stripos($err, 'timed out') !== false || stripos($err, 'timeout') !== false) {
+                throw HttpException::timeout($url);
+            }
+            throw HttpException::transport($url, 'file_get_contents 返回 false');
+        }
+
+        $status = 0;
+        foreach ($http_response_header ?? [] as $line) {
+            if (preg_match('~^HTTP/\S+\s+(\d{3})~', $line, $m)) $status = (int)$m[1];
+        }
+        if ($status < 200 || $status >= 300) throw HttpException::httpStatus($url, $status);
+
+        return (string)$resp;
+    }
+
     /** 取原始响应体（失败返回 null，不抛异常） */
     public static function getBody(string $url, array $headers = [], int $timeout = self::TOTAL_TIMEOUT): ?string
     {

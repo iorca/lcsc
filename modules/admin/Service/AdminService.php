@@ -26,6 +26,7 @@ final class AdminManager
         'webdav_url', 'webdav_user', 'webdav_path',
         'label_template', 'label_qr_content',
         'auth_enabled',
+        'ai_enabled', 'ai_base_url', 'ai_api_key', 'ai_model',
     ];
 
     /** 网站设置字段的中文标签（键与 SETTING_FIELDS 一致） */
@@ -47,6 +48,10 @@ final class AdminManager
         'label_template'        => '标签模板',
         'label_qr_content'      => '标签编号内容',
         'auth_enabled'          => '登录密码',
+        'ai_enabled'            => 'AI 智能分类',
+        'ai_base_url'           => 'AI 接口地址',
+        'ai_api_key'            => 'AI API Key',
+        'ai_model'              => 'AI 模型',
     ];
 
     /** 功能开关的中文标签（用于操作记录；键与 featureDefaults() 一致） */

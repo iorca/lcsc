@@ -52,6 +52,7 @@ $listCols = array_values(array_filter([
     // 库位列：恒显示（location 是普通文本字段，库位树只是录入辅助）。
 
     ['cls' => 'col-location', 'cond' => null],
+    ['cls' => 'col-ctime',    'cond' => null],
     ['cls' => 'col-actions',  'cond' => null],
 ], static fn(array $c): bool => $c['cond'] === null || (bool)$c['cond']));
 
@@ -219,9 +220,10 @@ require __DIR__ . '/../../../ui/layouts/head.php';
         <th class="sortable" data-sort="model" onclick="toggleSort(this)" title="点击排序">型号<span class="sort-arrow"></span></th>
         <th>封装</th>
         <th>分类</th>
-        <th>品牌</th>
+        <th class="sortable" data-sort="brand" onclick="toggleSort(this)" title="点击排序">品牌<span class="sort-arrow"></span></th>
         <th class="sortable" data-sort="stock" onclick="toggleSort(this)" title="点击排序">库存<span class="sort-arrow"></span></th>
         <th class="sortable" data-sort="location" onclick="toggleSort(this)" title="点击排序">库位<span class="sort-arrow"></span></th>
+        <th class="sortable" data-sort="create_time" onclick="toggleSort(this)" title="点击排序">导入时间<span class="sort-arrow"></span></th>
         <th>操作</th>
     </tr></thead>
     <tbody id="desktopTbody">
@@ -356,6 +358,9 @@ require __DIR__ . '/../../../ui/layouts/head.php';
 <div class="batch-bar" id="batchBar">
     <span>已选 <span class="batch-count" id="batchCount">0</span> 项</span>
     <button class="btn btn-ghost btn-sm" onclick="batchSetCategory()">设置分类</button>
+    <button class="btn btn-ghost btn-sm" onclick="autoClassifyParts()" title="按「品牌 / 商品类型 → 封装格式」自动建两级分类树；未选中时处理全部未分类物料">🏷 规则归类</button>
+    <button class="btn btn-ghost btn-sm" onclick="lcscEnrichParts()" title="按立创编号回查并补全商品类型（订单详情表没有「商品类型」列时用）">🔄 立创补全</button>
+    <button class="btn btn-ghost btn-sm" onclick="batchAiClassify()" title="调用大模型自动判定商品类型 / 品牌 / 封装">🤖 AI 分类</button>
     <button class="btn btn-ghost btn-sm" onclick="batchSetLocation()">设置库位</button>
     <button class="btn btn-ghost btn-sm" onclick="batchSetRemark()">设置备注</button>
     <button class="btn btn-ghost btn-sm" onclick="batchSetThreshold()">📉 批量阈值</button>

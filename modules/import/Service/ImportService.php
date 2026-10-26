@@ -43,6 +43,36 @@ final class ImportService
         $this->wsId    = $wsId;
     }
 
+    /**
+     * 批次收尾自动归类
+     *
+     * 给本批导入的物料按「品牌 / 商品类型 → 封装格式」建两级分类树并挂上，
+     * 让导入完成后物料列表的「分类」列不再是空的。
+     *
+     * 失败一律不抛出：分类是附加价值，不能因为它让整次导入失败。
+     */
+    private function autoClassifyBatch(int $batchId): void
+    {
+        try {
+            $st = $this->db->prepare(
+                "SELECT DISTINCT part_id FROM import_batch_rows
+                 WHERE batch_id=? AND part_id>0 AND action IN ('insert','update')
+                 LIMIT 5000"
+            );
+            $st->execute([$batchId]);
+            $ids = array_map(static fn(array $r): int => (int)$r['part_id'],
+                             $st->fetchAll(\PDO::FETCH_ASSOC));
+            if (empty($ids)) return;
+
+            $svc = new \Modules\Category\Service\CategoryAutoClassifier($this->db, $this->dataUid);
+            $res = $svc->classify($ids);
+            \traceLog($this->uid, 'auto_classify', 'imported_file', $batchId,
+                "自动归类 关联:{$res['linked']} 新建一级:{$res['new_top']} 新建二级:{$res['new_leaf']} 缺字段:{$res['no_value']}");
+        } catch (\Throwable $e) {
+            error_log('[ImportService] 自动归类失败: ' . $e->getMessage());
+        }
+    }
+
     // ══ ① 暂存 ═══════════════════════════════════════
 
     /** 建批次并入队 */
@@ -232,6 +262,10 @@ final class ImportService
             // 批次收尾时**批量重算成本缓存**。
 
             \recalcDirtyCostBatch($this->db, 1000);
+
+            // 批次收尾时**自动归类**：按「品牌 / 商品类型 → 封装格式」建两级分类树
+            // 并挂到本批物料上（导入后分类列不再是空的）。
+            $this->autoClassifyBatch($batchId);
 
             \traceLog($this->uid, 'import_order', 'imported_file', $batchId,
                 "导入订单 文件:{$batch['file_name']} 平台:{$batch['platform']} 新增:{$fresh['inserted']} 更新:{$fresh['updated']} 跳过:{$fresh['skipped']} 错误:{$fresh['errors']}");

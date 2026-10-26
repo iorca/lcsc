@@ -42,5 +42,17 @@ Fetch "php" "https://windows.php.net/downloads/releases/archives/php-$PHP_VER-nt
 # mariadb（Windows x64 zip，含 bin/mariadbd.exe）
 Fetch "mariadb" "https://archive.mariadb.org/mariadb-$MARIADB_VER/winx64-packages/mariadb-$MARIADB_VER-winx64.zip" "mariadb-$MARIADB_VER-winx64" (Join-Path $runtime "mariadb")
 
+# CA 证书包 —— **必须有**：Windows 版 PHP 不自带 CA bundle，
+# 缺这个文件时所有 https 出站（立创商品查询 / AI 接口 / 版本检测）都会
+# 静默失败（curl errno 77: Problem with the SSL CA cert）。
+$caPath = Join-Path $runtime "cacert.pem"
+Write-Host "下载 CA 证书包: https://curl.se/ca/cacert.pem"
+Invoke-WebRequest -Uri "https://curl.se/ca/cacert.pem" -OutFile $caPath -UseBasicParsing
+$caSize = (Get-Item $caPath).Length
+if ($caSize -lt 50000) {
+    throw "cacert.pem 下载异常（仅 $caSize 字节），https 出站会全部失败"
+}
+Write-Host "CA 证书包就位: $caSize 字节"
+
 Write-Host "完成。运行时已就位："
 Get-ChildItem $runtime

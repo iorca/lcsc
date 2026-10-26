@@ -252,6 +252,55 @@ document.addEventListener('change', function(e){
 
 function openMergeWizard(){ MergeWizard.open(); }
 
+// ── 规则自动归类：按「品牌 / 商品类型 → 封装格式」建两级分类树并挂到物料 ──
+// 未选中物料时 → 处理全部「尚未挂任何分类」的物料
+function autoClassifyParts(){
+    var ids = getSelectedIds();
+    var formData = new FormData();
+    formData.append('action', 'classify.auto');
+    formData.append('_csrf', LCSC.csrf);
+    formData.append('scope', 'all');
+    if (ids.length) { ids.forEach(function(id){ formData.append('ids[]', id); }); }
+    LCSC.post('api.php', formData, function(data, msg){
+        LCSC.toast(msg || '自动归类完成', 'success');
+        loadPartsList();
+    }, function(msg){
+        LCSC.toast(msg, 'error');
+    });
+}
+
+// ── 立创补全：按立创编号回查商品类型（订单详情表没有「商品类型」列时用）──
+// 未选中物料时 → 处理全部缺商品类型 / 品牌 / 封装的立创物料
+function lcscEnrichParts(){
+    var ids = getSelectedIds();
+    var formData = new FormData();
+    formData.append('action', 'classify.lcsc_enrich');
+    formData.append('_csrf', LCSC.csrf);
+    if (ids.length) { ids.forEach(function(id){ formData.append('ids[]', id); }); }
+    LCSC.post('api.php', formData, function(data, msg){
+        LCSC.toast(msg || '立创补全完成', 'success');
+        loadPartsList();
+    }, function(msg){
+        LCSC.toast(msg, 'error');
+    });
+}
+
+// ── AI 智能分类：调大模型判定商品类型 / 品牌 / 封装 ──
+function batchAiClassify(){
+    var ids = getSelectedIds();
+    if (ids.length === 0) { LCSC.toast('请先勾选要识别的物料', 'error'); return; }
+    var formData = new FormData();
+    formData.append('action', 'classify.ai');
+    formData.append('_csrf', LCSC.csrf);
+    ids.forEach(function(id){ formData.append('ids[]', id); });
+    LCSC.post('api.php', formData, function(data, msg){
+        LCSC.toast(msg || 'AI 识别完成', 'success');
+        loadPartsList();
+    }, function(msg){
+        LCSC.toast(msg, 'error');
+    });
+}
+
 function batchSetCategory(){
     const ids=getSelectedIds();
     if(ids.length===0) return;

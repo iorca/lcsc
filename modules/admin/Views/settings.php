@@ -197,6 +197,24 @@ $featToggles = [
             </label>
         </div>
     </div>
+    <div class="form-group"><label>AI 智能分类 <?=$tip('用大模型自动判定物料的商品类型 / 品牌 / 封装，并按「品牌 / 商品类型 → 封装格式」挂到两级分类树。需要一个 OpenAI 兼容接口：填 base_url + api_key + model 即可（base_url 填到 /v1，如 https://api.openai.com/v1）')?></label>
+        <div class="settings-inline">
+            <label class="settings-check">
+                <input type="hidden" name="ai_enabled" value="0">
+                <input type="checkbox" name="ai_enabled" value="1" <?= $sget('ai_enabled')==='1'?'checked':''?>>
+                <span>启用 AI 智能分类</span>
+            </label>
+        </div>
+    </div>
+    <div class="form-group"><label>AI 接口地址</label>
+        <input name="ai_base_url" type="text" placeholder="https://api.openai.com/v1" value="<?=h($sget('ai_base_url'))?>">
+    </div>
+    <div class="form-group"><label>AI API Key</label>
+        <input name="ai_api_key" type="password" placeholder="sk-..." value="<?=h($sget('ai_api_key'))?>">
+    </div>
+    <div class="form-group"><label>AI 模型</label>
+        <input name="ai_model" type="text" placeholder="gpt-4o-mini" value="<?=h($sget('ai_model'))?>">
+    </div>
 <?php  ?>
 </div>
 <?php if (!$outboundEnv['ok']): ?>

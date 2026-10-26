@@ -102,6 +102,11 @@ function renderDesktopTable(parts) {
             + (r.damaged > 0 ? '<span class="stk-tag red" title="不良品数量">不良' + r.damaged + '</span>' : '')
             + (r.is_stale ? '<span class="stk-tag gray" title="90天无出入库">呆滞</span>' : '') + '</td>';
         html += '<td onclick="openDrawer(' + r.id + ')" title="' + esc(r.location) + '" class="col-location td-ellipsis" data-label="库位">' + locHtml + '</td>';
+        var ctimeTxt = r.create_time ? String(r.create_time).substring(0, 16).replace('T', ' ') : '';
+        var ctimeHtml = ctimeTxt
+            ? '<span class="ctime-txt" title="导入时间 ' + esc(r.create_time || '') + '">' + esc(ctimeTxt) + '</span>'
+            : '<span class="ph-dash">—</span>';
+        html += '<td onclick="openDrawer(' + r.id + ')" class="col-ctime" data-label="导入时间">' + ctimeHtml + '</td>';
         html += '<td class="td-actions" onclick="event.stopPropagation()"><div class="actions">';
         if (canEdit_) html += '<button class="btn btn-ghost btn-sm btn-stock" data-info="' + esc(JSON.stringify({id:r.id,model:r.model,ppn:r.ppn,location_id:r.location_id || '',stock:r.stock,damaged:r.damaged})) + '">出入库</button>';
         if (canEdit_) html += '<button class="btn btn-ghost btn-sm" data-part="' + esc(JSON.stringify(r)) + '" data-platform-type="' + esc(r.platform_type || 'standard') + '" onclick="openEditModal(this)">编辑</button>';

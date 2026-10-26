@@ -284,6 +284,7 @@ final class PartService
         // 排序白名单
         $sortMap = [
             'update_time'      => 'p.update_time',
+            'create_time'      => 'p.create_time',
             'model'            => 'p.model',
             'stock'            => 'p.stock',
             'brand'            => 'p.brand',

@@ -215,19 +215,39 @@ func genNginxConf(tmpl, out, www, runtimeDir, logsDir string) {
 	}
 }
 
-// genPhpIni 由模板生成一份 extension_dir 为绝对路径的 php.ini。
+// genPhpIni 由模板生成一份 extension_dir / CA 证书路径为绝对路径的 php.ini。
 // 因为 php-cgi 通过 -c 指向 conf/php.ini（不在 php 目录下），相对 extension_dir
 // 会被解析到 conf/ext（不存在）；改为绝对路径确保扩展正确加载。
+// 另外：Windows 版 PHP 不自带 CA bundle，必须显式给出 cacert.pem，
+// 否则所有 https 出站（立创查询 / AI 接口 / 版本检测）会静默失败。
 func genPhpIni(tmpl, out, phpDir string) {
 	b, err := os.ReadFile(tmpl)
 	if err != nil {
 		log.Fatalf("读取 php.ini 模板失败: %v", err)
 	}
 	extDir := "extension_dir = \"" + filepath.ToSlash(filepath.Join(phpDir, "ext")) + "\""
+
+	// CA 证书包：runtime/cacert.pem（phpDir = runtime/php，故取其上级目录）
+	caFile := filepath.Join(filepath.Dir(phpDir), "cacert.pem")
+	caCurl := "curl.cainfo = \"" + filepath.ToSlash(caFile) + "\""
+	caOpen := "openssl.cafile = \"" + filepath.ToSlash(caFile) + "\""
+	hasCa  := fileExists(caFile)
+	if !hasCa {
+		// 没有 CA 包就把两行注释掉，避免指向不存在的文件
+		caCurl = "; curl.cainfo = \"\""
+		caOpen = "; openssl.cafile = \"\""
+	}
+
 	lines := strings.Split(string(b), "\n")
 	for i, ln := range lines {
-		if strings.HasPrefix(strings.TrimSpace(ln), "extension_dir") {
+		t := strings.TrimSpace(ln)
+		switch {
+		case strings.HasPrefix(t, "extension_dir"):
 			lines[i] = extDir
+		case strings.HasPrefix(t, "curl.cainfo"):
+			lines[i] = caCurl
+		case strings.HasPrefix(t, "openssl.cafile"):
+			lines[i] = caOpen
 		}
 	}
 	if err := os.WriteFile(out, []byte(strings.Join(lines, "\n")), 0644); err != nil {
