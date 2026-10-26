@@ -25,6 +25,7 @@ final class AdminManager
         'publish_version', 'publish_changelog_url', 'publish_download_url',
         'webdav_url', 'webdav_user', 'webdav_path',
         'label_template', 'label_qr_content',
+        'auth_enabled',
     ];
 
     /** 网站设置字段的中文标签（键与 SETTING_FIELDS 一致） */
@@ -45,6 +46,7 @@ final class AdminManager
         'webdav_path'           => 'WebDAV 备份路径',
         'label_template'        => '标签模板',
         'label_qr_content'      => '标签编号内容',
+        'auth_enabled'          => '登录密码',
     ];
 
     /** 功能开关的中文标签（用于操作记录；键与 featureDefaults() 一致） */

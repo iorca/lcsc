@@ -71,6 +71,16 @@ func main() {
 		log.Fatalf("找不到 www 目录: %s（请先放入 web-dist 内容）", wwwDir)
 	}
 
+	// 登录密码开关（桌面版默认免登录，适合纯本机单人直接进系统）
+	// 在桌面版根目录放置 require_login.flag 即可恢复「需要输入账号密码」
+	if fileExists(filepath.Join(baseDir, "require_login.flag")) {
+		os.Setenv("LCSC_LOGIN_ENABLED", "true")
+		log.Println("检测到 require_login.flag：已启用登录密码")
+	} else {
+		os.Setenv("LCSC_LOGIN_ENABLED", "false")
+		log.Println("登录密码已关闭（免登录直接进入）；放置 require_login.flag 可恢复密码登录")
+	}
+
 	// 1. 初始化 MariaDB 数据目录（首次）
 	if !fileExists(filepath.Join(mariadbData, "mysql")) {
 		log.Println("初始化 MariaDB 数据目录...")

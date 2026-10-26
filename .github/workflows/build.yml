@@ -143,6 +143,16 @@ jobs:
       - name: Install composer deps
         run: composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
 
+      - name: Lint PHP (syntax check)
+        shell: bash
+        run: |
+          ERR=0
+          while IFS= read -r f; do
+            if ! php -l "$f" >/dev/null 2>&1; then php -l "$f"; ERR=1; fi
+          done < <(find . -name '*.php' -not -path './vendor/*' -not -path './third_party/*' -not -path './backups/*' -not -path './uploads/*' -not -path './updates/*')
+          [ "$ERR" -ne 0 ] && { echo "PHP syntax errors found"; exit 1; }
+          echo "PHP lint passed"
+
       - name: Build web-dist
         run: node scripts/package-web.js
 

@@ -19,6 +19,8 @@ $marginCur    = h($sget('default_profit_margin') !== '' ? $sget('default_profit_
 $keepRawCur   = $sget('import_keep_raw') === '1' ? '1' : '0';
 // 图片开关同理：默认值 '0'（不显示），故未配置时也按「关闭」处理
 $showImgCur   = $sget('parts_show_images') === '1' ? '1' : '0';
+// 登录密码开关：反映当前是否需要登录（环境变量 LCSC_LOGIN_ENABLED 可强制覆盖）
+$authOn       = loginRequired();
 
 // 功能开关定义（双版本）
 // 键 => [标签, 说明, 默认值]
@@ -183,6 +185,15 @@ $featToggles = [
             <label class="settings-check">
                 <input type="checkbox" name="parts_show_images" value="1" <?=$sget('parts_show_images')==='1'?'checked':''?>>
                 <span>在列表与详情页显示图片</span>
+            </label>
+        </div>
+    </div>
+    <div class="form-group"><label>登录密码 <?=$tip('开启「登录密码」=进入系统需输入账号密码；关闭后免登录，自动以主管理员身份直接进入（适合纯本机单人使用）。本机部署也可用环境变量 LCSC_LOGIN_ENABLED 强制覆盖（true=开 / false=关）')?></label>
+        <div class="settings-inline">
+            <label class="settings-check">
+                <input type="hidden" name="auth_enabled" value="0">
+                <input type="checkbox" name="auth_enabled" value="1" <?= $authOn ? 'checked' : '' ?>>
+                <span>启用登录密码（关闭则免登录进入）</span>
             </label>
         </div>
     </div>

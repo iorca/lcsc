@@ -902,9 +902,61 @@ function verifyCsrf(): void {
     }
 }
 
+/**
+ * 是否需要登录鉴权。
+ * 返回 false 即「免登录模式」：自动以主管理员身份进入，无需输入密码。
+ * 优先级：环境变量 LCSC_LOGIN_ENABLED 强制覆盖（false/0/off 关；true/1/on 开）；
+ *         否则读系统设置 auth_enabled（默认 1=启用登录）。
+ */
+function loginRequired(): bool {
+    $env = getenv('LCSC_LOGIN_ENABLED');
+    if ($env !== false) {
+        $e = strtolower(trim((string)$env));
+        if (in_array($e, ['false', '0', 'off'], true)) return false;
+        if (in_array($e, ['true', '1', 'on'], true))  return true;
+    }
+    $v = getSetting('auth_enabled', '1');
+    return $v !== '0' && strtolower($v) !== 'false';
+}
+
+/** 免登录模式下自动登录的身份：优先主管理员（role=admin 且 parent_id 为空），否则任意管理员，再否则第一个用户。 */
+function authBypassUser(): ?array {
+    if (loginRequired()) return null;
+    if (!function_exists('getDB')) return null;
+    try {
+        if (!isset($GLOBALS['db'])) initDB();
+    } catch (\Throwable $e) {
+        return null;
+    }
+    $db = getDB();
+    $u = $db->query("SELECT * FROM users WHERE role='admin' AND parent_id IS NULL ORDER BY id ASC LIMIT 1")->fetch();
+    if (!$u) $u = $db->query("SELECT * FROM users WHERE role='admin' ORDER BY id ASC LIMIT 1")->fetch();
+    if (!$u) $u = $db->query("SELECT * FROM users ORDER BY id ASC LIMIT 1")->fetch();
+    if (!$u) return null;
+    return [
+        'id'             => (int)$u['id'],
+        'username'       => (string)$u['username'],
+        'role'           => (string)$u['role'],
+        'parent_id'      => $u['parent_id'] ?? null,
+        'permissions'    => $u['permissions'] ?? null,
+        'must_change_pw' => 0,
+    ];
+}
+
 function currentUser(): ?array {
     startSession();
-    return $_SESSION['user'] ?? null;
+    $u = $_SESSION['user'] ?? null;
+    if (!$u && !loginRequired()) {
+        $u = authBypassUser();
+        if ($u) {
+            $_SESSION['user'] = $u;
+            // 免登录模式下前端仍需 CSRF 令牌做写操作，自动补一个
+            if (empty($_SESSION['csrf'])) {
+                $_SESSION['csrf'] = bin2hex(random_bytes(16));
+            }
+        }
+    }
+    return $u;
 }
 
 function requireLogin(string $loginUrl = 'login.php'): array {
